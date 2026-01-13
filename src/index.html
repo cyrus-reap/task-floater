@@ -242,7 +242,8 @@
          ========================================================================== */
       .container {
         width: 380px;
-        height: 600px;
+        height: auto;
+        max-height: 600px;
         background: var(--surface-base);
         backdrop-filter: blur(60px) saturate(180%);
         -webkit-backdrop-filter: blur(60px) saturate(180%);
@@ -260,13 +261,11 @@
 
       /* Mode variations */
       .container.compact-mode {
-        height: 400px;
+        max-height: 400px;
       }
 
       .container.focus-mode {
-        height: auto;
-        min-height: 120px;
-        max-height: 300px;
+        max-height: none;
       }
 
       /* ==========================================================================
@@ -739,9 +738,10 @@
          TASKS LIST
          ========================================================================== */
       .tasks-section {
-        flex: 1;
+        flex: 0 1 auto;
         overflow-y: auto;
         overflow-x: hidden;
+        max-height: 400px;
       }
 
       .tasks-section::-webkit-scrollbar {
@@ -771,16 +771,21 @@
         align-items: center;
         gap: var(--space-2);
         padding: var(--space-2) var(--space-4);
-        cursor: pointer;
-        transition: background var(--transition-fast);
+        cursor: default;
         user-select: none;
       }
 
-      .task-group-header:hover {
+      /* Only Done section header is clickable */
+      .task-group-done .task-group-header {
+        cursor: pointer;
+        transition: background var(--transition-fast);
+      }
+
+      .task-group-done .task-group-header:hover {
         background: var(--surface-hover);
       }
 
-      .task-group-chevron {
+      .caret-icon {
         width: 12px;
         height: 12px;
         color: var(--text-muted);
@@ -788,7 +793,7 @@
         flex-shrink: 0;
       }
 
-      .task-group-header.collapsed .task-group-chevron {
+      .task-group-done.collapsed .caret-icon {
         transform: rotate(-90deg);
       }
 
@@ -806,13 +811,25 @@
         opacity: 0.6;
       }
 
-      .task-group-content {
+      .task-group-items {
         overflow: hidden;
-        transition: max-height var(--transition-smooth);
+        transition:
+          max-height var(--transition-smooth),
+          opacity var(--transition-smooth);
       }
 
-      .task-group-header.collapsed + .task-group-content {
+      .task-group-done.collapsed .task-group-items {
         max-height: 0 !important;
+        opacity: 0;
+      }
+
+      /* Done tasks visual treatment */
+      .task-group-done .task-item {
+        opacity: 0.6;
+      }
+
+      .task-group-done .task-item:hover {
+        opacity: 0.8;
       }
 
       /* ==========================================================================
@@ -874,6 +891,17 @@
       .drag-handle .icon {
         width: 10px;
         height: 10px;
+      }
+
+      /* Drag and drop states */
+      .task-item.dragging {
+        opacity: 0.5;
+        background: var(--surface-active);
+      }
+
+      .task-item.drag-over {
+        border-top: 2px solid var(--accent-default);
+        margin-top: -2px;
       }
 
       /* Timer running state */
@@ -1177,11 +1205,11 @@
       }
 
       .empty-state-illustration {
-        width: 64px;
-        height: 64px;
-        margin-bottom: var(--space-5);
+        width: 40px;
+        height: 40px;
+        margin-bottom: var(--space-4);
         color: var(--text-muted);
-        opacity: 0.3;
+        opacity: 0.25;
       }
 
       .empty-state-title {
@@ -1385,6 +1413,172 @@
       .container.focus-mode .task-item.timer-running .task-timer {
         opacity: 1;
         max-height: 40px;
+      }
+
+      /* Focus mode empty state */
+      .container.focus-mode .empty-state.focus-empty {
+        padding: var(--space-6) var(--space-4);
+        min-height: auto;
+      }
+
+      .container.focus-mode .empty-state-icon {
+        width: 40px;
+        height: 40px;
+      }
+
+      .container.focus-mode .empty-state-title {
+        font-size: 14px;
+      }
+
+      .container.focus-mode .empty-state-text {
+        font-size: 12px;
+      }
+
+      /* ==========================================================================
+         FOCUS TIMER VIEW - Premium Large Timer Display
+         ========================================================================== */
+      .focus-timer-view {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: var(--space-8) var(--space-4);
+        text-align: center;
+        animation: fadeIn 0.3s ease;
+      }
+
+      .focus-timer-display {
+        font-family: var(--font-mono);
+        font-size: 56px;
+        font-weight: 600;
+        color: var(--text-primary);
+        letter-spacing: -0.02em;
+        line-height: 1;
+        margin-bottom: var(--space-3);
+      }
+
+      .focus-timer-display.running {
+        color: var(--accent);
+        animation: pulse 2s ease-in-out infinite;
+      }
+
+      .focus-timer-title {
+        font-size: 14px;
+        font-weight: 450;
+        color: var(--text-secondary);
+        margin-bottom: var(--space-6);
+        max-width: 280px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .focus-timer-progress {
+        width: 100%;
+        max-width: 280px;
+        height: 4px;
+        background: var(--border-default);
+        border-radius: 2px;
+        overflow: hidden;
+        margin-bottom: var(--space-6);
+      }
+
+      .focus-timer-progress-fill {
+        height: 100%;
+        background: var(--accent);
+        border-radius: 2px;
+        transition: width 1s linear;
+      }
+
+      .focus-timer-progress-fill.paused {
+        background: var(--text-muted);
+      }
+
+      .focus-timer-controls {
+        display: flex;
+        align-items: center;
+        gap: var(--space-3);
+        margin-bottom: var(--space-5);
+      }
+
+      .focus-timer-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: var(--space-2);
+        padding: var(--space-3) var(--space-5);
+        border: none;
+        border-radius: var(--radius-md);
+        font-size: 13px;
+        font-weight: 600;
+        font-family: inherit;
+        cursor: pointer;
+        transition: all var(--transition-fast);
+      }
+
+      .focus-timer-btn:active {
+        transform: scale(0.96);
+      }
+
+      .focus-timer-btn .icon {
+        width: 14px;
+        height: 14px;
+      }
+
+      .focus-timer-btn.primary {
+        background: var(--accent);
+        color: white;
+        min-width: 120px;
+      }
+
+      .focus-timer-btn.primary:hover {
+        background: var(--accent-hover);
+      }
+
+      .focus-timer-btn.secondary {
+        width: 40px;
+        height: 40px;
+        padding: 0;
+        background: var(--surface-overlay);
+        color: var(--text-secondary);
+      }
+
+      .focus-timer-btn.secondary:hover {
+        background: var(--surface-active);
+        color: var(--text-primary);
+      }
+
+      .focus-timer-btn.tertiary {
+        width: 40px;
+        height: 40px;
+        padding: 0;
+        background: transparent;
+        color: var(--text-tertiary);
+      }
+
+      .focus-timer-btn.tertiary:hover {
+        background: var(--danger-muted);
+        color: var(--danger);
+      }
+
+      .focus-timer-hint {
+        font-size: 11px;
+        color: var(--text-muted);
+      }
+
+      .keyboard-hint {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 18px;
+        height: 18px;
+        padding: 0 4px;
+        background: var(--surface-overlay);
+        border-radius: var(--radius-xs);
+        font-size: 10px;
+        font-family: var(--font-mono);
+        color: var(--text-muted);
+        border: 1px solid var(--border-subtle);
       }
 
       /* ==========================================================================
