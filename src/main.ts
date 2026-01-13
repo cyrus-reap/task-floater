@@ -1,6 +1,7 @@
 import { app, BrowserWindow, ipcMain, screen, Notification, dialog } from 'electron';
 import * as path from 'path';
 import * as fs from 'fs';
+import { Validators, ValidationError } from './validation';
 
 const STORE_PATH = path.join(app.getPath('userData'), 'tasks.json');
 const SETTINGS_PATH = path.join(app.getPath('userData'), 'settings.json');
@@ -61,8 +62,12 @@ function createWindow() {
     alwaysOnTop: true,
     resizable: false,
     webPreferences: {
-      nodeIntegration: false,
-      contextIsolation: true,
+      nodeIntegration: false,           // Prevent Node.js access in renderer
+      contextIsolation: true,            // Isolate renderer from Node.js
+      sandbox: true,                     // Enable Chromium sandbox
+      webSecurity: true,                 // Enable web security
+      allowRunningInsecureContent: false, // Block mixed content
+      experimentalFeatures: false,       // Disable experimental features
       preload: path.join(__dirname, 'preload.js'),
     },
   });
@@ -105,9 +110,25 @@ app.on('window-all-closed', () => {
 // Helper functions
 function getTasks(): Task[] {
   try {
-    if (fs.existsSync(STORE_PATH)) {
-      const data = fs.readFileSync(STORE_PATH, 'utf-8');
-      return JSON.parse(data);
+    // Ensure we're reading from the correct path (prevent path traversal)
+    const normalizedPath = path.normalize(STORE_PATH);
+    const userDataPath = path.normalize(app.getPath('userData'));
+
+    if (!normalizedPath.startsWith(userDataPath)) {
+      throw new Error('Invalid file path - security violation');
+    }
+
+    if (fs.existsSync(normalizedPath)) {
+      const data = fs.readFileSync(normalizedPath, 'utf-8');
+      const parsed = JSON.parse(data);
+
+      // Validate parsed data is an array
+      if (!Array.isArray(parsed)) {
+        console.error('Tasks file corrupted - not an array');
+        return [];
+      }
+
+      return parsed;
     }
     return [];
   } catch (error) {
@@ -118,7 +139,21 @@ function getTasks(): Task[] {
 
 function saveTasks(tasks: Task[]): void {
   try {
-    fs.writeFileSync(STORE_PATH, JSON.stringify(tasks, null, 2));
+    // Ensure we're writing to the correct path (prevent path traversal)
+    const normalizedPath = path.normalize(STORE_PATH);
+    const userDataPath = path.normalize(app.getPath('userData'));
+
+    if (!normalizedPath.startsWith(userDataPath)) {
+      throw new Error('Invalid file path - security violation');
+    }
+
+    // Ensure directory exists
+    const dir = path.dirname(normalizedPath);
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+
+    fs.writeFileSync(normalizedPath, JSON.stringify(tasks, null, 2), { mode: 0o600 });
   } catch (error) {
     console.error('Error saving tasks:', error);
     throw error;
@@ -131,57 +166,159 @@ ipcMain.handle('get-tasks', async (): Promise<Task[]> => {
 });
 
 ipcMain.handle('save-tasks', async (_event, tasks: Task[]): Promise<void> => {
-  saveTasks(tasks);
+  try {
+    // Validate that tasks is an array
+    if (!Array.isArray(tasks)) {
+      throw new ValidationError('Tasks must be an array');
+    }
+
+    // Validate each task
+    const validatedTasks = tasks.map((task, index) => {
+      if (!task || typeof task !== 'object') {
+        throw new ValidationError(`Invalid task at index ${index}`);
+      }
+
+      return {
+        id: Validators.taskId(task.id),
+        title: Validators.taskTitle(task.title),
+        completed: typeof task.completed === 'boolean' ? task.completed : false,
+        createdAt: task.createdAt || new Date().toISOString(),
+        duration: Validators.duration(task.duration),
+        timeRemaining: Validators.timeRemaining(task.timeRemaining),
+        isTimerRunning: typeof task.isTimerRunning === 'boolean' ? task.isTimerRunning : false,
+        tags: task.tags,
+      };
+    });
+
+    saveTasks(validatedTasks);
+  } catch (error) {
+    console.error('Error saving tasks:', error);
+    throw error;
+  }
 });
 
 ipcMain.handle('add-task', async (_event, title: string, duration?: number): Promise<Task> => {
-  const tasks = getTasks();
-  const newTask: Task = {
-    id: Date.now().toString(),
-    title,
-    completed: false,
-    createdAt: new Date().toISOString(),
-    duration,
-    timeRemaining: duration ? duration * 60 : undefined,
-    isTimerRunning: false,
-  };
-  tasks.push(newTask);
-  saveTasks(tasks);
-  return newTask;
+  try {
+    // Validate inputs
+    const validatedTitle = Validators.taskTitle(title);
+    const validatedDuration = Validators.duration(duration);
+
+    const tasks = getTasks();
+
+    // Prevent DoS: Limit total number of tasks
+    if (tasks.length >= 1000) {
+      throw new ValidationError('Maximum number of tasks reached (1000)');
+    }
+
+    const newTask: Task = {
+      id: Date.now().toString(),
+      title: validatedTitle,
+      completed: false,
+      createdAt: new Date().toISOString(),
+      duration: validatedDuration,
+      timeRemaining: validatedDuration ? validatedDuration * 60 : undefined,
+      isTimerRunning: false,
+    };
+    tasks.push(newTask);
+    saveTasks(tasks);
+    return newTask;
+  } catch (error) {
+    console.error('Error adding task:', error);
+    throw error;
+  }
 });
 
 ipcMain.handle('toggle-task', async (_event, taskId: string): Promise<void> => {
-  const tasks = getTasks();
-  const task = tasks.find((t) => t.id === taskId);
-  if (task) {
+  try {
+    const validatedId = Validators.taskId(taskId);
+    const tasks = getTasks();
+    const task = tasks.find((t) => t.id === validatedId);
+    if (!task) {
+      throw new ValidationError('Task not found');
+    }
     task.completed = !task.completed;
     saveTasks(tasks);
+  } catch (error) {
+    console.error('Error toggling task:', error);
+    throw error;
   }
 });
 
 ipcMain.handle('delete-task', async (_event, taskId: string): Promise<void> => {
-  let tasks = getTasks();
-  tasks = tasks.filter((t) => t.id !== taskId);
-  saveTasks(tasks);
+  try {
+    const validatedId = Validators.taskId(taskId);
+    let tasks = getTasks();
+    tasks = tasks.filter((t) => t.id !== validatedId);
+    saveTasks(tasks);
+  } catch (error) {
+    console.error('Error deleting task:', error);
+    throw error;
+  }
 });
 
 ipcMain.handle('update-task-timer', async (_event, taskId: string, timerData: Partial<Task>): Promise<void> => {
-  const tasks = getTasks();
-  const task = tasks.find((t) => t.id === taskId);
-  if (task) {
-    if (timerData.timeRemaining !== undefined) task.timeRemaining = timerData.timeRemaining;
-    if (timerData.isTimerRunning !== undefined) task.isTimerRunning = timerData.isTimerRunning;
-    if (timerData.duration !== undefined) task.duration = timerData.duration;
+  try {
+    const validatedId = Validators.taskId(taskId);
+    const tasks = getTasks();
+    const task = tasks.find((t) => t.id === validatedId);
+    if (!task) {
+      throw new ValidationError('Task not found');
+    }
+
+    // Validate timer data
+    if (timerData.timeRemaining !== undefined) {
+      task.timeRemaining = Validators.timeRemaining(timerData.timeRemaining);
+    }
+    if (timerData.isTimerRunning !== undefined) {
+      if (typeof timerData.isTimerRunning !== 'boolean') {
+        throw new ValidationError('isTimerRunning must be a boolean');
+      }
+      task.isTimerRunning = timerData.isTimerRunning;
+    }
+    if (timerData.duration !== undefined) {
+      task.duration = Validators.duration(timerData.duration);
+    }
+
     saveTasks(tasks);
+  } catch (error) {
+    console.error('Error updating task timer:', error);
+    throw error;
   }
 });
 
 ipcMain.handle('update-task', async (_event, taskId: string, updates: Partial<Task>): Promise<void> => {
-  const tasks = getTasks();
-  const task = tasks.find((t) => t.id === taskId);
-  if (task) {
-    Object.assign(task, updates);
+  try {
+    const validatedId = Validators.taskId(taskId);
+    const tasks = getTasks();
+    const task = tasks.find((t) => t.id === validatedId);
+    if (!task) {
+      throw new ValidationError('Task not found');
+    }
+
+    // Only allow specific fields to be updated
+    if (updates.title !== undefined) {
+      task.title = Validators.taskTitle(updates.title);
+    }
+    if (updates.duration !== undefined) {
+      task.duration = Validators.duration(updates.duration);
+    }
+    if (updates.completed !== undefined) {
+      if (typeof updates.completed !== 'boolean') {
+        throw new ValidationError('completed must be a boolean');
+      }
+      task.completed = updates.completed;
+    }
+    if (updates.tags !== undefined) {
+      if (!Array.isArray(updates.tags) || !updates.tags.every(t => typeof t === 'string')) {
+        throw new ValidationError('tags must be an array of strings');
+      }
+      task.tags = updates.tags.map(t => t.trim()).filter(t => t.length > 0);
+    }
+
     saveTasks(tasks);
+  } catch (error) {
+    console.error('Error updating task:', error);
+    throw error;
   }
 });
 

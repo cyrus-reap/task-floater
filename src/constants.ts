@@ -52,3 +52,41 @@ export const AUDIO_SETTINGS = {
   GAIN: 0.3,
   DURATION: 0.5,
 } as const;
+
+// Security limits
+export const SECURITY_LIMITS = {
+  MAX_TASKS: 1000,           // Prevent DoS
+  MAX_TITLE_LENGTH: 500,     // Prevent memory exhaustion
+  MAX_DURATION_MINUTES: 1440, // 24 hours max
+  MAX_TIME_SECONDS: 86400,    // 24 hours max
+} as const;
+
+// DOM element IDs
+export const ELEMENT_IDS = {
+  TASK_INPUT: 'taskInput',
+  DURATION_INPUT: 'durationInput',
+  ADD_BTN: 'addBtn',
+  TASKS_SECTION: 'tasksSection',
+  MINIMIZE_BTN: 'minimizeBtn',
+  CLOSE_BTN: 'closeBtn',
+  SEARCH_INPUT: 'searchInput',
+  STATS_TEXT: 'statsText',
+  CLEAR_COMPLETED_BTN: 'clearCompletedBtn',
+  EXPORT_BTN: 'exportBtn',
+  IMPORT_BTN: 'importBtn',
+  THEME_TOGGLE: 'themeToggle',
+} as const;
+
+// CSS Selectors
+export const SELECTORS = {
+  PRESET_BTN: '.preset-btn',
+  TASK_CHECKBOX: '.task-checkbox',
+  DELETE_BTN: '.delete-btn',
+  TIMER_BTN: '.timer-btn',
+  TIMER_DISPLAY: '.timer-display',
+  TIMER_PROGRESS_BAR: '.timer-progress-bar',
+  TIMER_PROGRESS_FILL: '.timer-progress-fill',
+  TASK_ITEM: '.task-item',
+  TASK_TITLE: '.task-title',
+  DURATION_PRESETS: '.duration-presets',
+} as const;
