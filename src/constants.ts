@@ -39,7 +39,8 @@ export const TIMER_ACTIONS = {
 
 // Notification messages
 export const MESSAGES = {
-  TIMER_COMPLETE: (title: string) => `⏰ Timer completed for "${title}"!\n\nWould you like to proceed to the next task?`,
+  TIMER_COMPLETE: (title: string) =>
+    `⏰ Timer completed for "${title}"!\n\nWould you like to proceed to the next task?`,
   NO_MORE_TASKS: 'No more tasks with timers! Great work! 🎉',
   EMPTY_STATE_TITLE: 'No tasks yet',
   EMPTY_STATE_TEXT: 'Type a task above and click a duration to get started',
@@ -55,10 +56,10 @@ export const AUDIO_SETTINGS = {
 
 // Security limits
 export const SECURITY_LIMITS = {
-  MAX_TASKS: 1000,           // Prevent DoS
-  MAX_TITLE_LENGTH: 500,     // Prevent memory exhaustion
+  MAX_TASKS: 1000, // Prevent DoS
+  MAX_TITLE_LENGTH: 500, // Prevent memory exhaustion
   MAX_DURATION_MINUTES: 1440, // 24 hours max
-  MAX_TIME_SECONDS: 86400,    // 24 hours max
+  MAX_TIME_SECONDS: 86400, // 24 hours max
 } as const;
 
 // DOM element IDs
