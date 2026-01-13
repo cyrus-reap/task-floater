@@ -55,7 +55,7 @@ _Screenshots coming soon_
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/task-floater.git
+git clone https://github.com/cyrus-reap/task-floater.git
 cd task-floater
 
 # Install dependencies
@@ -293,7 +293,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 **Cyrus David Pastelero**
 
-- GitHub: [@yourusername](https://github.com/yourusername)
+- GitHub: [@cyrus-reap](https://github.com/cyrus-reap)
 - Email: cyrus@reap.hk
 
 ## 🙏 Acknowledgments
@@ -307,7 +307,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 If you like this project, please consider:
 
 - ⭐ Starring the repository
-- 🐛 Reporting bugs via [Issues](https://github.com/yourusername/task-floater/issues)
+- 🐛 Reporting bugs via [Issues](https://github.com/cyrus-reap/task-floater/issues)
 - 💡 Suggesting features
 - 🤝 Contributing to the codebase
 
