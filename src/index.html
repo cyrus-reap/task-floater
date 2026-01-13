@@ -292,7 +292,7 @@
         justify-content: space-between;
         padding: var(--space-2) var(--space-3);
         -webkit-app-region: drag;
-        min-height: 40px;
+        min-height: 24px;
         flex-shrink: 0;
       }
 
@@ -494,7 +494,7 @@
 
       #taskInput:focus {
         border-color: var(--accent);
-        box-shadow: 0 0 0 3px var(--accent-subtle);
+        box-shadow: 0 0 0 2px var(--accent-subtle);
       }
 
       #taskInput::placeholder {
@@ -556,11 +556,11 @@
       }
 
       .duration-label {
-        font-size: 11px;
+        font-size: 10px;
         font-weight: 500;
-        color: var(--text-muted);
+        color: var(--text-tertiary);
         text-transform: uppercase;
-        letter-spacing: 0.04em;
+        letter-spacing: 0.05em;
         flex-shrink: 0;
       }
 
@@ -813,17 +813,18 @@
       }
 
       .task-group-label {
-        font-size: 11px;
-        font-weight: 600;
-        color: var(--text-muted);
+        font-size: 10px;
+        font-weight: 500;
+        color: var(--text-tertiary);
         text-transform: uppercase;
-        letter-spacing: 0.04em;
+        letter-spacing: 0.05em;
       }
 
       .task-group-count {
-        font-size: 11px;
+        font-size: 10px;
+        font-weight: 500;
         color: var(--text-muted);
-        opacity: 0.6;
+        font-variant-numeric: tabular-nums;
       }
 
       .task-group-items {
@@ -1030,11 +1031,12 @@
       .task-title {
         flex: 1;
         color: var(--text-primary);
-        font-size: 13px;
-        font-weight: 450;
-        line-height: 1.45;
+        font-size: 14px;
+        font-weight: 500;
+        line-height: 1.4;
         word-break: break-word;
         cursor: text;
+        letter-spacing: -0.01em;
       }
 
       .task-item.completed .task-title {
@@ -1064,7 +1066,7 @@
         font-family: inherit;
         font-weight: 450;
         outline: none;
-        box-shadow: 0 0 0 3px var(--accent-subtle);
+        box-shadow: 0 0 0 2px var(--accent-subtle);
       }
 
       /* Task actions (on hover) */
@@ -1106,6 +1108,10 @@
         color: var(--danger);
       }
 
+      .task-action-btn:active {
+        transform: scale(0.9);
+      }
+
       .task-action-btn .icon {
         width: 12px;
         height: 12px;
@@ -1130,7 +1136,7 @@
       .task-item.timer-running .task-timer,
       .task-item.has-timer .task-timer {
         opacity: 1;
-        max-height: 40px;
+        max-height: 24px;
       }
 
       .task-item.timer-running .task-timer {
@@ -1139,11 +1145,12 @@
 
       .timer-time {
         font-family: var(--font-mono);
-        font-size: 12px;
+        font-size: 13px;
         font-weight: 600;
         color: var(--text-tertiary);
-        min-width: 42px;
+        min-width: 44px;
         flex-shrink: 0;
+        font-variant-numeric: tabular-nums;
       }
 
       .task-item.timer-running .timer-time {
@@ -1251,8 +1258,8 @@
       }
 
       .empty-state-illustration {
-        width: 40px;
-        height: 40px;
+        width: 24px;
+        height: 24px;
         margin-bottom: var(--space-4);
         color: var(--text-muted);
         opacity: 0.25;
@@ -1458,7 +1465,7 @@
 
       .container.focus-mode .task-item.timer-running .task-timer {
         opacity: 1;
-        max-height: 40px;
+        max-height: 24px;
       }
 
       /* Focus mode empty state */
@@ -1468,8 +1475,8 @@
       }
 
       .container.focus-mode .empty-state-icon {
-        width: 40px;
-        height: 40px;
+        width: 24px;
+        height: 24px;
       }
 
       .container.focus-mode .empty-state-title {
@@ -1582,8 +1589,8 @@
       }
 
       .focus-timer-btn.secondary {
-        width: 40px;
-        height: 40px;
+        width: 24px;
+        height: 24px;
         padding: 0;
         background: var(--surface-overlay);
         color: var(--text-secondary);
@@ -1595,8 +1602,8 @@
       }
 
       .focus-timer-btn.tertiary {
-        width: 40px;
-        height: 40px;
+        width: 24px;
+        height: 24px;
         padding: 0;
         background: transparent;
         color: var(--text-tertiary);
@@ -1675,7 +1682,7 @@
 
       .command-palette-input:focus {
         border-color: var(--accent);
-        box-shadow: 0 0 0 3px var(--accent-subtle);
+        box-shadow: 0 0 0 2px var(--accent-subtle);
       }
 
       .command-palette-input::placeholder {
@@ -1783,6 +1790,34 @@
 
       .command-palette-hint .kbd {
         font-size: 9px;
+      }
+
+      .command-palette-overlay.closing {
+        animation: fadeOut 0.15s ease-out forwards;
+      }
+
+      .command-palette-overlay.closing .command-palette {
+        animation: scaleOut 0.15s ease-out forwards;
+      }
+
+      @keyframes scaleOut {
+        from {
+          opacity: 1;
+          transform: scale(1);
+        }
+        to {
+          opacity: 0;
+          transform: scale(0.95);
+        }
+      }
+
+      @keyframes fadeOut {
+        from {
+          opacity: 1;
+        }
+        to {
+          opacity: 0;
+        }
       }
 
       /* ==========================================================================
