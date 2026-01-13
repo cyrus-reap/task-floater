@@ -140,6 +140,7 @@ npm run dev  # Watch mode with auto-reload
 
 | Shortcut | Action |
 |----------|--------|
+| `Cmd+K` | Open Command Palette |
 | `Cmd+Shift+F` | Toggle Focus Mode |
 | `Cmd+F` | Focus search |
 | `↑` / `↓` | Navigate tasks |
