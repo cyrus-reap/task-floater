@@ -8,6 +8,8 @@ interface Task {
   duration?: number;
   timeRemaining?: number;
   isTimerRunning?: boolean;
+  tags?: string[];
+  pinned?: boolean;
 }
 
 interface Settings {
