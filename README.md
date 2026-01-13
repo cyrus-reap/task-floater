@@ -229,27 +229,38 @@ Task Floater follows Electron's three-process architecture:
 - **Preload Script** (`src/preload.ts`) - Secure IPC bridge via contextBridge
 - **Renderer Process** (`src/renderer.ts`) - UI logic and DOM manipulation
 
-```
-┌─────────────────────────────────────────┐
-│         Renderer Process (UI)           │
-│  ┌───────────────────────────────────┐  │
-│  │   window.electronAPI.method()    │  │
-│  └───────────┬───────────────────────┘  │
-└──────────────┼──────────────────────────┘
-               │ IPC Communication
-┌──────────────┼──────────────────────────┐
-│  ┌───────────▼───────────────────────┐  │
-│  │    Preload (contextBridge)       │  │
-│  └───────────┬───────────────────────┘  │
-│              │                           │
-│  ┌───────────▼───────────────────────┐  │
-│  │     Main Process (Node.js)       │  │
-│  │  - File system                   │  │
-│  │  - Window management             │  │
-│  │  - IPC handlers                  │  │
-│  └──────────────────────────────────┘  │
-│         Main Process                    │
-└─────────────────────────────────────────┘
+```mermaid
+graph TB
+    subgraph "Renderer Process"
+        A[UI Layer<br/>renderer.ts]
+        B[window.electronAPI]
+    end
+
+    subgraph "Preload Script"
+        C[contextBridge<br/>preload.ts]
+    end
+
+    subgraph "Main Process"
+        D[IPC Handlers<br/>main.ts]
+        E[File System]
+        F[Window Management]
+    end
+
+    A -->|User Actions| B
+    B -->|ipcRenderer.invoke| C
+    C -->|IPC Channel| D
+    D -->|Read/Write| E
+    D -->|Control| F
+    D -->|Return Data| C
+    C -->|Response| B
+    B -->|Update UI| A
+
+    style A fill:#e1f5ff
+    style B fill:#e1f5ff
+    style C fill:#fff4e1
+    style D fill:#f0e1ff
+    style E fill:#f0e1ff
+    style F fill:#f0e1ff
 ```
 
 ### Tech Stack
