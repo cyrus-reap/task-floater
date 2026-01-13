@@ -5,16 +5,98 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Task Floater</title>
     <style>
+      /* ==========================================================================
+         CSS VARIABLES - Design Tokens
+         ========================================================================== */
+      :root {
+        /* Colors - Layered surfaces (3 levels) */
+        --surface-base: rgba(22, 22, 24, 0.94);
+        --surface-elevated: rgba(32, 32, 35, 1);
+        --surface-overlay: rgba(44, 44, 48, 1);
+
+        /* Text hierarchy */
+        --text-primary: rgba(255, 255, 255, 0.92);
+        --text-secondary: rgba(255, 255, 255, 0.6);
+        --text-tertiary: rgba(255, 255, 255, 0.4);
+        --text-muted: rgba(255, 255, 255, 0.24);
+
+        /* Accent - Controlled blue */
+        --accent: #3b82f6;
+        --accent-hover: #60a5fa;
+        --accent-muted: rgba(59, 130, 246, 0.16);
+        --accent-subtle: rgba(59, 130, 246, 0.08);
+
+        /* Semantic colors - Muted */
+        --success: #34d399;
+        --success-muted: rgba(52, 211, 153, 0.12);
+        --warning: #fbbf24;
+        --warning-muted: rgba(251, 191, 36, 0.12);
+        --danger: #f87171;
+        --danger-muted: rgba(248, 113, 113, 0.08);
+
+        /* Borders */
+        --border-subtle: rgba(255, 255, 255, 0.06);
+        --border-default: rgba(255, 255, 255, 0.1);
+        --border-strong: rgba(255, 255, 255, 0.16);
+
+        /* Spacing - 8px grid */
+        --space-1: 4px;
+        --space-2: 8px;
+        --space-3: 12px;
+        --space-4: 16px;
+        --space-5: 20px;
+        --space-6: 24px;
+        --space-8: 32px;
+
+        /* Radii */
+        --radius-sm: 6px;
+        --radius-md: 10px;
+        --radius-lg: 14px;
+        --radius-xl: 16px;
+
+        /* Typography */
+        --font-sans:
+          -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Inter', system-ui, sans-serif;
+        --font-mono: 'SF Mono', 'Menlo', 'Monaco', monospace;
+
+        /* Shadows - Soft and realistic */
+        --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
+        --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.25);
+        --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.35);
+
+        /* Transitions */
+        --transition-fast: 0.15s ease;
+        --transition-base: 0.2s ease;
+      }
+
+      /* ==========================================================================
+         RESET & BASE
+         ========================================================================== */
       * {
         margin: 0;
         padding: 0;
         box-sizing: border-box;
       }
 
+      body {
+        font-family: var(--font-sans);
+        font-size: 13px;
+        line-height: 1.5;
+        color: var(--text-primary);
+        background: transparent;
+        overflow: hidden;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        -webkit-app-region: no-drag;
+      }
+
+      /* ==========================================================================
+         ANIMATIONS
+         ========================================================================== */
       @keyframes fadeIn {
         from {
           opacity: 0;
-          transform: translateY(-10px);
+          transform: translateY(-4px);
         }
         to {
           opacity: 1;
@@ -25,41 +107,32 @@
       @keyframes slideIn {
         from {
           opacity: 0;
-          transform: translateX(-20px) scale(0.95);
+          transform: translateX(-8px);
         }
         to {
           opacity: 1;
-          transform: translateX(0) scale(1);
+          transform: translateX(0);
         }
       }
 
       @keyframes slideOut {
         from {
           opacity: 1;
-          transform: translateX(0) scale(1);
-          max-height: 200px;
+          transform: translateX(0);
         }
         to {
           opacity: 0;
-          transform: translateX(20px) scale(0.9);
-          max-height: 0;
+          transform: translateX(8px);
         }
       }
 
-      @keyframes checkBounce {
+      @keyframes pulse {
         0%,
         100% {
-          transform: scale(1);
+          opacity: 1;
         }
         50% {
-          transform: scale(1.15);
-        }
-      }
-
-      @keyframes ripple {
-        to {
-          transform: scale(4);
-          opacity: 0;
+          opacity: 0.7;
         }
       }
 
@@ -69,353 +142,29 @@
           transform: translateX(0);
         }
         25% {
-          transform: translateX(-6px);
+          transform: translateX(-4px);
         }
         75% {
-          transform: translateX(6px);
+          transform: translateX(4px);
         }
       }
 
-      @keyframes success {
-        0%,
+      @keyframes checkmark {
+        0% {
+          transform: scale(0.8);
+        }
+        50% {
+          transform: scale(1.1);
+        }
         100% {
           transform: scale(1);
         }
-        50% {
-          transform: scale(1.03);
-        }
-      }
-
-      @keyframes glowPulse {
-        0%,
-        100% {
-          box-shadow:
-            0 0 20px rgba(255, 59, 48, 0.4),
-            0 4px 12px rgba(0, 0, 0, 0.3);
-        }
-        50% {
-          box-shadow:
-            0 0 30px rgba(255, 59, 48, 0.6),
-            0 6px 16px rgba(0, 0, 0, 0.4);
-        }
-      }
-
-      body {
-        font-family:
-          -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell,
-          sans-serif;
-        background: transparent;
-        overflow: hidden;
-        -webkit-app-region: no-drag;
-      }
-
-      .container {
-        width: 380px;
-        height: 600px;
-        background: rgba(30, 30, 30, 0.92);
-        backdrop-filter: blur(60px) saturate(200%);
-        -webkit-backdrop-filter: blur(60px) saturate(200%);
-        border-radius: 8px;
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
-        display: flex;
-        flex-direction: column;
-        overflow: hidden;
-        animation: fadeIn 0.4s ease-out;
-        transition:
-          background 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-          border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-          box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      }
-
-      .container:hover,
-      .container:focus-within {
-        background: rgba(35, 35, 35, 0.96);
-        border-color: rgba(255, 255, 255, 0.25);
-        box-shadow: 0 12px 48px 0 rgba(0, 0, 0, 0.5);
-      }
-
-      .container.focus-mode .search-bar,
-      .container.focus-mode .input-section,
-      .container.focus-mode .section-toggle {
-        display: none;
-      }
-
-      .header {
-        background: linear-gradient(
-          135deg,
-          rgba(255, 255, 255, 0.1) 0%,
-          rgba(255, 255, 255, 0.05) 100%
-        );
-        padding: 18px 20px;
-        display: grid;
-        grid-template-columns: 1fr auto 1fr;
-        align-items: center;
-        -webkit-app-region: drag;
-        cursor: move;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-      }
-
-      .header-title {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 10px;
-        grid-column: 2;
-      }
-
-      .header h1 {
-        color: #fff;
-        font-size: 17px;
-        font-weight: 600;
-        user-select: none;
-        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-        letter-spacing: 0.3px;
-      }
-
-      .window-controls {
-        display: flex;
-        gap: 10px;
-        align-items: center;
-        justify-content: flex-end;
-        grid-column: 3;
-        -webkit-app-region: no-drag;
-      }
-
-      .window-btn {
-        width: 12px;
-        height: 12px;
-        border-radius: 50%;
-        border: none;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-        -webkit-app-region: no-drag;
-      }
-
-      .window-btn:hover {
-        transform: scale(1.1);
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-      }
-
-      .window-btn:active {
-        transform: scale(0.95);
-      }
-
-      .minimize-btn {
-        background: linear-gradient(135deg, #ffd93d 0%, #ffb800 100%);
-      }
-
-      .close-btn {
-        background: linear-gradient(135deg, #ff6b6b 0%, #ee5253 100%);
-      }
-
-      .theme-toggle {
-        width: 32px;
-        height: 32px;
-        padding: 0;
-        background: rgba(255, 255, 255, 0.1);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        border-radius: 8px;
-        color: rgba(255, 255, 255, 0.8);
-        cursor: pointer;
-        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin-right: 12px;
-        -webkit-app-region: no-drag;
-      }
-
-      .theme-toggle:hover {
-        background: rgba(255, 255, 255, 0.2);
-        border-color: rgba(255, 255, 255, 0.3);
-        color: #fff;
-        transform: rotate(20deg) scale(1.05);
-        box-shadow: 0 4px 12px rgba(100, 150, 255, 0.2);
-      }
-
-      .theme-toggle:active {
-        transform: rotate(20deg) scale(0.95);
-      }
-
-      .focus-toggle {
-        width: 32px;
-        height: 32px;
-        padding: 0;
-        background: rgba(255, 255, 255, 0.1);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        border-radius: 8px;
-        color: rgba(255, 255, 255, 0.8);
-        cursor: pointer;
-        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin-right: 12px;
-        -webkit-app-region: no-drag;
-      }
-
-      .focus-toggle:hover {
-        background: rgba(255, 255, 255, 0.2);
-        border-color: rgba(255, 255, 255, 0.3);
-        color: #fff;
-        transform: scale(1.05);
-        box-shadow: 0 4px 12px rgba(100, 150, 255, 0.2);
-      }
-
-      .focus-toggle:active {
-        transform: scale(0.95);
-      }
-
-      .focus-toggle.active {
-        background: linear-gradient(
-          135deg,
-          rgba(100, 150, 255, 0.4) 0%,
-          rgba(80, 120, 220, 0.4) 100%
-        );
-        border-color: rgba(100, 150, 255, 0.6);
-        color: #fff;
-        box-shadow: 0 0 16px rgba(100, 150, 255, 0.4);
-      }
-
-      /* Focus mode styles */
-      .container.focus-mode {
-        background: rgba(20, 20, 30, 0.95);
-        border-color: rgba(100, 150, 255, 0.3);
-        box-shadow: 0 12px 48px 0 rgba(100, 150, 255, 0.2);
-      }
-
-      .container.focus-mode .stats-bar,
-      .container.focus-mode .search-bar,
-      .container.focus-mode .input-section {
-        opacity: 0;
-        height: 0;
-        overflow: hidden;
-        padding: 0;
-        margin: 0;
-        border: none;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      }
-
-      .container:not(.focus-mode) .stats-bar,
-      .container:not(.focus-mode) .search-bar,
-      .container:not(.focus-mode) .input-section {
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      }
-
-      .container.focus-mode .task-item.completed {
-        display: none;
-      }
-
-      .container.focus-mode .task-item:not(.timer-running) {
-        opacity: 0.5;
-      }
-
-      .container.focus-mode .task-item.timer-running {
-        transform: scale(1.02);
-        box-shadow: 0 8px 24px rgba(76, 220, 100, 0.3);
-      }
-
-      .stats-bar {
-        display: grid;
-        grid-template-columns: 1fr auto 1fr;
-        align-items: center;
-        padding: 14px 20px;
-        background: rgba(255, 255, 255, 0.05);
-        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-      }
-
-      .stats-text {
-        font-size: 11px;
-        color: rgba(255, 255, 255, 0.6);
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.8px;
-        grid-column: 1;
-      }
-
-      .stats-actions {
-        display: flex;
-        gap: 8px;
-        grid-column: 3;
-        justify-content: flex-end;
-      }
-
-      .action-btn {
-        padding: 7px 14px;
-        background: rgba(255, 255, 255, 0.08);
-        border: 1px solid rgba(255, 255, 255, 0.15);
-        border-radius: 10px;
-        color: rgba(255, 255, 255, 0.7);
-        font-size: 10px;
-        font-weight: 700;
-        cursor: pointer;
-        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        white-space: nowrap;
-      }
-
-      .action-btn:hover {
-        background: rgba(255, 255, 255, 0.15);
-        border-color: rgba(255, 255, 255, 0.3);
-        color: #fff;
-        transform: translateY(-1px);
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-      }
-
-      .action-btn:active {
-        transform: translateY(0) scale(0.95);
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-      }
-
-      .action-btn:focus-visible,
-      .timer-btn:focus-visible,
-      .delete-btn:focus-visible,
-      .preset-btn:focus-visible,
-      .section-toggle:focus-visible {
-        outline: 2px solid rgba(100, 150, 255, 0.6);
-        outline-offset: 2px;
-      }
-
-      button:focus:not(:focus-visible) {
-        outline: none;
-      }
-
-      /* Toast Notifications */
-      .toast-container {
-        position: fixed;
-        bottom: 20px;
-        right: 20px;
-        z-index: 1000;
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-        pointer-events: none;
-      }
-
-      .toast {
-        padding: 14px 20px;
-        background: rgba(40, 40, 40, 0.98);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        border-radius: 8px;
-        color: #fff;
-        font-size: 13px;
-        font-weight: 500;
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
-        backdrop-filter: blur(20px);
-        animation: slideInRight 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        pointer-events: auto;
-        display: flex;
-        align-items: center;
-        gap: 10px;
       }
 
       @keyframes slideInRight {
         from {
           opacity: 0;
-          transform: translateX(100px);
+          transform: translateX(40px);
         }
         to {
           opacity: 1;
@@ -423,60 +172,10 @@
         }
       }
 
-      .toast.success {
-        border-color: rgba(76, 175, 80, 0.6);
-        background: rgba(40, 60, 40, 0.98);
-      }
-
-      .toast.error {
-        border-color: rgba(244, 67, 54, 0.6);
-        background: rgba(60, 30, 30, 0.98);
-      }
-
-      .toast.info {
-        border-color: rgba(100, 150, 255, 0.6);
-        background: rgba(30, 40, 60, 0.98);
-      }
-
-      /* Loading Spinner */
-      .spinner {
-        width: 16px;
-        height: 16px;
-        border: 2px solid rgba(255, 255, 255, 0.2);
-        border-top-color: #fff;
-        border-radius: 50%;
-        animation: spin 0.6s linear infinite;
-      }
-
       @keyframes spin {
         to {
           transform: rotate(360deg);
         }
-      }
-
-      .loading-overlay {
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(0, 0, 0, 0.5);
-        backdrop-filter: blur(8px);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 999;
-        animation: fadeIn 0.2s ease-out;
-      }
-
-      /* Confetti */
-      .confetti {
-        position: fixed;
-        width: 10px;
-        height: 10px;
-        background: #f0f;
-        animation: confettiFall 3s linear forwards;
-        pointer-events: none;
       }
 
       @keyframes confettiFall {
@@ -486,198 +185,475 @@
         }
       }
 
-      .search-bar {
-        background: linear-gradient(
-          135deg,
-          rgba(255, 255, 255, 0.06) 0%,
-          rgba(255, 255, 255, 0.02) 100%
-        );
-        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      /* ==========================================================================
+         CONTAINER - Main app window
+         ========================================================================== */
+      .container {
+        width: 380px;
+        height: 600px;
+        background: var(--surface-base);
+        backdrop-filter: blur(80px) saturate(180%);
+        -webkit-backdrop-filter: blur(80px) saturate(180%);
+        border-radius: var(--radius-xl);
+        border: 1px solid var(--border-default);
+        box-shadow: var(--shadow-lg);
+        display: flex;
+        flex-direction: column;
         overflow: hidden;
-        transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        max-height: 200px;
+        animation: fadeIn 0.3s ease-out;
       }
 
-      .search-bar.collapsed {
-        max-height: 0;
-        border-bottom: none;
+      /* ==========================================================================
+         HEADER - Top toolbar
+         ========================================================================== */
+      .header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: var(--space-3) var(--space-4);
+        background: var(--surface-elevated);
+        border-bottom: 1px solid var(--border-subtle);
+        -webkit-app-region: drag;
+        cursor: move;
+        min-height: 48px;
       }
 
-      .search-bar-content {
-        padding: 16px 20px;
+      .header-title {
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
+        flex: 1;
+        justify-content: center;
       }
 
-      .search-input {
-        width: 100%;
-        padding: 12px 18px 12px 42px;
-        background: rgba(255, 255, 255, 0.08);
-        border: 1.5px solid rgba(255, 255, 255, 0.15);
-        border-radius: 10px;
-        color: #fff;
+      .header-title .icon {
+        width: 16px;
+        height: 16px;
+        color: var(--text-secondary);
+      }
+
+      .header h1 {
         font-size: 13px;
-        outline: none;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>');
-        background-repeat: no-repeat;
-        background-position: 16px center;
+        font-weight: 600;
+        color: var(--text-secondary);
+        letter-spacing: -0.01em;
+        user-select: none;
       }
 
-      .search-input:focus {
-        background-color: rgba(255, 255, 255, 0.12);
-        border-color: rgba(100, 150, 255, 0.6);
-        box-shadow:
-          0 0 0 3px rgba(100, 150, 255, 0.15),
-          0 4px 12px rgba(0, 0, 0, 0.1);
+      .header-left {
+        width: 72px;
       }
 
-      .search-input::placeholder {
-        color: rgba(255, 255, 255, 0.4);
+      .window-controls {
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
+        -webkit-app-region: no-drag;
+        width: 72px;
+        justify-content: flex-end;
       }
 
-      .input-section {
-        background: linear-gradient(
-          135deg,
-          rgba(255, 255, 255, 0.08) 0%,
-          rgba(255, 255, 255, 0.03) 100%
-        );
-        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        overflow: hidden;
-        transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        max-height: 300px;
-      }
-
-      .input-section.collapsed {
-        max-height: 0;
-        border-bottom: none;
-      }
-
-      .input-section-content {
-        padding: 20px;
-      }
-
-      .section-toggle {
-        padding: 8px 20px;
-        background: rgba(255, 255, 255, 0.04);
-        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      /* Toolbar buttons - Unified style */
+      .toolbar-btn {
+        width: 28px;
+        height: 28px;
+        padding: 0;
+        background: transparent;
+        border: none;
+        border-radius: var(--radius-sm);
+        color: var(--text-tertiary);
+        cursor: pointer;
         display: flex;
         align-items: center;
         justify-content: center;
+        transition: all var(--transition-fast);
+        -webkit-app-region: no-drag;
+      }
+
+      .toolbar-btn:hover {
+        background: var(--surface-overlay);
+        color: var(--text-secondary);
+      }
+
+      .toolbar-btn:active {
+        transform: scale(0.95);
+      }
+
+      .toolbar-btn.active {
+        background: var(--accent-muted);
+        color: var(--accent);
+      }
+
+      .toolbar-btn .icon {
+        width: 14px;
+        height: 14px;
+      }
+
+      /* Window traffic light buttons */
+      .window-btn {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        border: none;
         cursor: pointer;
-        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        transition: all var(--transition-fast);
+        -webkit-app-region: no-drag;
+      }
+
+      .window-btn:hover {
+        filter: brightness(1.1);
+      }
+
+      .window-btn:active {
+        transform: scale(0.9);
+      }
+
+      .minimize-btn {
+        background: #fbbf24;
+      }
+
+      .close-btn {
+        background: #f87171;
+      }
+
+      /* ==========================================================================
+         STATS BAR
+         ========================================================================== */
+      .stats-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: var(--space-2) var(--space-4);
+        background: var(--surface-base);
+        border-bottom: 1px solid var(--border-subtle);
+      }
+
+      .stats-text {
+        font-size: 11px;
+        font-weight: 500;
+        color: var(--text-tertiary);
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+
+      .stats-actions {
+        display: flex;
+        gap: var(--space-1);
+      }
+
+      /* ==========================================================================
+         BUTTON SYSTEM - Primary / Secondary / Ghost
+         ========================================================================== */
+
+      /* Ghost button (tertiary) */
+      .btn-ghost {
+        padding: var(--space-1) var(--space-2);
+        background: transparent;
+        border: none;
+        border-radius: var(--radius-sm);
+        color: var(--text-tertiary);
+        font-size: 11px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all var(--transition-fast);
+        white-space: nowrap;
+      }
+
+      .btn-ghost:hover {
+        background: var(--surface-overlay);
+        color: var(--text-secondary);
+      }
+
+      .btn-ghost:active {
+        transform: scale(0.98);
+      }
+
+      /* Secondary button */
+      .btn-secondary {
+        padding: var(--space-2) var(--space-3);
+        background: var(--surface-overlay);
+        border: 1px solid var(--border-default);
+        border-radius: var(--radius-md);
+        color: var(--text-primary);
+        font-size: 13px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all var(--transition-fast);
+      }
+
+      .btn-secondary:hover {
+        background: rgba(255, 255, 255, 0.12);
+        border-color: var(--border-strong);
+      }
+
+      .btn-secondary:active {
+        transform: scale(0.98);
+      }
+
+      /* Primary button */
+      .btn-primary {
+        padding: var(--space-2) var(--space-4);
+        background: var(--accent);
+        border: none;
+        border-radius: var(--radius-md);
+        color: white;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all var(--transition-fast);
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+      }
+
+      .btn-primary:hover {
+        background: var(--accent-hover);
+      }
+
+      .btn-primary:active {
+        transform: scale(0.98);
+      }
+
+      .btn-primary:focus-visible,
+      .btn-secondary:focus-visible,
+      .btn-ghost:focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: 2px;
+      }
+
+      /* Action buttons in stats bar */
+      .action-btn {
+        padding: var(--space-1) var(--space-2);
+        background: transparent;
+        border: none;
+        border-radius: var(--radius-sm);
+        color: var(--text-tertiary);
+        font-size: 11px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all var(--transition-fast);
+      }
+
+      .action-btn:hover {
+        background: var(--surface-overlay);
+        color: var(--text-secondary);
+      }
+
+      /* ==========================================================================
+         SECTION TOGGLES (Accordion)
+         ========================================================================== */
+      .section-toggle {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: var(--space-1) var(--space-4);
+        background: transparent;
+        border: none;
+        border-bottom: 1px solid var(--border-subtle);
+        cursor: pointer;
+        transition: background var(--transition-fast);
         -webkit-app-region: no-drag;
       }
 
       .section-toggle:hover {
-        background: rgba(255, 255, 255, 0.08);
+        background: var(--surface-overlay);
       }
 
       .section-toggle-icon {
-        width: 16px;
-        height: 16px;
-        color: rgba(255, 255, 255, 0.5);
-        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        width: 12px;
+        height: 12px;
+        color: var(--text-muted);
+        transition: transform var(--transition-base);
       }
 
       .section-toggle.collapsed .section-toggle-icon {
         transform: rotate(180deg);
       }
 
+      /* ==========================================================================
+         SEARCH BAR
+         ========================================================================== */
+      .search-bar {
+        background: var(--surface-base);
+        border-bottom: 1px solid var(--border-subtle);
+        overflow: hidden;
+        transition:
+          max-height 0.25s ease,
+          opacity 0.25s ease;
+        max-height: 60px;
+      }
+
+      .search-bar.collapsed {
+        max-height: 0;
+        opacity: 0;
+        border-bottom: none;
+      }
+
+      .search-bar-content {
+        padding: var(--space-2) var(--space-4);
+      }
+
+      .search-input {
+        width: 100%;
+        padding: var(--space-2) var(--space-3);
+        padding-left: 36px;
+        background: var(--surface-overlay);
+        border: 1px solid var(--border-subtle);
+        border-radius: var(--radius-md);
+        color: var(--text-primary);
+        font-size: 13px;
+        font-family: inherit;
+        outline: none;
+        transition: all var(--transition-fast);
+        background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>');
+        background-repeat: no-repeat;
+        background-position: 12px center;
+      }
+
+      .search-input:focus {
+        border-color: var(--accent);
+        background-color: rgba(255, 255, 255, 0.06);
+      }
+
+      .search-input::placeholder {
+        color: var(--text-muted);
+      }
+
+      /* ==========================================================================
+         INPUT SECTION - Add new task
+         ========================================================================== */
+      .input-section {
+        background: var(--surface-base);
+        border-bottom: 1px solid var(--border-subtle);
+        overflow: hidden;
+        transition:
+          max-height 0.25s ease,
+          opacity 0.25s ease;
+        max-height: 200px;
+      }
+
+      .input-section.collapsed {
+        max-height: 0;
+        opacity: 0;
+        border-bottom: none;
+      }
+
+      .input-section-content {
+        padding: var(--space-4);
+      }
+
       .input-wrapper {
-        display: grid;
-        grid-template-columns: 1fr auto;
-        gap: 12px;
+        display: flex;
+        gap: var(--space-2);
         align-items: center;
       }
 
       #taskInput {
-        padding: 14px 18px;
-        background: rgba(255, 255, 255, 0.1);
-        border: 1.5px solid rgba(255, 255, 255, 0.2);
-        border-radius: 10px;
-        color: #fff;
-        font-size: 14px;
+        flex: 1;
+        padding: var(--space-2) var(--space-3);
+        background: var(--surface-overlay);
+        border: 1px solid var(--border-subtle);
+        border-radius: var(--radius-md);
+        color: var(--text-primary);
+        font-size: 13px;
+        font-family: inherit;
         outline: none;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        transition: all var(--transition-fast);
       }
 
       #taskInput:focus {
-        background: rgba(255, 255, 255, 0.15);
-        border-color: rgba(100, 150, 255, 0.6);
-        box-shadow: 0 0 0 3px rgba(100, 150, 255, 0.15);
+        border-color: var(--accent);
+        background-color: rgba(255, 255, 255, 0.06);
       }
 
       #taskInput::placeholder {
-        color: rgba(255, 255, 255, 0.5);
+        color: var(--text-muted);
       }
 
       .add-btn {
-        padding: 14px 28px;
-        background: linear-gradient(
-          135deg,
-          rgba(100, 150, 255, 0.9) 0%,
-          rgba(80, 120, 220, 0.9) 100%
-        );
+        padding: var(--space-2) var(--space-4);
+        background: var(--accent);
         border: none;
-        border-radius: 10px;
-        color: #fff;
-        font-size: 14px;
-        font-weight: 700;
-        letter-spacing: 0.3px;
+        border-radius: var(--radius-md);
+        color: white;
+        font-size: 13px;
+        font-weight: 600;
         cursor: pointer;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        box-shadow: 0 4px 16px rgba(100, 150, 255, 0.35);
+        transition: all var(--transition-fast);
         white-space: nowrap;
-        position: relative;
-        overflow: hidden;
-      }
-
-      .add-btn::before {
-        content: '';
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        width: 0;
-        height: 0;
-        border-radius: 50%;
-        background: rgba(255, 255, 255, 0.3);
-        transform: translate(-50%, -50%);
-        transition:
-          width 0.6s,
-          height 0.6s;
-      }
-
-      .add-btn:active::before {
-        width: 300px;
-        height: 300px;
-        transition:
-          width 0s,
-          height 0s;
       }
 
       .add-btn:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(100, 150, 255, 0.45);
-        background: linear-gradient(135deg, rgba(100, 150, 255, 1) 0%, rgba(80, 120, 220, 1) 100%);
+        background: var(--accent-hover);
       }
 
       .add-btn:active {
-        transform: translateY(0) scale(0.98);
-        box-shadow: 0 3px 12px rgba(100, 150, 255, 0.4);
-      }
-
-      .add-btn:focus-visible {
-        outline: 3px solid rgba(100, 150, 255, 0.5);
-        outline-offset: 2px;
+        transform: scale(0.98);
       }
 
       .add-btn.success {
-        animation: success 0.4s ease-out;
+        animation: checkmark 0.3s ease;
       }
 
+      /* Duration section */
+      .duration-section {
+        margin-top: var(--space-3);
+      }
+
+      .duration-label {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: var(--space-1);
+        font-size: 10px;
+        font-weight: 500;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        margin-bottom: var(--space-2);
+      }
+
+      .duration-label svg {
+        width: 10px;
+        height: 10px;
+      }
+
+      .duration-presets {
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        gap: var(--space-1);
+      }
+
+      .preset-btn {
+        padding: var(--space-2) var(--space-1);
+        background: var(--surface-overlay);
+        border: 1px solid var(--border-subtle);
+        border-radius: var(--radius-sm);
+        color: var(--text-secondary);
+        font-size: 11px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all var(--transition-fast);
+        text-align: center;
+      }
+
+      .preset-btn:hover {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: var(--border-default);
+        color: var(--text-primary);
+      }
+
+      .preset-btn.selected {
+        background: var(--accent-muted);
+        border-color: var(--accent);
+        color: var(--accent);
+      }
+
+      /* ==========================================================================
+         TASKS SECTION - Task list
+         ========================================================================== */
       .tasks-section {
         flex: 1;
         overflow-y: auto;
-        padding: 20px;
+        padding: var(--space-2) 0;
       }
 
       .tasks-section::-webkit-scrollbar {
@@ -689,56 +665,43 @@
       }
 
       .tasks-section::-webkit-scrollbar-thumb {
-        background: rgba(255, 255, 255, 0.2);
-        border-radius: 10px;
+        background: var(--border-default);
+        border-radius: 3px;
       }
 
       .tasks-section::-webkit-scrollbar-thumb:hover {
-        background: rgba(255, 255, 255, 0.3);
+        background: var(--border-strong);
       }
 
+      /* ==========================================================================
+         TASK ITEM - Slim list row design
+         ========================================================================== */
       .task-item {
-        display: grid;
-        grid-template-columns: auto 1fr auto;
-        align-items: center;
-        gap: 14px;
-        padding: 16px 18px;
-        background: rgba(255, 255, 255, 0.08);
-        border: 1px solid rgba(255, 255, 255, 0.12);
-        border-radius: 10px;
-        margin-bottom: 12px;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        animation: slideIn 0.3s ease-out;
+        display: flex;
+        align-items: flex-start;
+        gap: var(--space-3);
+        padding: var(--space-3) var(--space-4);
+        background: transparent;
+        border-bottom: 1px solid var(--border-subtle);
+        transition: background var(--transition-fast);
+        animation: slideIn 0.2s ease-out;
+        cursor: default;
         position: relative;
-        overflow: hidden;
-        cursor: grab;
       }
 
-      .task-item:active {
-        cursor: grabbing;
+      .task-item:last-child {
+        border-bottom: none;
+      }
+
+      .task-item:hover {
+        background: rgba(255, 255, 255, 0.02);
       }
 
       .task-item.selected {
-        background: rgba(100, 150, 255, 0.15);
-        border-color: rgba(100, 150, 255, 0.4);
-        box-shadow: 0 0 0 2px rgba(100, 150, 255, 0.2);
+        background: var(--accent-subtle);
       }
 
-      .task-item.editing .task-title {
-        display: none;
-      }
-
-      .task-edit-input {
-        width: 100%;
-        padding: 8px 12px;
-        background: rgba(255, 255, 255, 0.15);
-        border: 1.5px solid rgba(100, 150, 255, 0.6);
-        border-radius: 10px;
-        color: #fff;
-        font-size: 14px;
-        outline: none;
-      }
-
+      /* Running timer indicator - Left accent bar */
       .task-item::before {
         content: '';
         position: absolute;
@@ -747,55 +710,48 @@
         bottom: 0;
         width: 3px;
         background: transparent;
-        transition: all 0.3s ease;
+        transition: background var(--transition-fast);
       }
 
       .task-item.timer-running {
-        background: rgba(76, 220, 100, 0.08);
-        border-color: rgba(76, 220, 100, 0.3);
-        box-shadow: 0 0 20px rgba(76, 220, 100, 0.15);
+        background: var(--success-muted);
       }
 
       .task-item.timer-running::before {
-        background: linear-gradient(180deg, rgba(76, 220, 100, 1) 0%, rgba(56, 180, 80, 1) 100%);
-        box-shadow: 0 0 10px rgba(76, 220, 100, 0.5);
+        background: var(--success);
       }
 
-      .task-item:hover {
-        background: rgba(255, 255, 255, 0.12);
-        transform: translateX(2px);
-        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+      .task-item.timer-warning {
+        background: var(--danger-muted);
       }
 
-      .task-item.timer-running:hover {
-        background: rgba(76, 220, 100, 0.12);
-        box-shadow: 0 6px 20px rgba(76, 220, 100, 0.2);
+      .task-item.timer-warning::before {
+        background: var(--danger);
       }
 
+      /* Checkbox - Smaller, cleaner */
       .task-checkbox {
-        width: 24px;
-        height: 24px;
-        min-width: 24px;
-        border-radius: 8px;
-        border: 2px solid rgba(255, 255, 255, 0.4);
+        width: 18px;
+        height: 18px;
+        min-width: 18px;
+        border-radius: var(--radius-sm);
+        border: 1.5px solid var(--border-strong);
+        background: transparent;
         cursor: pointer;
         position: relative;
-        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-        background: rgba(255, 255, 255, 0.05);
-        align-self: flex-start;
+        transition: all var(--transition-fast);
+        margin-top: 1px;
       }
 
       .task-checkbox:hover {
-        border-color: rgba(100, 200, 100, 0.7);
-        background: rgba(100, 200, 100, 0.15);
-        transform: scale(1.05);
+        border-color: var(--accent);
+        background: var(--accent-subtle);
       }
 
       .task-checkbox.completed {
-        background: linear-gradient(135deg, rgba(76, 175, 80, 1) 0%, rgba(56, 142, 60, 1) 100%);
-        border-color: rgba(76, 175, 80, 1);
-        box-shadow: 0 2px 8px rgba(76, 175, 80, 0.4);
-        animation: checkBounce 0.3s ease-out;
+        background: var(--accent);
+        border-color: var(--accent);
+        animation: checkmark 0.2s ease;
       }
 
       .task-checkbox.completed::after {
@@ -803,445 +759,439 @@
         position: absolute;
         top: 50%;
         left: 50%;
-        width: 6px;
-        height: 11px;
-        border: solid #fff;
-        border-width: 0 2.5px 2.5px 0;
-        transform: translate(-50%, -60%) rotate(45deg);
+        width: 5px;
+        height: 8px;
+        border: solid white;
+        border-width: 0 2px 2px 0;
+        transform: translate(-50%, -55%) rotate(45deg);
       }
 
       .task-checkbox:focus-visible {
-        outline: 2px solid rgba(100, 150, 255, 0.6);
+        outline: 2px solid var(--accent);
         outline-offset: 2px;
       }
 
+      /* Task content */
       .task-content {
+        flex: 1;
+        min-width: 0;
         display: flex;
         flex-direction: column;
-        gap: 10px;
-        min-width: 0;
+        gap: var(--space-2);
       }
 
       .task-title {
-        color: #fff;
-        font-size: 14px;
-        line-height: 1.5;
+        color: var(--text-primary);
+        font-size: 13px;
+        font-weight: 450;
+        line-height: 1.4;
         word-break: break-word;
-        text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
-        font-weight: 500;
-        letter-spacing: 0.01em;
-        margin-bottom: 2px;
       }
 
       .task-item.completed .task-title {
+        color: var(--text-tertiary);
         text-decoration: line-through;
-        opacity: 0.4;
       }
 
       .task-item.timer-running .task-title {
-        color: rgba(255, 255, 255, 1);
-        font-weight: 600;
+        font-weight: 500;
       }
 
+      .task-item.editing .task-title {
+        display: none;
+      }
+
+      .task-edit-input {
+        width: 100%;
+        padding: var(--space-1) var(--space-2);
+        background: var(--surface-overlay);
+        border: 1px solid var(--accent);
+        border-radius: var(--radius-sm);
+        color: var(--text-primary);
+        font-size: 13px;
+        font-family: inherit;
+        outline: none;
+      }
+
+      /* Delete button - Subtle, appears on hover */
       .delete-btn {
-        width: 34px;
-        height: 34px;
+        width: 24px;
+        height: 24px;
         padding: 0;
-        background: rgba(244, 67, 54, 0.12);
-        border: 1.5px solid rgba(244, 67, 54, 0.3);
-        border-radius: 10px;
-        color: rgba(244, 67, 54, 1);
+        background: transparent;
+        border: none;
+        border-radius: var(--radius-sm);
+        color: var(--text-muted);
         cursor: pointer;
-        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        transition: all var(--transition-fast);
         display: flex;
         align-items: center;
         justify-content: center;
         flex-shrink: 0;
-        opacity: 0.7;
+        opacity: 0;
+        margin-top: -2px;
       }
 
       .task-item:hover .delete-btn {
         opacity: 1;
       }
 
-      .delete-btn svg {
-        width: 17px;
-        height: 17px;
-      }
-
       .delete-btn:hover {
-        background: linear-gradient(135deg, rgba(244, 67, 54, 0.5) 0%, rgba(220, 50, 40, 0.5) 100%);
-        border-color: rgba(244, 67, 54, 0.7);
-        color: #fff;
-        transform: translateY(-2px) scale(1.05);
-        box-shadow: 0 6px 14px rgba(244, 67, 54, 0.4);
+        background: var(--danger-muted);
+        color: var(--danger);
       }
 
-      .delete-btn:active {
-        transform: translateY(0) scale(1);
-        box-shadow: 0 2px 6px rgba(244, 67, 54, 0.3);
+      .delete-btn svg {
+        width: 14px;
+        height: 14px;
       }
 
+      /* ==========================================================================
+         TIMER - Integrated design
+         ========================================================================== */
+      .task-timer {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-2);
+        padding: var(--space-2) var(--space-3);
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: var(--radius-sm);
+        border: 1px solid var(--border-subtle);
+      }
+
+      .timer-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--space-3);
+      }
+
+      .timer-display {
+        font-family: var(--font-mono);
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--text-secondary);
+        letter-spacing: 0.02em;
+        min-width: 54px;
+      }
+
+      .timer-display.running {
+        color: var(--success);
+      }
+
+      .timer-display.warning {
+        color: var(--danger);
+        animation: pulse 1s ease-in-out infinite;
+      }
+
+      .task-timer.warning {
+        background: rgba(248, 113, 113, 0.06);
+        border-color: rgba(248, 113, 113, 0.2);
+      }
+
+      /* Timer controls - Compact group */
+      .timer-controls {
+        display: flex;
+        gap: var(--space-1);
+      }
+
+      .timer-btn {
+        width: 28px;
+        height: 28px;
+        padding: 0;
+        background: var(--surface-overlay);
+        border: 1px solid var(--border-subtle);
+        border-radius: var(--radius-sm);
+        color: var(--text-secondary);
+        cursor: pointer;
+        transition: all var(--transition-fast);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+      }
+
+      .timer-btn:hover {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: var(--border-default);
+        color: var(--text-primary);
+      }
+
+      .timer-btn:active {
+        transform: scale(0.95);
+      }
+
+      /* Primary action uses accent */
+      .timer-btn.play {
+        background: var(--accent-muted);
+        border-color: var(--accent);
+        color: var(--accent);
+      }
+
+      .timer-btn.play:hover {
+        background: var(--accent);
+        color: white;
+      }
+
+      /* Pause is secondary */
+      .timer-btn.pause {
+        background: var(--warning-muted);
+        border-color: rgba(251, 191, 36, 0.3);
+        color: var(--warning);
+      }
+
+      .timer-btn.pause:hover {
+        background: var(--warning);
+        color: rgba(0, 0, 0, 0.8);
+      }
+
+      /* Reset is tertiary/ghost */
+      .timer-btn.reset {
+        background: transparent;
+        border-color: var(--border-subtle);
+        color: var(--text-tertiary);
+      }
+
+      .timer-btn.reset:hover {
+        background: var(--surface-overlay);
+        color: var(--text-secondary);
+      }
+
+      .timer-btn svg {
+        width: 12px;
+        height: 12px;
+        fill: currentColor;
+      }
+
+      /* Progress bar - Thin and elegant */
+      .timer-progress-bar {
+        width: 100%;
+        height: 3px;
+        background: rgba(255, 255, 255, 0.06);
+        border-radius: 2px;
+        overflow: hidden;
+      }
+
+      .timer-progress-fill {
+        height: 100%;
+        background: var(--success);
+        border-radius: 2px;
+        transition: width 0.5s linear;
+      }
+
+      .timer-progress-fill.paused {
+        background: var(--accent);
+      }
+
+      /* ==========================================================================
+         EMPTY STATE
+         ========================================================================== */
       .empty-state {
-        text-align: center;
-        padding: 60px 30px;
-        color: rgba(255, 255, 255, 0.6);
-        animation: fadeIn 0.6s ease-out;
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
         height: 100%;
+        padding: var(--space-8);
+        text-align: center;
+        animation: fadeIn 0.4s ease;
       }
 
       .empty-state-icon {
-        width: 56px;
-        height: 56px;
-        margin-bottom: 20px;
-        opacity: 0.35;
-        display: block;
-        color: rgba(255, 255, 255, 0.5);
+        width: 48px;
+        height: 48px;
+        color: var(--text-muted);
+        margin-bottom: var(--space-4);
+        opacity: 0.5;
       }
 
       .empty-state-title {
-        font-size: 18px;
+        font-size: 15px;
         font-weight: 600;
-        margin-bottom: 10px;
-        color: rgba(255, 255, 255, 0.7);
-        letter-spacing: 0.2px;
+        color: var(--text-secondary);
+        margin-bottom: var(--space-2);
       }
 
       .empty-state-text {
         font-size: 13px;
-        color: rgba(255, 255, 255, 0.5);
-        line-height: 1.6;
-        max-width: 280px;
+        color: var(--text-tertiary);
+        max-width: 240px;
+        line-height: 1.5;
       }
 
+      /* ==========================================================================
+         TOAST NOTIFICATIONS
+         ========================================================================== */
+      .toast-container {
+        position: fixed;
+        bottom: var(--space-4);
+        right: var(--space-4);
+        z-index: 1000;
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-2);
+        pointer-events: none;
+      }
+
+      .toast {
+        padding: var(--space-3) var(--space-4);
+        background: var(--surface-elevated);
+        border: 1px solid var(--border-default);
+        border-radius: var(--radius-md);
+        color: var(--text-primary);
+        font-size: 13px;
+        font-weight: 500;
+        box-shadow: var(--shadow-lg);
+        animation: slideInRight 0.25s ease;
+        pointer-events: auto;
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
+      }
+
+      .toast.success {
+        border-color: rgba(52, 211, 153, 0.3);
+      }
+
+      .toast.error {
+        border-color: rgba(248, 113, 113, 0.3);
+      }
+
+      .toast.info {
+        border-color: var(--border-default);
+      }
+
+      /* ==========================================================================
+         LOADING & CONFETTI
+         ========================================================================== */
+      .spinner {
+        width: 14px;
+        height: 14px;
+        border: 2px solid var(--border-default);
+        border-top-color: var(--accent);
+        border-radius: 50%;
+        animation: spin 0.6s linear infinite;
+      }
+
+      .loading-overlay {
+        position: absolute;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(4px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 999;
+      }
+
+      .confetti {
+        position: fixed;
+        width: 8px;
+        height: 8px;
+        pointer-events: none;
+        animation: confettiFall 3s linear forwards;
+      }
+
+      /* ==========================================================================
+         FOCUS MODE
+         ========================================================================== */
+      .container.focus-mode {
+        background: rgba(18, 18, 22, 0.96);
+      }
+
+      .container.focus-mode .stats-bar,
+      .container.focus-mode .search-bar,
+      .container.focus-mode .input-section,
+      .container.focus-mode .section-toggle {
+        display: none;
+      }
+
+      .container.focus-mode .task-item.completed {
+        display: none;
+      }
+
+      .container.focus-mode .task-item:not(.timer-running) {
+        opacity: 0.4;
+      }
+
+      .container.focus-mode .task-item.timer-running {
+        opacity: 1;
+      }
+
+      /* ==========================================================================
+         ICONS - Unified stroke weight
+         ========================================================================== */
       .icon {
-        width: 20px;
-        height: 20px;
+        width: 16px;
+        height: 16px;
         fill: none;
         stroke: currentColor;
-        stroke-width: 2;
+        stroke-width: 1.75;
         stroke-linecap: round;
         stroke-linejoin: round;
       }
 
-      .duration-section {
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-        margin-top: 16px;
+      /* ==========================================================================
+         LIGHT THEME
+         ========================================================================== */
+      .light-theme {
+        --surface-base: rgba(255, 255, 255, 0.96);
+        --surface-elevated: rgba(245, 245, 247, 1);
+        --surface-overlay: rgba(235, 235, 240, 1);
+
+        --text-primary: rgba(0, 0, 0, 0.88);
+        --text-secondary: rgba(0, 0, 0, 0.6);
+        --text-tertiary: rgba(0, 0, 0, 0.4);
+        --text-muted: rgba(0, 0, 0, 0.24);
+
+        --border-subtle: rgba(0, 0, 0, 0.06);
+        --border-default: rgba(0, 0, 0, 0.1);
+        --border-strong: rgba(0, 0, 0, 0.16);
+
+        --accent-muted: rgba(59, 130, 246, 0.12);
+        --accent-subtle: rgba(59, 130, 246, 0.06);
+
+        --success-muted: rgba(52, 211, 153, 0.1);
+        --warning-muted: rgba(251, 191, 36, 0.1);
+        --danger-muted: rgba(248, 113, 113, 0.08);
       }
 
-      .duration-label {
-        font-size: 11px;
-        color: rgba(255, 255, 255, 0.6);
-        text-transform: uppercase;
-        letter-spacing: 0.8px;
-        font-weight: 700;
-        text-align: center;
+      .light-theme .container {
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+        border-color: rgba(0, 0, 0, 0.08);
       }
 
-      .duration-presets {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 8px;
-      }
-
-      .preset-btn {
-        padding: 12px 8px;
-        background: rgba(255, 255, 255, 0.08);
-        border: 1px solid rgba(255, 255, 255, 0.15);
-        border-radius: 8px;
-        color: rgba(255, 255, 255, 0.7);
-        font-size: 12px;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-        white-space: nowrap;
-        text-align: center;
-      }
-
-      .preset-btn:hover {
-        background: rgba(255, 255, 255, 0.15);
-        border-color: rgba(255, 255, 255, 0.3);
-        color: #fff;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
-      }
-
-      .preset-btn:active {
-        transform: translateY(0);
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-      }
-
-      .preset-btn.selected {
-        background: linear-gradient(
-          135deg,
-          rgba(100, 150, 255, 0.5) 0%,
-          rgba(80, 120, 220, 0.5) 100%
-        );
-        border-color: rgba(100, 150, 255, 0.7);
-        color: #fff;
-        box-shadow: 0 0 16px rgba(100, 150, 255, 0.4);
-        transform: translateY(-1px);
-      }
-
+      /* Hidden utility */
       .duration-row {
         display: none;
       }
 
       #durationInput {
-        flex: 1;
-        padding: 10px 14px;
-        background: rgba(255, 255, 255, 0.1);
-        border: 1.5px solid rgba(255, 255, 255, 0.2);
-        border-radius: 8px;
-        color: #fff;
-        font-size: 13px;
-        outline: none;
-        transition: all 0.3s ease;
-      }
-
-      #durationInput:focus {
-        background: rgba(255, 255, 255, 0.15);
-        border-color: rgba(100, 150, 255, 0.6);
-        box-shadow: 0 0 0 3px rgba(100, 150, 255, 0.1);
-      }
-
-      #durationInput::placeholder {
-        color: rgba(255, 255, 255, 0.5);
-      }
-
-      .task-timer {
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-        width: 100%;
-        padding: 12px 14px;
-        background: rgba(0, 0, 0, 0.15);
-        border-radius: 8px;
-        border: 1px solid rgba(255, 255, 255, 0.08);
-      }
-
-      .timer-row {
-        display: grid;
-        grid-template-columns: auto 1fr;
-        align-items: center;
-        gap: 12px;
-      }
-
-      .timer-display {
-        font-family: 'SF Mono', 'Monaco', 'Courier New', monospace;
-        font-size: 18px;
-        font-weight: 700;
-        color: rgba(100, 200, 255, 1);
-        text-shadow: 0 0 12px rgba(100, 200, 255, 0.4);
-        letter-spacing: 0.5px;
-        min-width: 70px;
-      }
-
-      .timer-display.running {
-        color: rgba(76, 220, 100, 1);
-        text-shadow: 0 0 16px rgba(76, 220, 100, 0.6);
-        animation: pulse 2s ease-in-out infinite;
-      }
-
-      .timer-display.warning {
-        color: rgba(255, 59, 48, 1);
-        text-shadow: 0 0 20px rgba(255, 59, 48, 0.7);
-        animation: pulse 1s ease-in-out infinite;
-      }
-
-      .task-timer.warning {
-        border-color: rgba(255, 59, 48, 0.4);
-        background: rgba(255, 59, 48, 0.08);
-      }
-
-      .task-item.timer-warning {
-        border-color: rgba(255, 59, 48, 0.4);
-        animation: glowPulse 2s ease-in-out infinite;
-      }
-
-      .task-item.timer-warning::before {
-        background: linear-gradient(180deg, rgba(255, 59, 48, 1) 0%, rgba(220, 38, 38, 1) 100%);
-        box-shadow: 0 0 12px rgba(255, 59, 48, 0.6);
-      }
-
-      @keyframes pulse {
-        0%,
-        100% {
-          opacity: 1;
-          transform: scale(1);
-        }
-        50% {
-          opacity: 0.85;
-          transform: scale(1.02);
-        }
-      }
-
-      .timer-progress-bar {
-        width: 100%;
-        height: 6px;
-        background: rgba(255, 255, 255, 0.12);
-        border-radius: 10px;
-        overflow: hidden;
-        position: relative;
-        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
-      }
-
-      .timer-progress-fill {
-        height: 100%;
-        background: linear-gradient(90deg, rgba(76, 220, 100, 0.9) 0%, rgba(56, 180, 80, 1) 100%);
-        border-radius: 10px;
-        transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-        box-shadow: 0 0 12px rgba(76, 220, 100, 0.5);
-        position: relative;
-      }
-
-      .timer-progress-fill::after {
-        content: '';
-        position: absolute;
-        top: 0;
-        right: 0;
-        bottom: 0;
-        width: 30%;
-        background: linear-gradient(
-          90deg,
-          transparent 0%,
-          rgba(255, 255, 255, 0.3) 50%,
-          transparent 100%
-        );
-        animation: shimmer 2s infinite;
-      }
-
-      @keyframes shimmer {
-        0% {
-          transform: translateX(-100%);
-        }
-        100% {
-          transform: translateX(100%);
-        }
-      }
-
-      .timer-progress-fill.paused {
-        background: linear-gradient(90deg, rgba(100, 200, 255, 0.9) 0%, rgba(80, 150, 220, 1) 100%);
-        box-shadow: 0 0 12px rgba(100, 200, 255, 0.4);
-      }
-
-      .timer-progress-fill.paused::after {
-        animation: none;
-      }
-
-      .timer-controls {
-        display: flex;
-        gap: 6px;
-        justify-content: flex-end;
-      }
-
-      .timer-btn {
-        width: 36px;
-        height: 36px;
-        padding: 0;
-        background: rgba(255, 255, 255, 0.1);
-        border: 1.5px solid rgba(255, 255, 255, 0.2);
-        border-radius: 10px;
-        color: #fff;
-        cursor: pointer;
-        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        backdrop-filter: blur(10px);
-        flex-shrink: 0;
-      }
-
-      .timer-btn svg {
-        width: 16px;
-        height: 16px;
-        fill: currentColor;
-      }
-
-      .timer-btn:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.25);
-      }
-
-      .timer-btn:active {
-        transform: translateY(0);
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-      }
-
-      .timer-btn.play {
-        background: linear-gradient(
-          135deg,
-          rgba(76, 220, 100, 0.5) 0%,
-          rgba(56, 180, 80, 0.5) 100%
-        );
-        border-color: rgba(76, 220, 100, 0.7);
-        box-shadow: 0 2px 8px rgba(76, 220, 100, 0.3);
-      }
-
-      .timer-btn.play:hover {
-        background: linear-gradient(
-          135deg,
-          rgba(76, 220, 100, 0.7) 0%,
-          rgba(56, 180, 80, 0.7) 100%
-        );
-        box-shadow: 0 6px 16px rgba(76, 220, 100, 0.4);
-      }
-
-      .timer-btn.pause {
-        background: linear-gradient(135deg, rgba(255, 180, 0, 0.5) 0%, rgba(255, 152, 0, 0.5) 100%);
-        border-color: rgba(255, 180, 0, 0.7);
-        box-shadow: 0 2px 8px rgba(255, 180, 0, 0.3);
-      }
-
-      .timer-btn.pause:hover {
-        background: linear-gradient(135deg, rgba(255, 180, 0, 0.7) 0%, rgba(255, 152, 0, 0.7) 100%);
-        box-shadow: 0 6px 16px rgba(255, 180, 0, 0.4);
-      }
-
-      .timer-btn.reset {
-        background: linear-gradient(135deg, rgba(244, 67, 54, 0.4) 0%, rgba(220, 50, 40, 0.4) 100%);
-        border-color: rgba(244, 67, 54, 0.6);
-        box-shadow: 0 2px 8px rgba(244, 67, 54, 0.25);
-      }
-
-      .timer-btn.reset:hover {
-        background: linear-gradient(135deg, rgba(244, 67, 54, 0.6) 0%, rgba(220, 50, 40, 0.6) 100%);
-        box-shadow: 0 6px 16px rgba(244, 67, 54, 0.35);
+        display: none;
       }
     </style>
   </head>
   <body>
     <div class="container">
+      <!-- Header / Toolbar -->
       <div class="header">
+        <div class="header-left"></div>
         <div class="header-title">
-          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
             <circle cx="12" cy="12" r="10" />
             <polyline points="9 12 11 14 15 10" />
           </svg>
           <h1>Task Floater</h1>
         </div>
         <div class="window-controls">
-          <button class="focus-toggle" id="focusBtn" title="Focus">
-            <svg
-              class="icon"
-              style="width: 14px; height: 14px"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-            >
+          <button class="toolbar-btn" id="focusBtn" title="Focus Mode (Cmd+Shift+F)">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
               <circle cx="12" cy="12" r="3" />
               <circle cx="12" cy="12" r="10" />
             </svg>
           </button>
-          <button class="theme-toggle" id="themeToggle" title="Theme">
-            <svg class="icon" style="width: 14px; height: 14px" viewBox="0 0 24 24">
+          <button class="toolbar-btn" id="themeToggle" title="Toggle Theme (Cmd+T)">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
               <circle cx="12" cy="12" r="5" />
               <line x1="12" y1="1" x2="12" y2="3" />
               <line x1="12" y1="21" x2="12" y2="23" />
@@ -1253,22 +1203,22 @@
               <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
             </svg>
           </button>
-          <button class="window-btn minimize-btn" id="minimizeBtn"></button>
-          <button class="window-btn close-btn" id="closeBtn"></button>
+          <button class="window-btn minimize-btn" id="minimizeBtn" title="Minimize"></button>
+          <button class="window-btn close-btn" id="closeBtn" title="Close"></button>
         </div>
       </div>
 
+      <!-- Stats Bar -->
       <div class="stats-bar" id="statsBar">
         <div class="stats-text" id="statsText">0 tasks</div>
         <div class="stats-actions">
-          <button class="action-btn" id="clearCompletedBtn" title="Clear completed tasks">
-            Clear
-          </button>
+          <button class="action-btn" id="clearCompletedBtn" title="Clear completed">Clear</button>
           <button class="action-btn" id="exportBtn" title="Export tasks">Export</button>
           <button class="action-btn" id="importBtn" title="Import tasks">Import</button>
         </div>
       </div>
 
+      <!-- Search Toggle -->
       <button class="section-toggle" id="searchToggle" title="Toggle search">
         <svg
           class="section-toggle-icon"
@@ -1281,12 +1231,14 @@
         </svg>
       </button>
 
+      <!-- Search Bar -->
       <div class="search-bar" id="searchBar">
         <div class="search-bar-content">
           <input type="text" id="searchInput" class="search-input" placeholder="Search tasks..." />
         </div>
       </div>
 
+      <!-- Input Toggle -->
       <button class="section-toggle" id="inputToggle" title="Toggle add task">
         <svg
           class="section-toggle-icon"
@@ -1299,6 +1251,7 @@
         </svg>
       </button>
 
+      <!-- Input Section -->
       <div class="input-section" id="inputSection">
         <div class="input-section-content">
           <div class="input-wrapper">
@@ -1307,19 +1260,7 @@
           </div>
           <div class="duration-section">
             <div class="duration-label">
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                style="
-                  width: 12px;
-                  height: 12px;
-                  display: inline-block;
-                  vertical-align: middle;
-                  margin-right: 6px;
-                "
-              >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <circle cx="12" cy="12" r="10" />
                 <polyline points="12 6 12 12 16 14" />
               </svg>
@@ -1328,19 +1269,27 @@
             <div class="duration-presets">
               <!-- Dynamically populated by renderer.ts -->
             </div>
-            <input
-              type="number"
-              id="durationInput"
-              placeholder="Duration (minutes)"
-              min="1"
-              style="display: none"
-            />
+            <input type="number" id="durationInput" placeholder="Duration (minutes)" min="1" />
           </div>
         </div>
       </div>
 
+      <!-- Tasks List -->
       <div class="tasks-section" id="tasksSection" role="list" aria-label="Task list">
-        <div class="empty-state">No tasks yet. Add one above!</div>
+        <div class="empty-state">
+          <svg
+            class="empty-state-icon"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.5"
+          >
+            <circle cx="12" cy="12" r="10" />
+            <path d="M12 6v6l4 2" />
+          </svg>
+          <div class="empty-state-title">No tasks yet</div>
+          <div class="empty-state-text">Add a task above to get started</div>
+        </div>
       </div>
     </div>
 
