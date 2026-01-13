@@ -35,7 +35,8 @@ Task Floater is a productivity application designed to stay visible above all wi
 
 | Full View | Command Palette |
 |:-:|:-:|
-| <img width="340" alt="Full View" src="https://github.com/user-attachments/assets/bb3aa356-50db-4c30-85ba-bf19d70e3b55" /> | <img width="340" alt="Command Palette" src="https://github.com/user-attachments/assets/e4dc3862-215f-4804-8c9d-9a61f3834b7d" /> |
+| <img width="340" alt="Full View" src="https://github.com/user-attachments/assets/bb3aa356-50db-4c30-85ba-bf19d70e3b55" /> | <img width="403" height="631" alt="Screenshot 2026-01-13 at 20 46 48" src="https://github.com/user-attachments/assets/c761ee9f-5d05-49a1-ba73-a99687b6edb7" />
+ |
 
 | Focus Timer | Focus Mode | Compact Mode |
 |:-:|:-:|:-:|
