@@ -95,13 +95,17 @@
       "output": "release",
       "buildResources": "build"
     },
+    "asar": true,
+    "compression": "maximum",
     "files": [
       "dist/**/*",
       "src/index.html",
       "build/icon.png",
       "build/icon.icns",
-      "package.json"
+      "package.json",
+      "!node_modules/**/*"
     ],
+    "asarUnpack": [],
     "mac": {
       "category": "public.app-category.productivity",
       "target": [
@@ -124,7 +128,8 @@
       "hardenedRuntime": true,
       "gatekeeperAssess": false,
       "entitlements": "build/entitlements.mac.plist",
-      "entitlementsInherit": "build/entitlements.mac.plist"
+      "entitlementsInherit": "build/entitlements.mac.plist",
+      "electronLanguages": ["en"]
     },
     "dmg": {
       "contents": [
