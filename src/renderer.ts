@@ -63,6 +63,13 @@ const ELEMENT_IDS = {
   INPUT_TOGGLE: 'inputToggle',
   SEARCH_BAR: 'searchBar',
   INPUT_SECTION: 'inputSection',
+  // New premium UI elements
+  APP_CONTAINER: 'appContainer',
+  FULL_MODE_BTN: 'fullModeBtn',
+  COMPACT_MODE_BTN: 'compactModeBtn',
+  FOCUS_MODE_BTN: 'focusModeBtn',
+  DURATION_PICKER: 'durationPicker',
+  OVERFLOW_MENU_BTN: 'overflowMenuBtn',
 } as const;
 
 // CSS Selectors
@@ -80,6 +87,13 @@ const SELECTORS = {
   TASK_TITLE: '.task-title',
   TASK_ITEM_NOT_COMPLETED: '.task-item:not(.completed)',
   DURATION_PRESETS: '.duration-presets',
+  // New premium UI selectors
+  DURATION_OPTION: '.duration-option',
+  MODE_BTN: '.mode-btn',
+  TIMER_TIME: '.timer-time',
+  TIMER_PROGRESS: '.timer-progress',
+  CONTEXT_MENU: '.context-menu',
+  OVERFLOW_MENU: '.overflow-menu',
 } as const;
 
 // CSS Classes
@@ -101,7 +115,18 @@ const CSS_CLASSES = {
   EMPTY_STATE_TEXT: 'empty-state-text',
   COLLAPSED: 'collapsed',
   FOCUS_MODE: 'focus-mode',
+  COMPACT_MODE: 'compact-mode',
+  HAS_TIMER: 'has-timer',
 } as const;
+
+// App modes
+const APP_MODES = {
+  FULL: 'full',
+  COMPACT: 'compact',
+  FOCUS: 'focus',
+} as const;
+
+type AppMode = (typeof APP_MODES)[keyof typeof APP_MODES];
 
 // Data Attributes
 const ATTR_ID = 'data-id';
@@ -146,7 +171,8 @@ let tasks: Task[] = [];
 const timerIntervals: Map<string, number> = new Map();
 let selectedDuration: number | undefined = undefined;
 let selectedTaskIndex = -1;
-let isFocusMode = false;
+let currentMode: AppMode = APP_MODES.FULL;
+let contextMenuTarget: string | null = null;
 
 // =============================================================================
 // DOM ELEMENTS
@@ -174,6 +200,15 @@ const DOM = {
   inputToggle: document.getElementById(ELEMENT_IDS.INPUT_TOGGLE) as HTMLButtonElement | null,
   searchBar: document.getElementById(ELEMENT_IDS.SEARCH_BAR) as HTMLDivElement | null,
   inputSection: document.getElementById(ELEMENT_IDS.INPUT_SECTION) as HTMLDivElement | null,
+  // New premium UI elements
+  appContainer: document.getElementById(ELEMENT_IDS.APP_CONTAINER) as HTMLDivElement | null,
+  fullModeBtn: document.getElementById(ELEMENT_IDS.FULL_MODE_BTN) as HTMLButtonElement | null,
+  compactModeBtn: document.getElementById(ELEMENT_IDS.COMPACT_MODE_BTN) as HTMLButtonElement | null,
+  focusModeBtn: document.getElementById(ELEMENT_IDS.FOCUS_MODE_BTN) as HTMLButtonElement | null,
+  durationPicker: document.getElementById(ELEMENT_IDS.DURATION_PICKER) as HTMLDivElement | null,
+  overflowMenuBtn: document.getElementById(
+    ELEMENT_IDS.OVERFLOW_MENU_BTN
+  ) as HTMLButtonElement | null,
 };
 
 // =============================================================================
@@ -504,17 +539,30 @@ async function tickTimer(taskId: string): Promise<void> {
 }
 
 function updateTimerDisplay(taskId: string, timeRemaining: number, duration: number): void {
+  // Support both old and new selectors
   const timerDisplay = document.querySelector(`${SELECTORS.TIMER_DISPLAY}[${ATTR_ID}="${taskId}"]`);
+  const timerTime = document.querySelector(`${SELECTORS.TIMER_TIME}[${ATTR_ID}="${taskId}"]`);
   if (timerDisplay) {
     timerDisplay.textContent = formatTime(timeRemaining);
   }
+  if (timerTime) {
+    timerTime.textContent = formatTime(timeRemaining);
+  }
 
   const progressPercent = (timeRemaining / (duration * SECONDS_PER_MINUTE)) * 100;
+
+  // Support both old and new progress bar selectors
   const progressBar = document.querySelector(
     `${SELECTORS.TIMER_PROGRESS_BAR}[${ATTR_ID}="${taskId}"] ${SELECTORS.TIMER_PROGRESS_FILL}`
   );
+  const progressFill = document.querySelector(
+    `${SELECTORS.TIMER_PROGRESS}[${ATTR_ID}="${taskId}"] .timer-progress-fill`
+  );
   if (progressBar) {
     (progressBar as HTMLElement).style.width = `${progressPercent}%`;
+  }
+  if (progressFill) {
+    (progressFill as HTMLElement).style.width = `${progressPercent}%`;
   }
 }
 
@@ -618,13 +666,22 @@ function renderTaskHTML(task: Task): string {
   const timerHTML = renderTimerHTML(task);
   const completedClass = task.completed ? CSS_CLASSES.COMPLETED : '';
   const timerRunningClass = task.isTimerRunning ? CSS_CLASSES.TIMER_RUNNING : '';
+  const hasTimerClass = task.duration && task.duration > 0 ? CSS_CLASSES.HAS_TIMER : '';
+
+  // SVG icons
+  const dragIcon = `<svg class="icon" viewBox="0 0 24 24"><circle cx="9" cy="6" r="1.5"/><circle cx="15" cy="6" r="1.5"/><circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/><circle cx="9" cy="18" r="1.5"/><circle cx="15" cy="18" r="1.5"/></svg>`;
+  const deleteIcon = `<svg class="icon" viewBox="0 0 24 24"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>`;
+  const moreIcon = `<svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>`;
 
   return `
-    <div class="task-item ${completedClass} ${timerRunningClass}"
+    <div class="task-item ${completedClass} ${timerRunningClass} ${hasTimerClass}"
          draggable="true"
          data-id="${task.id}"
          role="listitem"
          aria-label="${escapeHtml(task.title)}${task.completed ? ' (completed)' : ''}">
+      <div class="drag-handle" title="Drag to reorder">
+        ${dragIcon}
+      </div>
       <div class="task-checkbox ${completedClass}"
            data-id="${task.id}"
            role="checkbox"
@@ -632,17 +689,19 @@ function renderTaskHTML(task: Task): string {
            tabindex="0"
            aria-label="Mark as ${task.completed ? 'incomplete' : 'complete'}"></div>
       <div class="task-content">
-        <div class="task-title">${escapeHtml(task.title)}</div>
+        <div class="task-main">
+          <div class="task-title">${escapeHtml(task.title)}</div>
+          <div class="task-actions">
+            <button class="task-action-btn more-btn" data-id="${task.id}" title="More actions">
+              ${moreIcon}
+            </button>
+            <button class="task-action-btn delete-btn delete" data-id="${task.id}" title="Delete">
+              ${deleteIcon}
+            </button>
+          </div>
+        </div>
         ${timerHTML}
       </div>
-      <button class="delete-btn"
-              data-id="${task.id}"
-              title="Delete task"
-              aria-label="Delete ${escapeHtml(task.title)}">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
-        </svg>
-      </button>
     </div>
   `;
 }
@@ -655,24 +714,24 @@ function renderTimerHTML(task: Task): string {
   const progressPercent = ((task.timeRemaining || 0) / (task.duration * 60)) * 100;
 
   // SVG icons for timer controls - compact inline design
-  const playIcon = `<svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="6 4 18 12 6 20 6 4"></polygon></svg>`;
-  const pauseIcon = `<svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>`;
-  const resetIcon = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>`;
+  const playIcon = `<svg class="icon" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="6 4 18 12 6 20 6 4"></polygon></svg>`;
+  const pauseIcon = `<svg class="icon" viewBox="0 0 24 24" fill="currentColor" stroke="none"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>`;
+  const resetIcon = `<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>`;
 
-  // Inline timer design - time | progress | controls
+  // New premium timer design
   return `
     <div class="task-timer">
-      <span class="timer-display ${task.isTimerRunning ? CSS_CLASSES.RUNNING : ''}" data-id="${task.id}">
+      <span class="timer-time ${task.isTimerRunning ? CSS_CLASSES.RUNNING : ''}" data-id="${task.id}">
         ${formatTime(task.timeRemaining || 0)}
       </span>
-      <div class="timer-progress-bar" data-id="${task.id}">
+      <div class="timer-progress" data-id="${task.id}">
         <div class="timer-progress-fill ${task.isTimerRunning ? '' : CSS_CLASSES.PAUSED}" style="width: ${progressPercent}%"></div>
       </div>
       <div class="timer-controls">
         ${
           task.isTimerRunning
-            ? `<button class="timer-btn pause" data-id="${task.id}" data-action="${TIMER_ACTION_PAUSE}" title="Pause">${pauseIcon}</button>`
-            : `<button class="timer-btn play" data-id="${task.id}" data-action="${TIMER_ACTION_PLAY}" title="Start">${playIcon}</button>`
+            ? `<button class="timer-btn pause" data-id="${task.id}" data-action="${TIMER_ACTION_PAUSE}" title="Pause (Space)">${pauseIcon}</button>`
+            : `<button class="timer-btn play" data-id="${task.id}" data-action="${TIMER_ACTION_PLAY}" title="Start (Space)">${playIcon}</button>`
         }
         <button class="timer-btn reset" data-id="${task.id}" data-action="${TIMER_ACTION_RESET}" title="Reset">${resetIcon}</button>
       </div>
@@ -884,6 +943,22 @@ async function handleKeyboardShortcut(e: KeyboardEvent): Promise<void> {
 
 async function handleModifierShortcut(e: KeyboardEvent, incompleteTasks: Task[]): Promise<void> {
   switch (e.key) {
+    // Mode switching: ⌘1, ⌘2, ⌘3
+    case '1':
+      e.preventDefault();
+      setAppMode(APP_MODES.FULL);
+      break;
+
+    case '2':
+      e.preventDefault();
+      setAppMode(APP_MODES.COMPACT);
+      break;
+
+    case '3':
+      e.preventDefault();
+      setAppMode(APP_MODES.FOCUS);
+      break;
+
     case 'd':
       e.preventDefault();
       if (selectedTaskIndex >= 0 && incompleteTasks[selectedTaskIndex]) {
@@ -901,12 +976,18 @@ async function handleModifierShortcut(e: KeyboardEvent, incompleteTasks: Task[])
 
     case 'e':
       e.preventDefault();
-      DOM.exportBtn?.click();
+      await handleExport();
       break;
 
     case 'i':
       e.preventDefault();
-      DOM.importBtn?.click();
+      await handleImport();
+      break;
+
+    case 'n':
+      e.preventDefault();
+      // Focus task input for new task
+      DOM.taskInput.focus();
       break;
 
     case 'f':
@@ -988,7 +1069,14 @@ function clearInputs(): void {
 // =============================================================================
 
 function initializePresetButtons(): void {
-  // Try segmented control first (new UI)
+  // Try new duration picker first (premium UI)
+  const durationPicker = DOM.durationPicker;
+  if (durationPicker) {
+    attachDurationPickerHandlers();
+    return;
+  }
+
+  // Try segmented control (old premium UI)
   const segmentedControl = document.querySelector(SELECTORS.SEGMENTED_CONTROL);
   if (segmentedControl) {
     attachSegmentHandlers();
@@ -1007,6 +1095,27 @@ function initializePresetButtons(): void {
   ).join('');
 
   attachPresetHandlers();
+}
+
+function attachDurationPickerHandlers(): void {
+  document.querySelectorAll(SELECTORS.DURATION_OPTION).forEach(btn => {
+    btn.addEventListener('click', e => {
+      const target = e.currentTarget as HTMLElement;
+      const minutes = parseInt(target.getAttribute(ATTR_MINUTES) || '0');
+      toggleDurationOption(target, minutes);
+    });
+  });
+}
+
+function toggleDurationOption(clickedBtn: HTMLElement, minutes: number): void {
+  // Clear all selections
+  clearPresetSelection();
+
+  // Select the clicked button
+  clickedBtn.classList.add(CSS_CLASSES.SELECTED);
+
+  // Set duration (0 means no timer)
+  selectedDuration = minutes === 0 ? undefined : minutes;
 }
 
 function attachSegmentHandlers(): void {
@@ -1054,6 +1163,16 @@ function togglePresetSelection(clickedBtn: HTMLElement, minutes: number): void {
 }
 
 function clearPresetSelection(): void {
+  // Clear duration option buttons (new premium UI)
+  document.querySelectorAll(SELECTORS.DURATION_OPTION).forEach(btn => {
+    btn.classList.remove(CSS_CLASSES.SELECTED);
+  });
+  // Select "None" option by default
+  const noneOption = document.querySelector(`${SELECTORS.DURATION_OPTION}[${ATTR_MINUTES}="0"]`);
+  if (noneOption) {
+    noneOption.classList.add(CSS_CLASSES.SELECTED);
+  }
+
   // Clear both segment buttons and legacy preset buttons
   document.querySelectorAll(SELECTORS.SEGMENT_BTN).forEach(btn => {
     btn.classList.remove(CSS_CLASSES.SELECTED);
@@ -1138,29 +1257,301 @@ function setupActionButtons(): void {
 }
 
 // =============================================================================
-// FOCUS MODE
+// APP MODES (Full / Compact / Focus)
 // =============================================================================
 
-function toggleFocusMode(): void {
-  isFocusMode = !isFocusMode;
+function setAppMode(mode: AppMode): void {
+  currentMode = mode;
 
-  if (isFocusMode) {
-    DOM.container.classList.add(CSS_CLASSES.FOCUS_MODE);
-    DOM.focusBtn?.classList.add(CSS_CLASSES.ACTIVE);
+  // Remove all mode classes
+  DOM.container.classList.remove(CSS_CLASSES.FOCUS_MODE, CSS_CLASSES.COMPACT_MODE);
 
-    // Show notification
-    if (window.electronAPI.showNotification) {
-      window.electronAPI.showNotification(
-        '🎯 Focus Mode',
-        'Completed tasks hidden. Distractions minimized.'
-      );
-    }
-  } else {
-    DOM.container.classList.remove(CSS_CLASSES.FOCUS_MODE);
-    DOM.focusBtn?.classList.remove(CSS_CLASSES.ACTIVE);
+  // Remove active class from all mode buttons
+  DOM.fullModeBtn?.classList.remove(CSS_CLASSES.ACTIVE);
+  DOM.compactModeBtn?.classList.remove(CSS_CLASSES.ACTIVE);
+  DOM.focusModeBtn?.classList.remove(CSS_CLASSES.ACTIVE);
+
+  // Apply new mode
+  switch (mode) {
+    case APP_MODES.COMPACT:
+      DOM.container.classList.add(CSS_CLASSES.COMPACT_MODE);
+      DOM.compactModeBtn?.classList.add(CSS_CLASSES.ACTIVE);
+      break;
+    case APP_MODES.FOCUS:
+      DOM.container.classList.add(CSS_CLASSES.FOCUS_MODE);
+      DOM.focusModeBtn?.classList.add(CSS_CLASSES.ACTIVE);
+      break;
+    case APP_MODES.FULL:
+    default:
+      DOM.fullModeBtn?.classList.add(CSS_CLASSES.ACTIVE);
+      break;
   }
 
   renderTasks();
+}
+
+function setupModeSelector(): void {
+  // Full mode button
+  DOM.fullModeBtn?.addEventListener('click', () => {
+    setAppMode(APP_MODES.FULL);
+  });
+
+  // Compact mode button
+  DOM.compactModeBtn?.addEventListener('click', () => {
+    setAppMode(APP_MODES.COMPACT);
+  });
+
+  // Focus mode button
+  DOM.focusModeBtn?.addEventListener('click', () => {
+    setAppMode(APP_MODES.FOCUS);
+  });
+
+  // Legacy focus button
+  DOM.focusBtn?.addEventListener('click', () => {
+    toggleFocusMode();
+  });
+}
+
+function toggleFocusMode(): void {
+  if (currentMode === APP_MODES.FOCUS) {
+    setAppMode(APP_MODES.FULL);
+  } else {
+    setAppMode(APP_MODES.FOCUS);
+  }
+}
+
+// =============================================================================
+// OVERFLOW MENU
+// =============================================================================
+
+function setupOverflowMenu(): void {
+  DOM.overflowMenuBtn?.addEventListener('click', e => {
+    e.stopPropagation();
+    showOverflowMenu();
+  });
+}
+
+function showOverflowMenu(): void {
+  // Remove existing menu if any
+  closeContextMenu();
+
+  const menu = document.createElement('div');
+  menu.className = 'context-menu overflow-menu';
+
+  // Position relative to overflow button
+  const btnRect = DOM.overflowMenuBtn?.getBoundingClientRect();
+  if (btnRect) {
+    menu.style.top = `${btnRect.bottom + 4}px`;
+    menu.style.right = `${window.innerWidth - btnRect.right}px`;
+    menu.style.left = 'auto';
+  }
+
+  menu.innerHTML = `
+    <div class="context-menu-item" data-action="export">
+      <svg class="icon" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      <span>Export Tasks</span>
+      <span class="shortcut">⌘E</span>
+    </div>
+    <div class="context-menu-item" data-action="import">
+      <svg class="icon" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      <span>Import Tasks</span>
+      <span class="shortcut">⌘I</span>
+    </div>
+    <div class="context-menu-divider"></div>
+    <div class="context-menu-item" data-action="clear">
+      <svg class="icon" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+      <span>Clear Completed</span>
+    </div>
+  `;
+
+  document.body.appendChild(menu);
+
+  // Handle menu actions
+  menu.addEventListener('click', async e => {
+    const target = (e.target as HTMLElement).closest('.context-menu-item');
+    if (!target) {
+      return;
+    }
+
+    const action = target.getAttribute('data-action');
+    closeContextMenu();
+
+    switch (action) {
+      case 'export':
+        await handleExport();
+        break;
+      case 'import':
+        await handleImport();
+        break;
+      case 'clear':
+        await handleClearCompleted();
+        break;
+    }
+  });
+
+  // Close on click outside
+  setTimeout(() => {
+    document.addEventListener('click', closeContextMenu, { once: true });
+  }, 0);
+}
+
+async function handleExport(): Promise<void> {
+  showToast('Exporting tasks...', 'info');
+  const result = await window.electronAPI.exportTasks();
+  if (result) {
+    showToast('Tasks exported successfully!', 'success');
+  }
+}
+
+async function handleImport(): Promise<void> {
+  showToast('Importing tasks...', 'info');
+  const count = await window.electronAPI.importTasks();
+  if (count > 0) {
+    showToast(`Imported ${count} task${count > 1 ? 's' : ''}!`, 'success');
+    await loadTasks();
+  } else {
+    showToast('No tasks imported', 'info');
+  }
+}
+
+async function handleClearCompleted(): Promise<void> {
+  const completedCount = tasks.filter(t => t.completed).length;
+  if (completedCount === 0) {
+    showToast('No completed tasks to clear', 'info');
+    return;
+  }
+
+  await window.electronAPI.clearCompleted();
+  showToast(`Cleared ${completedCount} completed task${completedCount > 1 ? 's' : ''}`, 'success');
+  await loadTasks();
+}
+
+// =============================================================================
+// CONTEXT MENU
+// =============================================================================
+
+function setupContextMenu(): void {
+  // Right-click on tasks
+  DOM.tasksSection.addEventListener('contextmenu', e => {
+    const taskItem = (e.target as HTMLElement).closest(SELECTORS.TASK_ITEM);
+    if (!taskItem) {
+      return;
+    }
+
+    e.preventDefault();
+    const taskId = taskItem.getAttribute(ATTR_ID);
+    if (taskId) {
+      showTaskContextMenu(e as MouseEvent, taskId);
+    }
+  });
+}
+
+function showTaskContextMenu(e: MouseEvent, taskId: string): void {
+  closeContextMenu();
+  contextMenuTarget = taskId;
+
+  const task = tasks.find(t => t.id === taskId);
+  if (!task) {
+    return;
+  }
+
+  const menu = document.createElement('div');
+  menu.className = 'context-menu';
+  menu.style.top = `${e.clientY}px`;
+  menu.style.left = `${e.clientX}px`;
+
+  const timerAction = task.isTimerRunning
+    ? `<div class="context-menu-item" data-action="pause">
+        <svg class="icon" viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+        <span>Pause Timer</span>
+        <span class="shortcut">Space</span>
+      </div>`
+    : task.duration && task.duration > 0
+      ? `<div class="context-menu-item" data-action="play">
+          <svg class="icon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          <span>Start Timer</span>
+          <span class="shortcut">Space</span>
+        </div>`
+      : '';
+
+  menu.innerHTML = `
+    <div class="context-menu-item" data-action="edit">
+      <svg class="icon" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+      <span>Edit</span>
+      <span class="shortcut">Enter</span>
+    </div>
+    <div class="context-menu-item" data-action="toggle">
+      <svg class="icon" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+      <span>${task.completed ? 'Mark Incomplete' : 'Mark Complete'}</span>
+      <span class="shortcut">⌘D</span>
+    </div>
+    ${timerAction}
+    <div class="context-menu-divider"></div>
+    <div class="context-menu-item danger" data-action="delete">
+      <svg class="icon" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+      <span>Delete</span>
+      <span class="shortcut">⌫</span>
+    </div>
+  `;
+
+  document.body.appendChild(menu);
+
+  // Handle menu actions
+  menu.addEventListener('click', async e => {
+    const target = (e.target as HTMLElement).closest('.context-menu-item');
+    if (!target) {
+      return;
+    }
+
+    const action = target.getAttribute('data-action');
+    closeContextMenu();
+
+    if (!contextMenuTarget) {
+      return;
+    }
+
+    switch (action) {
+      case 'edit':
+        enterEditMode(contextMenuTarget);
+        break;
+      case 'toggle':
+        await toggleTask(contextMenuTarget);
+        break;
+      case 'play':
+        await startTimer(contextMenuTarget);
+        break;
+      case 'pause':
+        await pauseTimer(contextMenuTarget);
+        break;
+      case 'delete':
+        await deleteTask(contextMenuTarget);
+        break;
+    }
+  });
+
+  // Adjust position if menu goes off-screen
+  requestAnimationFrame(() => {
+    const menuRect = menu.getBoundingClientRect();
+    if (menuRect.right > window.innerWidth) {
+      menu.style.left = `${window.innerWidth - menuRect.width - 8}px`;
+    }
+    if (menuRect.bottom > window.innerHeight) {
+      menu.style.top = `${window.innerHeight - menuRect.height - 8}px`;
+    }
+  });
+
+  // Close on click outside
+  setTimeout(() => {
+    document.addEventListener('click', closeContextMenu, { once: true });
+  }, 0);
+}
+
+function closeContextMenu(): void {
+  const existingMenu = document.querySelector('.context-menu');
+  if (existingMenu) {
+    existingMenu.remove();
+  }
+  contextMenuTarget = null;
 }
 
 // =============================================================================
@@ -1265,6 +1656,11 @@ function initialize(): void {
   setupSearch();
   setupAccordionToggles();
   setupKeyboardShortcuts();
+
+  // Premium UI setup
+  setupModeSelector();
+  setupOverflowMenu();
+  setupContextMenu();
 
   // Load initial data
   loadTasks();
