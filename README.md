@@ -60,11 +60,35 @@ Task Floater is a minimalist, always-on-top task manager for macOS featuring a s
 
 ## 📸 Screenshots
 
-<img width="408" height="641" alt="Screenshot 2026-01-13 at 19 12 21" src="https://github.com/user-attachments/assets/bd23cbd3-7927-4139-863b-c59005b24c7b" />
+<div align="center">
 
-<img width="456" height="658" alt="Screenshot 2026-01-13 at 19 13 24" src="https://github.com/user-attachments/assets/cfae2ffe-8b2e-4e35-a360-d869b28c178e" />
-<img width="418" height="630" alt="Screenshot 2026-01-13 at 19 13 46" src="https://github.com/user-attachments/assets/f837ba6c-ec94-4fdc-80a8-8e1e66951d83" />
-<img width="413" height="620" alt="Screenshot 2026-01-13 at 19 14 06" src="https://github.com/user-attachments/assets/a67d12e5-ed90-466c-9563-8aeb4d73c06e" />
+### Main View with Tasks
+<img width="380" alt="Main interface with glassmorphism design" src="https://github.com/user-attachments/assets/bd23cbd3-7927-4139-863b-c59005b24c7b" />
+
+<table>
+  <tr>
+    <td width="50%">
+      <h3 align="center">Timer with Progress Bar</h3>
+      <img width="100%" alt="Running timer with visual progress" src="https://github.com/user-attachments/assets/cfae2ffe-8b2e-4e35-a360-d869b28c178e" />
+    </td>
+    <td width="50%">
+      <h3 align="center">Duration Presets</h3>
+      <img width="100%" alt="Quick duration selection presets" src="https://github.com/user-attachments/assets/f837ba6c-ec94-4fdc-80a8-8e1e66951d83" />
+    </td>
+  </tr>
+  <tr>
+    <td width="50%">
+      <h3 align="center">Focus Mode</h3>
+      <img width="100%" alt="Focus mode for distraction-free work" src="https://github.com/user-attachments/assets/a67d12e5-ed90-466c-9563-8aeb4d73c06e" />
+    </td>
+    <td width="50%">
+      <h3 align="center">Modern UI</h3>
+      <img width="100%" alt="Clean, modern interface design" src="https://github.com/user-attachments/assets/bd23cbd3-7927-4139-863b-c59005b24c7b" />
+    </td>
+  </tr>
+</table>
+
+</div>
 
 ## 🚀 Installation
 
