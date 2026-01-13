@@ -32,21 +32,19 @@ Task Floater is a productivity application designed to stay visible above all wi
 ## Screenshots
 
 <div align="center">
-<table>
-<tr>
-<td align="center"><img width="280" alt="Focus Mode" src="https://github.com/user-attachments/assets/0193c4d2-9d19-4ae7-86c8-571fc37e420c" /><br><sub>Focus Mode</sub></td>
-<td align="center"><img width="280" alt="Compact Mode" src="https://github.com/user-attachments/assets/beb7f1b6-142e-4393-a66a-c6fbbb7776e3" /><br><sub>Compact Mode</sub></td>
-<td align="center"><img width="280" alt="Timer Running" src="https://github.com/user-attachments/assets/56cb9bd6-f364-42d1-bc8e-21e9bfe0f03a" /><br><sub>Timer Running</sub></td>
-</tr>
-<tr>
-<td align="center"><img width="280" alt="Full View" src="https://github.com/user-attachments/assets/bb3aa356-50db-4c30-85ba-bf19d70e3b55" /><br><sub>Full View</sub></td>
-<td align="center"><img width="280" alt="Command Palette" src="https://github.com/user-attachments/assets/e4dc3862-215f-4804-8c9d-9a61f3834b7d" /><br><sub>Command Palette</sub></td>
-<td align="center"><img width="280" alt="Context Menu" src="https://github.com/user-attachments/assets/c95ac21b-27db-4a95-8dcb-02d115ec64cd" /><br><sub>Context Menu</sub></td>
-</tr>
-<tr>
-<td colspan="3" align="center"><img width="320" alt="Light Theme" src="https://github.com/user-attachments/assets/314fccfe-91ef-49c9-934d-a5893111a441" /><br><sub>Light Theme</sub></td>
-</tr>
-</table>
+
+| Full View | Command Palette |
+|:-:|:-:|
+| <img width="340" alt="Full View" src="https://github.com/user-attachments/assets/bb3aa356-50db-4c30-85ba-bf19d70e3b55" /> | <img width="340" alt="Command Palette" src="https://github.com/user-attachments/assets/e4dc3862-215f-4804-8c9d-9a61f3834b7d" /> |
+
+| Focus Timer | Light Theme |
+|:-:|:-:|
+| <img width="340" alt="Focus Timer" src="https://github.com/user-attachments/assets/c95ac21b-27db-4a95-8dcb-02d115ec64cd" /> | <img width="340" alt="Light Theme" src="https://github.com/user-attachments/assets/314fccfe-91ef-49c9-934d-a5893111a441" /> |
+
+| Focus Mode | Compact Mode | Empty State |
+|:-:|:-:|:-:|
+| <img width="240" alt="Focus Mode" src="https://github.com/user-attachments/assets/0193c4d2-9d19-4ae7-86c8-571fc37e420c" /> | <img width="240" alt="Compact Mode" src="https://github.com/user-attachments/assets/beb7f1b6-142e-4393-a66a-c6fbbb7776e3" /> | <img width="240" alt="Empty State" src="https://github.com/user-attachments/assets/56cb9bd6-f364-42d1-bc8e-21e9bfe0f03a" /> |
+
 </div>
 
 ## Features
