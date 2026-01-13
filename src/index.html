@@ -226,13 +226,24 @@
       }
 
       .search-bar {
-        padding: 16px 20px;
         background: linear-gradient(
           135deg,
           rgba(255, 255, 255, 0.06) 0%,
           rgba(255, 255, 255, 0.02) 100%
         );
         border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        overflow: hidden;
+        transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        max-height: 200px;
+      }
+
+      .search-bar.collapsed {
+        max-height: 0;
+        border-bottom: none;
+      }
+
+      .search-bar-content {
+        padding: 16px 20px;
       }
 
       .search-input {
@@ -263,13 +274,51 @@
       }
 
       .input-section {
-        padding: 20px;
         background: linear-gradient(
           135deg,
           rgba(255, 255, 255, 0.08) 0%,
           rgba(255, 255, 255, 0.03) 100%
         );
         border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        overflow: hidden;
+        transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        max-height: 300px;
+      }
+
+      .input-section.collapsed {
+        max-height: 0;
+        border-bottom: none;
+      }
+
+      .input-section-content {
+        padding: 20px;
+      }
+
+      .section-toggle {
+        padding: 8px 20px;
+        background: rgba(255, 255, 255, 0.04);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        -webkit-app-region: no-drag;
+      }
+
+      .section-toggle:hover {
+        background: rgba(255, 255, 255, 0.08);
+      }
+
+      .section-toggle-icon {
+        width: 16px;
+        height: 16px;
+        color: rgba(255, 255, 255, 0.5);
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .section-toggle.collapsed .section-toggle-icon {
+        transform: rotate(180deg);
       }
 
       .input-wrapper {
@@ -885,45 +934,73 @@
         </div>
       </div>
 
-      <div class="search-bar">
-        <input type="text" id="searchInput" class="search-input" placeholder="Search tasks..." />
+      <button class="section-toggle" id="searchToggle" title="Toggle search">
+        <svg
+          class="section-toggle-icon"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+      </button>
+
+      <div class="search-bar" id="searchBar">
+        <div class="search-bar-content">
+          <input type="text" id="searchInput" class="search-input" placeholder="Search tasks..." />
+        </div>
       </div>
 
-      <div class="input-section">
-        <div class="input-wrapper">
-          <input type="text" id="taskInput" placeholder="Add a new task..." />
-          <button class="add-btn" id="addBtn">Add</button>
-        </div>
-        <div class="duration-section">
-          <div class="duration-label">
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              style="
-                width: 12px;
-                height: 12px;
-                display: inline-block;
-                vertical-align: middle;
-                margin-right: 6px;
-              "
-            >
-              <circle cx="12" cy="12" r="10" />
-              <polyline points="12 6 12 12 16 14" />
-            </svg>
-            Duration
+      <button class="section-toggle" id="inputToggle" title="Toggle add task">
+        <svg
+          class="section-toggle-icon"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+      </button>
+
+      <div class="input-section" id="inputSection">
+        <div class="input-section-content">
+          <div class="input-wrapper">
+            <input type="text" id="taskInput" placeholder="Add a new task..." />
+            <button class="add-btn" id="addBtn">Add</button>
           </div>
-          <div class="duration-presets">
-            <!-- Dynamically populated by renderer.ts -->
+          <div class="duration-section">
+            <div class="duration-label">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                style="
+                  width: 12px;
+                  height: 12px;
+                  display: inline-block;
+                  vertical-align: middle;
+                  margin-right: 6px;
+                "
+              >
+                <circle cx="12" cy="12" r="10" />
+                <polyline points="12 6 12 12 16 14" />
+              </svg>
+              Duration
+            </div>
+            <div class="duration-presets">
+              <!-- Dynamically populated by renderer.ts -->
+            </div>
+            <input
+              type="number"
+              id="durationInput"
+              placeholder="Duration (minutes)"
+              min="1"
+              style="display: none"
+            />
           </div>
-          <input
-            type="number"
-            id="durationInput"
-            placeholder="Duration (minutes)"
-            min="1"
-            style="display: none"
-          />
         </div>
       </div>
 
