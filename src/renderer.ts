@@ -68,6 +68,8 @@ const ELEMENT_IDS = {
 // CSS Selectors
 const SELECTORS = {
   PRESET_BTN: '.preset-btn',
+  SEGMENT_BTN: '.segment-btn',
+  SEGMENTED_CONTROL: '.segmented-control',
   TASK_CHECKBOX: '.task-checkbox',
   DELETE_BTN: '.delete-btn',
   TIMER_BTN: '.timer-btn',
@@ -582,20 +584,32 @@ function sortTasks(taskList: Task[]): Task[] {
 }
 
 function renderEmptyState(searchQuery?: string): string {
-  const message = searchQuery
-    ? `No tasks matching "${searchQuery}"`
-    : 'Type a task above and click a duration to get started';
-
-  const title = searchQuery ? 'No matches' : 'No tasks yet';
+  if (searchQuery) {
+    return `
+      <div class="empty-state">
+        <svg class="empty-state-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <circle cx="11" cy="11" r="8"/>
+          <path d="m21 21-4.35-4.35"/>
+        </svg>
+        <div class="empty-state-title">No matches</div>
+        <div class="empty-state-text">No tasks matching "${escapeHtml(searchQuery)}"</div>
+      </div>
+    `;
+  }
 
   return `
     <div class="empty-state">
       <svg class="empty-state-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-        <circle cx="12" cy="12" r="10"/>
-        <path d="M12 6v6l4 2"/>
+        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+        <line x1="9" y1="9" x2="15" y2="9"/>
+        <line x1="9" y1="13" x2="13" y2="13"/>
+        <line x1="9" y1="17" x2="11" y2="17"/>
       </svg>
-      <div class="empty-state-title">${title}</div>
-      <div class="empty-state-text">${message}</div>
+      <div class="empty-state-title">No tasks yet</div>
+      <div class="empty-state-text">Add your first task to get started</div>
+      <div class="empty-state-hint">
+        Press <span class="keyboard-hint">Enter</span> to add quickly
+      </div>
     </div>
   `;
 }
@@ -640,28 +654,27 @@ function renderTimerHTML(task: Task): string {
 
   const progressPercent = ((task.timeRemaining || 0) / (task.duration * 60)) * 100;
 
-  // SVG icons for timer controls
-  const playIcon = `<svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>`;
+  // SVG icons for timer controls - compact inline design
+  const playIcon = `<svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="6 4 18 12 6 20 6 4"></polygon></svg>`;
   const pauseIcon = `<svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>`;
-  const resetIcon = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>`;
+  const resetIcon = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>`;
 
+  // Inline timer design - time | progress | controls
   return `
     <div class="task-timer">
-      <div class="timer-row">
-        <span class="timer-display ${task.isTimerRunning ? CSS_CLASSES.RUNNING : ''}" data-id="${task.id}">
-          ${formatTime(task.timeRemaining || 0)}
-        </span>
-        <div class="timer-controls">
-          ${
-            task.isTimerRunning
-              ? `<button class="timer-btn pause" data-id="${task.id}" data-action="${TIMER_ACTION_PAUSE}" title="Pause">${pauseIcon}</button>`
-              : `<button class="timer-btn play" data-id="${task.id}" data-action="${TIMER_ACTION_PLAY}" title="Start">${playIcon}</button>`
-          }
-          <button class="timer-btn reset" data-id="${task.id}" data-action="${TIMER_ACTION_RESET}" title="Reset">${resetIcon}</button>
-        </div>
-      </div>
+      <span class="timer-display ${task.isTimerRunning ? CSS_CLASSES.RUNNING : ''}" data-id="${task.id}">
+        ${formatTime(task.timeRemaining || 0)}
+      </span>
       <div class="timer-progress-bar" data-id="${task.id}">
         <div class="timer-progress-fill ${task.isTimerRunning ? '' : CSS_CLASSES.PAUSED}" style="width: ${progressPercent}%"></div>
+      </div>
+      <div class="timer-controls">
+        ${
+          task.isTimerRunning
+            ? `<button class="timer-btn pause" data-id="${task.id}" data-action="${TIMER_ACTION_PAUSE}" title="Pause">${pauseIcon}</button>`
+            : `<button class="timer-btn play" data-id="${task.id}" data-action="${TIMER_ACTION_PLAY}" title="Start">${playIcon}</button>`
+        }
+        <button class="timer-btn reset" data-id="${task.id}" data-action="${TIMER_ACTION_RESET}" title="Reset">${resetIcon}</button>
       </div>
     </div>
   `;
@@ -971,10 +984,18 @@ function clearInputs(): void {
 }
 
 // =============================================================================
-// DURATION PRESETS
+// DURATION PRESETS / SEGMENTED CONTROL
 // =============================================================================
 
 function initializePresetButtons(): void {
+  // Try segmented control first (new UI)
+  const segmentedControl = document.querySelector(SELECTORS.SEGMENTED_CONTROL);
+  if (segmentedControl) {
+    attachSegmentHandlers();
+    return;
+  }
+
+  // Fall back to legacy preset buttons
   const presetsContainer = document.querySelector(SELECTORS.DURATION_PRESETS);
   if (!presetsContainer) {
     return;
@@ -986,6 +1007,27 @@ function initializePresetButtons(): void {
   ).join('');
 
   attachPresetHandlers();
+}
+
+function attachSegmentHandlers(): void {
+  document.querySelectorAll(SELECTORS.SEGMENT_BTN).forEach(btn => {
+    btn.addEventListener('click', e => {
+      const target = e.currentTarget as HTMLElement;
+      const minutes = parseInt(target.getAttribute(ATTR_MINUTES) || '0');
+      toggleSegmentSelection(target, minutes);
+    });
+  });
+}
+
+function toggleSegmentSelection(clickedBtn: HTMLElement, minutes: number): void {
+  // Clear all selections
+  clearPresetSelection();
+
+  // Select the clicked button
+  clickedBtn.classList.add(CSS_CLASSES.SELECTED);
+
+  // Set duration (0 means no timer)
+  selectedDuration = minutes === 0 ? undefined : minutes;
 }
 
 function attachPresetHandlers(): void {
@@ -1012,6 +1054,10 @@ function togglePresetSelection(clickedBtn: HTMLElement, minutes: number): void {
 }
 
 function clearPresetSelection(): void {
+  // Clear both segment buttons and legacy preset buttons
+  document.querySelectorAll(SELECTORS.SEGMENT_BTN).forEach(btn => {
+    btn.classList.remove(CSS_CLASSES.SELECTED);
+  });
   document.querySelectorAll(SELECTORS.PRESET_BTN).forEach(btn => {
     btn.classList.remove(CSS_CLASSES.SELECTED);
   });

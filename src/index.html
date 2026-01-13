@@ -10,34 +10,34 @@
          ========================================================================== */
       :root {
         /* Colors - Layered surfaces (3 levels) */
-        --surface-base: rgba(22, 22, 24, 0.94);
-        --surface-elevated: rgba(32, 32, 35, 1);
-        --surface-overlay: rgba(44, 44, 48, 1);
+        --surface-base: rgba(20, 20, 22, 0.96);
+        --surface-elevated: rgba(28, 28, 32, 1);
+        --surface-overlay: rgba(40, 40, 46, 1);
 
         /* Text hierarchy */
-        --text-primary: rgba(255, 255, 255, 0.92);
-        --text-secondary: rgba(255, 255, 255, 0.6);
-        --text-tertiary: rgba(255, 255, 255, 0.4);
-        --text-muted: rgba(255, 255, 255, 0.24);
+        --text-primary: rgba(255, 255, 255, 0.95);
+        --text-secondary: rgba(255, 255, 255, 0.55);
+        --text-tertiary: rgba(255, 255, 255, 0.35);
+        --text-muted: rgba(255, 255, 255, 0.2);
 
         /* Accent - Controlled blue */
         --accent: #3b82f6;
         --accent-hover: #60a5fa;
-        --accent-muted: rgba(59, 130, 246, 0.16);
-        --accent-subtle: rgba(59, 130, 246, 0.08);
+        --accent-muted: rgba(59, 130, 246, 0.15);
+        --accent-subtle: rgba(59, 130, 246, 0.06);
 
         /* Semantic colors - Muted */
-        --success: #34d399;
-        --success-muted: rgba(52, 211, 153, 0.12);
-        --warning: #fbbf24;
-        --warning-muted: rgba(251, 191, 36, 0.12);
-        --danger: #f87171;
-        --danger-muted: rgba(248, 113, 113, 0.08);
+        --success: #22c55e;
+        --success-muted: rgba(34, 197, 94, 0.1);
+        --warning: #f59e0b;
+        --warning-muted: rgba(245, 158, 11, 0.1);
+        --danger: #ef4444;
+        --danger-muted: rgba(239, 68, 68, 0.08);
 
         /* Borders */
-        --border-subtle: rgba(255, 255, 255, 0.06);
-        --border-default: rgba(255, 255, 255, 0.1);
-        --border-strong: rgba(255, 255, 255, 0.16);
+        --border-subtle: rgba(255, 255, 255, 0.04);
+        --border-default: rgba(255, 255, 255, 0.08);
+        --border-strong: rgba(255, 255, 255, 0.12);
 
         /* Spacing - 8px grid */
         --space-1: 4px;
@@ -49,24 +49,25 @@
         --space-8: 32px;
 
         /* Radii */
+        --radius-xs: 4px;
         --radius-sm: 6px;
-        --radius-md: 10px;
-        --radius-lg: 14px;
-        --radius-xl: 16px;
+        --radius-md: 8px;
+        --radius-lg: 12px;
+        --radius-xl: 14px;
 
         /* Typography */
         --font-sans:
           -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Inter', system-ui, sans-serif;
         --font-mono: 'SF Mono', 'Menlo', 'Monaco', monospace;
 
-        /* Shadows - Soft and realistic */
-        --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
-        --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.25);
-        --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.35);
+        /* Shadows - Very soft */
+        --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.15);
+        --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.2);
+        --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.25);
 
         /* Transitions */
-        --transition-fast: 0.15s ease;
-        --transition-base: 0.2s ease;
+        --transition-fast: 0.12s ease;
+        --transition-base: 0.18s ease;
       }
 
       /* ==========================================================================
@@ -107,7 +108,7 @@
       @keyframes slideIn {
         from {
           opacity: 0;
-          transform: translateX(-8px);
+          transform: translateX(-6px);
         }
         to {
           opacity: 1;
@@ -122,7 +123,7 @@
         }
         to {
           opacity: 0;
-          transform: translateX(8px);
+          transform: translateX(6px);
         }
       }
 
@@ -132,7 +133,7 @@
           opacity: 1;
         }
         50% {
-          opacity: 0.7;
+          opacity: 0.6;
         }
       }
 
@@ -142,19 +143,19 @@
           transform: translateX(0);
         }
         25% {
-          transform: translateX(-4px);
+          transform: translateX(-3px);
         }
         75% {
-          transform: translateX(4px);
+          transform: translateX(3px);
         }
       }
 
       @keyframes checkmark {
         0% {
-          transform: scale(0.8);
+          transform: scale(0.85);
         }
         50% {
-          transform: scale(1.1);
+          transform: scale(1.08);
         }
         100% {
           transform: scale(1);
@@ -164,7 +165,7 @@
       @keyframes slideInRight {
         from {
           opacity: 0;
-          transform: translateX(40px);
+          transform: translateX(24px);
         }
         to {
           opacity: 1;
@@ -185,6 +186,18 @@
         }
       }
 
+      @keyframes timerGlow {
+        0%,
+        100% {
+          box-shadow: inset 0 0 0 1px var(--success);
+        }
+        50% {
+          box-shadow:
+            inset 0 0 0 1px var(--success),
+            0 0 12px rgba(34, 197, 94, 0.15);
+        }
+      }
+
       /* ==========================================================================
          CONTAINER - Main app window
          ========================================================================== */
@@ -196,72 +209,72 @@
         -webkit-backdrop-filter: blur(80px) saturate(180%);
         border-radius: var(--radius-xl);
         border: 1px solid var(--border-default);
-        box-shadow: var(--shadow-lg);
+        box-shadow:
+          var(--shadow-lg),
+          0 0 0 1px rgba(0, 0, 0, 0.3);
         display: flex;
         flex-direction: column;
         overflow: hidden;
-        animation: fadeIn 0.3s ease-out;
+        animation: fadeIn 0.25s ease-out;
       }
 
       /* ==========================================================================
-         HEADER - Top toolbar
+         HEADER - Minimal top bar
          ========================================================================== */
       .header {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        padding: var(--space-3) var(--space-4);
-        background: var(--surface-elevated);
-        border-bottom: 1px solid var(--border-subtle);
+        padding: var(--space-2) var(--space-4);
         -webkit-app-region: drag;
         cursor: move;
-        min-height: 48px;
+        min-height: 44px;
+        background: transparent;
+      }
+
+      .header-left {
+        display: flex;
+        align-items: center;
+        gap: var(--space-1);
+        -webkit-app-region: no-drag;
       }
 
       .header-title {
         display: flex;
         align-items: center;
         gap: var(--space-2);
-        flex: 1;
-        justify-content: center;
       }
 
       .header-title .icon {
-        width: 16px;
-        height: 16px;
-        color: var(--text-secondary);
+        width: 14px;
+        height: 14px;
+        color: var(--text-tertiary);
       }
 
       .header h1 {
-        font-size: 13px;
-        font-weight: 600;
-        color: var(--text-secondary);
-        letter-spacing: -0.01em;
+        font-size: 12px;
+        font-weight: 500;
+        color: var(--text-tertiary);
+        letter-spacing: 0;
         user-select: none;
       }
 
-      .header-left {
-        width: 72px;
-      }
-
-      .window-controls {
+      .header-right {
         display: flex;
         align-items: center;
-        gap: var(--space-2);
+        gap: var(--space-1);
         -webkit-app-region: no-drag;
-        width: 72px;
-        justify-content: flex-end;
       }
 
-      /* Toolbar buttons - Unified style */
+      /* Toolbar icon buttons */
       .toolbar-btn {
-        width: 28px;
-        height: 28px;
+        width: 26px;
+        height: 26px;
         padding: 0;
         background: transparent;
         border: none;
         border-radius: var(--radius-sm);
-        color: var(--text-tertiary);
+        color: var(--text-muted);
         cursor: pointer;
         display: flex;
         align-items: center;
@@ -276,7 +289,7 @@
       }
 
       .toolbar-btn:active {
-        transform: scale(0.95);
+        transform: scale(0.92);
       }
 
       .toolbar-btn.active {
@@ -285,23 +298,25 @@
       }
 
       .toolbar-btn .icon {
-        width: 14px;
-        height: 14px;
+        width: 13px;
+        height: 13px;
       }
 
-      /* Window traffic light buttons */
+      /* Window traffic lights */
       .window-btn {
-        width: 12px;
-        height: 12px;
+        width: 11px;
+        height: 11px;
         border-radius: 50%;
         border: none;
         cursor: pointer;
         transition: all var(--transition-fast);
         -webkit-app-region: no-drag;
+        opacity: 0.9;
       }
 
       .window-btn:hover {
-        filter: brightness(1.1);
+        opacity: 1;
+        transform: scale(1.1);
       }
 
       .window-btn:active {
@@ -309,251 +324,37 @@
       }
 
       .minimize-btn {
-        background: #fbbf24;
+        background: #f59e0b;
       }
 
       .close-btn {
-        background: #f87171;
+        background: #ef4444;
       }
 
       /* ==========================================================================
-         STATS BAR
-         ========================================================================== */
-      .stats-bar {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: var(--space-2) var(--space-4);
-        background: var(--surface-base);
-        border-bottom: 1px solid var(--border-subtle);
-      }
-
-      .stats-text {
-        font-size: 11px;
-        font-weight: 500;
-        color: var(--text-tertiary);
-        text-transform: uppercase;
-        letter-spacing: 0.04em;
-      }
-
-      .stats-actions {
-        display: flex;
-        gap: var(--space-1);
-      }
-
-      /* ==========================================================================
-         BUTTON SYSTEM - Primary / Secondary / Ghost
-         ========================================================================== */
-
-      /* Ghost button (tertiary) */
-      .btn-ghost {
-        padding: var(--space-1) var(--space-2);
-        background: transparent;
-        border: none;
-        border-radius: var(--radius-sm);
-        color: var(--text-tertiary);
-        font-size: 11px;
-        font-weight: 500;
-        cursor: pointer;
-        transition: all var(--transition-fast);
-        white-space: nowrap;
-      }
-
-      .btn-ghost:hover {
-        background: var(--surface-overlay);
-        color: var(--text-secondary);
-      }
-
-      .btn-ghost:active {
-        transform: scale(0.98);
-      }
-
-      /* Secondary button */
-      .btn-secondary {
-        padding: var(--space-2) var(--space-3);
-        background: var(--surface-overlay);
-        border: 1px solid var(--border-default);
-        border-radius: var(--radius-md);
-        color: var(--text-primary);
-        font-size: 13px;
-        font-weight: 500;
-        cursor: pointer;
-        transition: all var(--transition-fast);
-      }
-
-      .btn-secondary:hover {
-        background: rgba(255, 255, 255, 0.12);
-        border-color: var(--border-strong);
-      }
-
-      .btn-secondary:active {
-        transform: scale(0.98);
-      }
-
-      /* Primary button */
-      .btn-primary {
-        padding: var(--space-2) var(--space-4);
-        background: var(--accent);
-        border: none;
-        border-radius: var(--radius-md);
-        color: white;
-        font-size: 13px;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all var(--transition-fast);
-        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
-      }
-
-      .btn-primary:hover {
-        background: var(--accent-hover);
-      }
-
-      .btn-primary:active {
-        transform: scale(0.98);
-      }
-
-      .btn-primary:focus-visible,
-      .btn-secondary:focus-visible,
-      .btn-ghost:focus-visible {
-        outline: 2px solid var(--accent);
-        outline-offset: 2px;
-      }
-
-      /* Action buttons in stats bar */
-      .action-btn {
-        padding: var(--space-1) var(--space-2);
-        background: transparent;
-        border: none;
-        border-radius: var(--radius-sm);
-        color: var(--text-tertiary);
-        font-size: 11px;
-        font-weight: 500;
-        cursor: pointer;
-        transition: all var(--transition-fast);
-      }
-
-      .action-btn:hover {
-        background: var(--surface-overlay);
-        color: var(--text-secondary);
-      }
-
-      /* ==========================================================================
-         SECTION TOGGLES (Accordion)
-         ========================================================================== */
-      .section-toggle {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: var(--space-1) var(--space-4);
-        background: transparent;
-        border: none;
-        border-bottom: 1px solid var(--border-subtle);
-        cursor: pointer;
-        transition: background var(--transition-fast);
-        -webkit-app-region: no-drag;
-      }
-
-      .section-toggle:hover {
-        background: var(--surface-overlay);
-      }
-
-      .section-toggle-icon {
-        width: 12px;
-        height: 12px;
-        color: var(--text-muted);
-        transition: transform var(--transition-base);
-      }
-
-      .section-toggle.collapsed .section-toggle-icon {
-        transform: rotate(180deg);
-      }
-
-      /* ==========================================================================
-         SEARCH BAR
-         ========================================================================== */
-      .search-bar {
-        background: var(--surface-base);
-        border-bottom: 1px solid var(--border-subtle);
-        overflow: hidden;
-        transition:
-          max-height 0.25s ease,
-          opacity 0.25s ease;
-        max-height: 60px;
-      }
-
-      .search-bar.collapsed {
-        max-height: 0;
-        opacity: 0;
-        border-bottom: none;
-      }
-
-      .search-bar-content {
-        padding: var(--space-2) var(--space-4);
-      }
-
-      .search-input {
-        width: 100%;
-        padding: var(--space-2) var(--space-3);
-        padding-left: 36px;
-        background: var(--surface-overlay);
-        border: 1px solid var(--border-subtle);
-        border-radius: var(--radius-md);
-        color: var(--text-primary);
-        font-size: 13px;
-        font-family: inherit;
-        outline: none;
-        transition: all var(--transition-fast);
-        background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>');
-        background-repeat: no-repeat;
-        background-position: 12px center;
-      }
-
-      .search-input:focus {
-        border-color: var(--accent);
-        background-color: rgba(255, 255, 255, 0.06);
-      }
-
-      .search-input::placeholder {
-        color: var(--text-muted);
-      }
-
-      /* ==========================================================================
-         INPUT SECTION - Add new task
+         HERO INPUT SECTION - Primary action area
          ========================================================================== */
       .input-section {
-        background: var(--surface-base);
+        padding: var(--space-5) var(--space-5) var(--space-4);
+        background: var(--surface-elevated);
         border-bottom: 1px solid var(--border-subtle);
-        overflow: hidden;
-        transition:
-          max-height 0.25s ease,
-          opacity 0.25s ease;
-        max-height: 200px;
-      }
-
-      .input-section.collapsed {
-        max-height: 0;
-        opacity: 0;
-        border-bottom: none;
-      }
-
-      .input-section-content {
-        padding: var(--space-4);
       }
 
       .input-wrapper {
         display: flex;
         gap: var(--space-2);
         align-items: center;
+        margin-bottom: var(--space-3);
       }
 
       #taskInput {
         flex: 1;
-        padding: var(--space-2) var(--space-3);
-        background: var(--surface-overlay);
-        border: 1px solid var(--border-subtle);
+        padding: var(--space-3) var(--space-4);
+        background: var(--surface-base);
+        border: 1px solid var(--border-default);
         border-radius: var(--radius-md);
         color: var(--text-primary);
-        font-size: 13px;
+        font-size: 14px;
         font-family: inherit;
         outline: none;
         transition: all var(--transition-fast);
@@ -561,7 +362,7 @@
 
       #taskInput:focus {
         border-color: var(--accent);
-        background-color: rgba(255, 255, 255, 0.06);
+        box-shadow: 0 0 0 3px var(--accent-subtle);
       }
 
       #taskInput::placeholder {
@@ -569,7 +370,7 @@
       }
 
       .add-btn {
-        padding: var(--space-2) var(--space-4);
+        padding: var(--space-3) var(--space-5);
         background: var(--accent);
         border: none;
         border-radius: var(--radius-md);
@@ -586,40 +387,66 @@
       }
 
       .add-btn:active {
-        transform: scale(0.98);
+        transform: scale(0.97);
       }
 
       .add-btn.success {
-        animation: checkmark 0.3s ease;
+        animation: checkmark 0.25s ease;
       }
 
-      /* Duration section */
+      /* Segmented Duration Control */
       .duration-section {
-        margin-top: var(--space-3);
+        display: flex;
+        align-items: center;
+        gap: var(--space-3);
       }
 
       .duration-label {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: var(--space-1);
-        font-size: 10px;
+        font-size: 11px;
         font-weight: 500;
         color: var(--text-muted);
         text-transform: uppercase;
-        letter-spacing: 0.06em;
-        margin-bottom: var(--space-2);
+        letter-spacing: 0.03em;
+        white-space: nowrap;
       }
 
-      .duration-label svg {
-        width: 10px;
-        height: 10px;
+      .segmented-control {
+        display: flex;
+        background: var(--surface-base);
+        border-radius: var(--radius-sm);
+        padding: 2px;
+        gap: 1px;
+        flex: 1;
       }
 
+      .segment-btn {
+        flex: 1;
+        padding: var(--space-1) var(--space-2);
+        background: transparent;
+        border: none;
+        border-radius: var(--radius-xs);
+        color: var(--text-tertiary);
+        font-size: 11px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all var(--transition-fast);
+        text-align: center;
+      }
+
+      .segment-btn:hover {
+        color: var(--text-secondary);
+        background: rgba(255, 255, 255, 0.04);
+      }
+
+      .segment-btn.selected {
+        background: var(--accent);
+        color: white;
+        box-shadow: var(--shadow-sm);
+      }
+
+      /* Legacy preset buttons (hidden by default, use segmented control) */
       .duration-presets {
-        display: grid;
-        grid-template-columns: repeat(6, 1fr);
-        gap: var(--space-1);
+        display: none;
       }
 
       .preset-btn {
@@ -636,7 +463,7 @@
       }
 
       .preset-btn:hover {
-        background: rgba(255, 255, 255, 0.1);
+        background: rgba(255, 255, 255, 0.08);
         border-color: var(--border-default);
         color: var(--text-primary);
       }
@@ -648,16 +475,114 @@
       }
 
       /* ==========================================================================
+         SECONDARY TOOLBAR - Stats & Actions
+         ========================================================================== */
+      .secondary-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: var(--space-2) var(--space-5);
+        background: transparent;
+      }
+
+      .stats-text {
+        font-size: 10px;
+        font-weight: 500;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+
+      .stats-actions {
+        display: flex;
+        gap: 0;
+      }
+
+      .action-icon-btn {
+        width: 26px;
+        height: 26px;
+        padding: 0;
+        background: transparent;
+        border: none;
+        border-radius: var(--radius-sm);
+        color: var(--text-muted);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all var(--transition-fast);
+      }
+
+      .action-icon-btn:hover {
+        background: var(--surface-overlay);
+        color: var(--text-secondary);
+      }
+
+      .action-icon-btn .icon {
+        width: 13px;
+        height: 13px;
+      }
+
+      /* Legacy action buttons (hidden) */
+      .action-btn {
+        display: none;
+      }
+
+      /* ==========================================================================
+         SEARCH BAR - Compact, secondary
+         ========================================================================== */
+      .search-section {
+        padding: 0 var(--space-5) var(--space-2);
+      }
+
+      .search-input {
+        width: 100%;
+        padding: var(--space-2) var(--space-3);
+        padding-left: 32px;
+        background: var(--surface-overlay);
+        border: 1px solid transparent;
+        border-radius: var(--radius-md);
+        color: var(--text-primary);
+        font-size: 12px;
+        font-family: inherit;
+        outline: none;
+        transition: all var(--transition-fast);
+        background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.25)" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>');
+        background-repeat: no-repeat;
+        background-position: 10px center;
+      }
+
+      .search-input:focus {
+        border-color: var(--border-default);
+        background-color: var(--surface-base);
+      }
+
+      .search-input::placeholder {
+        color: var(--text-muted);
+        font-size: 12px;
+      }
+
+      /* Legacy search bar (hidden) */
+      .search-bar {
+        display: none;
+      }
+
+      /* Hide section toggles */
+      .section-toggle {
+        display: none;
+      }
+
+      /* ==========================================================================
          TASKS SECTION - Task list
          ========================================================================== */
       .tasks-section {
         flex: 1;
         overflow-y: auto;
-        padding: var(--space-2) 0;
+        padding: var(--space-1) 0;
       }
 
       .tasks-section::-webkit-scrollbar {
-        width: 6px;
+        width: 5px;
       }
 
       .tasks-section::-webkit-scrollbar-track {
@@ -673,24 +598,59 @@
         background: var(--border-strong);
       }
 
+      /* Task section headers */
+      .task-section-header {
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
+        padding: var(--space-2) var(--space-5);
+        cursor: pointer;
+        transition: background var(--transition-fast);
+      }
+
+      .task-section-header:hover {
+        background: rgba(255, 255, 255, 0.02);
+      }
+
+      .task-section-label {
+        font-size: 10px;
+        font-weight: 600;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+
+      .task-section-count {
+        font-size: 10px;
+        color: var(--text-muted);
+        opacity: 0.7;
+      }
+
+      .task-section-chevron {
+        width: 10px;
+        height: 10px;
+        color: var(--text-muted);
+        margin-left: auto;
+        transition: transform var(--transition-base);
+      }
+
+      .task-section-header.collapsed .task-section-chevron {
+        transform: rotate(-90deg);
+      }
+
       /* ==========================================================================
-         TASK ITEM - Slim list row design
+         TASK ITEM - Sleek row design
          ========================================================================== */
       .task-item {
         display: flex;
         align-items: flex-start;
         gap: var(--space-3);
-        padding: var(--space-3) var(--space-4);
+        padding: var(--space-3) var(--space-5);
         background: transparent;
-        border-bottom: 1px solid var(--border-subtle);
         transition: background var(--transition-fast);
-        animation: slideIn 0.2s ease-out;
+        animation: slideIn 0.15s ease-out;
         cursor: default;
         position: relative;
-      }
-
-      .task-item:last-child {
-        border-bottom: none;
       }
 
       .task-item:hover {
@@ -701,14 +661,14 @@
         background: var(--accent-subtle);
       }
 
-      /* Running timer indicator - Left accent bar */
+      /* Running timer - Left accent line */
       .task-item::before {
         content: '';
         position: absolute;
         left: 0;
         top: 0;
         bottom: 0;
-        width: 3px;
+        width: 2px;
         background: transparent;
         transition: background var(--transition-fast);
       }
@@ -729,29 +689,28 @@
         background: var(--danger);
       }
 
-      /* Checkbox - Smaller, cleaner */
+      /* Checkbox */
       .task-checkbox {
-        width: 18px;
-        height: 18px;
-        min-width: 18px;
-        border-radius: var(--radius-sm);
+        width: 16px;
+        height: 16px;
+        min-width: 16px;
+        border-radius: var(--radius-xs);
         border: 1.5px solid var(--border-strong);
         background: transparent;
         cursor: pointer;
         position: relative;
         transition: all var(--transition-fast);
-        margin-top: 1px;
+        margin-top: 2px;
       }
 
       .task-checkbox:hover {
         border-color: var(--accent);
-        background: var(--accent-subtle);
       }
 
       .task-checkbox.completed {
         background: var(--accent);
         border-color: var(--accent);
-        animation: checkmark 0.2s ease;
+        animation: checkmark 0.18s ease;
       }
 
       .task-checkbox.completed::after {
@@ -759,10 +718,10 @@
         position: absolute;
         top: 50%;
         left: 50%;
-        width: 5px;
-        height: 8px;
+        width: 4px;
+        height: 7px;
         border: solid white;
-        border-width: 0 2px 2px 0;
+        border-width: 0 1.5px 1.5px 0;
         transform: translate(-50%, -55%) rotate(45deg);
       }
 
@@ -780,7 +739,15 @@
         gap: var(--space-2);
       }
 
+      /* Task header row: title + delete */
+      .task-header {
+        display: flex;
+        align-items: flex-start;
+        gap: var(--space-2);
+      }
+
       .task-title {
+        flex: 1;
         color: var(--text-primary);
         font-size: 13px;
         font-weight: 450;
@@ -802,25 +769,25 @@
       }
 
       .task-edit-input {
-        width: 100%;
+        flex: 1;
         padding: var(--space-1) var(--space-2);
         background: var(--surface-overlay);
         border: 1px solid var(--accent);
-        border-radius: var(--radius-sm);
+        border-radius: var(--radius-xs);
         color: var(--text-primary);
         font-size: 13px;
         font-family: inherit;
         outline: none;
       }
 
-      /* Delete button - Subtle, appears on hover */
+      /* Delete button */
       .delete-btn {
-        width: 24px;
-        height: 24px;
+        width: 22px;
+        height: 22px;
         padding: 0;
         background: transparent;
         border: none;
-        border-radius: var(--radius-sm);
+        border-radius: var(--radius-xs);
         color: var(--text-muted);
         cursor: pointer;
         transition: all var(--transition-fast);
@@ -829,7 +796,7 @@
         justify-content: center;
         flex-shrink: 0;
         opacity: 0;
-        margin-top: -2px;
+        margin: -2px -4px 0 0;
       }
 
       .task-item:hover .delete-btn {
@@ -842,37 +809,28 @@
       }
 
       .delete-btn svg {
-        width: 14px;
-        height: 14px;
+        width: 12px;
+        height: 12px;
       }
 
       /* ==========================================================================
-         TIMER - Integrated design
+         TIMER - Inline integrated design
          ========================================================================== */
       .task-timer {
         display: flex;
-        flex-direction: column;
-        gap: var(--space-2);
-        padding: var(--space-2) var(--space-3);
-        background: rgba(0, 0, 0, 0.2);
-        border-radius: var(--radius-sm);
-        border: 1px solid var(--border-subtle);
-      }
-
-      .timer-row {
-        display: flex;
         align-items: center;
-        justify-content: space-between;
-        gap: var(--space-3);
+        gap: var(--space-2);
+        margin-top: var(--space-1);
       }
 
       .timer-display {
         font-family: var(--font-mono);
-        font-size: 16px;
+        font-size: 12px;
         font-weight: 600;
-        color: var(--text-secondary);
+        color: var(--text-tertiary);
         letter-spacing: 0.02em;
-        min-width: 54px;
+        min-width: 40px;
+        flex-shrink: 0;
       }
 
       .timer-display.running {
@@ -884,92 +842,14 @@
         animation: pulse 1s ease-in-out infinite;
       }
 
-      .task-timer.warning {
-        background: rgba(248, 113, 113, 0.06);
-        border-color: rgba(248, 113, 113, 0.2);
-      }
-
-      /* Timer controls - Compact group */
-      .timer-controls {
-        display: flex;
-        gap: var(--space-1);
-      }
-
-      .timer-btn {
-        width: 28px;
-        height: 28px;
-        padding: 0;
-        background: var(--surface-overlay);
-        border: 1px solid var(--border-subtle);
-        border-radius: var(--radius-sm);
-        color: var(--text-secondary);
-        cursor: pointer;
-        transition: all var(--transition-fast);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 12px;
-      }
-
-      .timer-btn:hover {
-        background: rgba(255, 255, 255, 0.1);
-        border-color: var(--border-default);
-        color: var(--text-primary);
-      }
-
-      .timer-btn:active {
-        transform: scale(0.95);
-      }
-
-      /* Primary action uses accent */
-      .timer-btn.play {
-        background: var(--accent-muted);
-        border-color: var(--accent);
-        color: var(--accent);
-      }
-
-      .timer-btn.play:hover {
-        background: var(--accent);
-        color: white;
-      }
-
-      /* Pause is secondary */
-      .timer-btn.pause {
-        background: var(--warning-muted);
-        border-color: rgba(251, 191, 36, 0.3);
-        color: var(--warning);
-      }
-
-      .timer-btn.pause:hover {
-        background: var(--warning);
-        color: rgba(0, 0, 0, 0.8);
-      }
-
-      /* Reset is tertiary/ghost */
-      .timer-btn.reset {
-        background: transparent;
-        border-color: var(--border-subtle);
-        color: var(--text-tertiary);
-      }
-
-      .timer-btn.reset:hover {
-        background: var(--surface-overlay);
-        color: var(--text-secondary);
-      }
-
-      .timer-btn svg {
-        width: 12px;
-        height: 12px;
-        fill: currentColor;
-      }
-
-      /* Progress bar - Thin and elegant */
+      /* Progress bar - Thin inline */
       .timer-progress-bar {
-        width: 100%;
+        flex: 1;
         height: 3px;
-        background: rgba(255, 255, 255, 0.06);
+        background: var(--border-default);
         border-radius: 2px;
         overflow: hidden;
+        min-width: 40px;
       }
 
       .timer-progress-fill {
@@ -980,7 +860,82 @@
       }
 
       .timer-progress-fill.paused {
-        background: var(--accent);
+        background: var(--text-muted);
+      }
+
+      /* Timer controls - Compact inline */
+      .timer-controls {
+        display: flex;
+        gap: 2px;
+        flex-shrink: 0;
+      }
+
+      .timer-btn {
+        width: 22px;
+        height: 22px;
+        padding: 0;
+        background: transparent;
+        border: none;
+        border-radius: var(--radius-xs);
+        color: var(--text-tertiary);
+        cursor: pointer;
+        transition: all var(--transition-fast);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .timer-btn:hover {
+        background: var(--surface-overlay);
+        color: var(--text-secondary);
+      }
+
+      .timer-btn:active {
+        transform: scale(0.9);
+      }
+
+      /* Primary play button */
+      .timer-btn.play {
+        background: var(--success);
+        color: white;
+      }
+
+      .timer-btn.play:hover {
+        background: #16a34a;
+      }
+
+      /* Pause button */
+      .timer-btn.pause {
+        background: var(--warning);
+        color: rgba(0, 0, 0, 0.85);
+      }
+
+      .timer-btn.pause:hover {
+        background: #d97706;
+      }
+
+      /* Reset button - Ghost */
+      .timer-btn.reset {
+        background: transparent;
+        color: var(--text-muted);
+      }
+
+      .timer-btn.reset:hover {
+        background: var(--surface-overlay);
+        color: var(--text-tertiary);
+      }
+
+      .timer-btn svg {
+        width: 10px;
+        height: 10px;
+      }
+
+      .task-timer.warning .timer-display {
+        color: var(--danger);
+      }
+
+      .task-timer.warning .timer-progress-fill {
+        background: var(--danger);
       }
 
       /* ==========================================================================
@@ -994,29 +949,50 @@
         height: 100%;
         padding: var(--space-8);
         text-align: center;
-        animation: fadeIn 0.4s ease;
+        animation: fadeIn 0.3s ease;
       }
 
       .empty-state-icon {
-        width: 48px;
-        height: 48px;
+        width: 40px;
+        height: 40px;
         color: var(--text-muted);
         margin-bottom: var(--space-4);
-        opacity: 0.5;
+        opacity: 0.4;
       }
 
       .empty-state-title {
-        font-size: 15px;
+        font-size: 14px;
         font-weight: 600;
         color: var(--text-secondary);
         margin-bottom: var(--space-2);
       }
 
       .empty-state-text {
-        font-size: 13px;
+        font-size: 12px;
         color: var(--text-tertiary);
-        max-width: 240px;
+        max-width: 200px;
         line-height: 1.5;
+      }
+
+      .empty-state-hint {
+        margin-top: var(--space-4);
+        font-size: 11px;
+        color: var(--text-muted);
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
+      }
+
+      .keyboard-hint {
+        display: inline-flex;
+        align-items: center;
+        gap: 3px;
+        padding: 2px 5px;
+        background: var(--surface-overlay);
+        border-radius: var(--radius-xs);
+        font-size: 10px;
+        font-family: var(--font-mono);
+        color: var(--text-tertiary);
       }
 
       /* ==========================================================================
@@ -1034,15 +1010,15 @@
       }
 
       .toast {
-        padding: var(--space-3) var(--space-4);
+        padding: var(--space-2) var(--space-4);
         background: var(--surface-elevated);
         border: 1px solid var(--border-default);
         border-radius: var(--radius-md);
         color: var(--text-primary);
-        font-size: 13px;
+        font-size: 12px;
         font-weight: 500;
         box-shadow: var(--shadow-lg);
-        animation: slideInRight 0.25s ease;
+        animation: slideInRight 0.2s ease;
         pointer-events: auto;
         display: flex;
         align-items: center;
@@ -1050,11 +1026,11 @@
       }
 
       .toast.success {
-        border-color: rgba(52, 211, 153, 0.3);
+        border-color: rgba(34, 197, 94, 0.25);
       }
 
       .toast.error {
-        border-color: rgba(248, 113, 113, 0.3);
+        border-color: rgba(239, 68, 68, 0.25);
       }
 
       .toast.info {
@@ -1062,12 +1038,12 @@
       }
 
       /* ==========================================================================
-         LOADING & CONFETTI
+         UTILITIES
          ========================================================================== */
       .spinner {
-        width: 14px;
-        height: 14px;
-        border: 2px solid var(--border-default);
+        width: 12px;
+        height: 12px;
+        border: 1.5px solid var(--border-default);
         border-top-color: var(--accent);
         border-radius: 50%;
         animation: spin 0.6s linear infinite;
@@ -1076,7 +1052,7 @@
       .loading-overlay {
         position: absolute;
         inset: 0;
-        background: rgba(0, 0, 0, 0.6);
+        background: rgba(0, 0, 0, 0.5);
         backdrop-filter: blur(4px);
         display: flex;
         align-items: center;
@@ -1086,8 +1062,8 @@
 
       .confetti {
         position: fixed;
-        width: 8px;
-        height: 8px;
+        width: 6px;
+        height: 6px;
         pointer-events: none;
         animation: confettiFall 3s linear forwards;
       }
@@ -1096,13 +1072,12 @@
          FOCUS MODE
          ========================================================================== */
       .container.focus-mode {
-        background: rgba(18, 18, 22, 0.96);
+        background: rgba(16, 16, 20, 0.98);
       }
 
-      .container.focus-mode .stats-bar,
-      .container.focus-mode .search-bar,
-      .container.focus-mode .input-section,
-      .container.focus-mode .section-toggle {
+      .container.focus-mode .secondary-bar,
+      .container.focus-mode .search-section,
+      .container.focus-mode .input-section {
         display: none;
       }
 
@@ -1111,7 +1086,7 @@
       }
 
       .container.focus-mode .task-item:not(.timer-running) {
-        opacity: 0.4;
+        opacity: 0.35;
       }
 
       .container.focus-mode .task-item.timer-running {
@@ -1119,14 +1094,14 @@
       }
 
       /* ==========================================================================
-         ICONS - Unified stroke weight
+         ICONS
          ========================================================================== */
       .icon {
-        width: 16px;
-        height: 16px;
+        width: 14px;
+        height: 14px;
         fill: none;
         stroke: currentColor;
-        stroke-width: 1.75;
+        stroke-width: 2;
         stroke-linecap: round;
         stroke-linejoin: round;
       }
@@ -1135,37 +1110,35 @@
          LIGHT THEME
          ========================================================================== */
       .light-theme {
-        --surface-base: rgba(255, 255, 255, 0.96);
-        --surface-elevated: rgba(245, 245, 247, 1);
-        --surface-overlay: rgba(235, 235, 240, 1);
+        --surface-base: rgba(255, 255, 255, 0.98);
+        --surface-elevated: rgba(248, 248, 250, 1);
+        --surface-overlay: rgba(240, 240, 244, 1);
 
-        --text-primary: rgba(0, 0, 0, 0.88);
-        --text-secondary: rgba(0, 0, 0, 0.6);
-        --text-tertiary: rgba(0, 0, 0, 0.4);
-        --text-muted: rgba(0, 0, 0, 0.24);
+        --text-primary: rgba(0, 0, 0, 0.9);
+        --text-secondary: rgba(0, 0, 0, 0.55);
+        --text-tertiary: rgba(0, 0, 0, 0.35);
+        --text-muted: rgba(0, 0, 0, 0.2);
 
-        --border-subtle: rgba(0, 0, 0, 0.06);
-        --border-default: rgba(0, 0, 0, 0.1);
-        --border-strong: rgba(0, 0, 0, 0.16);
+        --border-subtle: rgba(0, 0, 0, 0.04);
+        --border-default: rgba(0, 0, 0, 0.08);
+        --border-strong: rgba(0, 0, 0, 0.12);
 
-        --accent-muted: rgba(59, 130, 246, 0.12);
-        --accent-subtle: rgba(59, 130, 246, 0.06);
+        --accent-muted: rgba(59, 130, 246, 0.1);
+        --accent-subtle: rgba(59, 130, 246, 0.04);
 
-        --success-muted: rgba(52, 211, 153, 0.1);
-        --warning-muted: rgba(251, 191, 36, 0.1);
-        --danger-muted: rgba(248, 113, 113, 0.08);
+        --success-muted: rgba(34, 197, 94, 0.08);
+        --warning-muted: rgba(245, 158, 11, 0.08);
+        --danger-muted: rgba(239, 68, 68, 0.06);
       }
 
       .light-theme .container {
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
-        border-color: rgba(0, 0, 0, 0.08);
+        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
+        border-color: rgba(0, 0, 0, 0.06);
       }
 
-      /* Hidden utility */
-      .duration-row {
-        display: none;
-      }
-
+      /* Legacy elements hidden */
+      .stats-bar,
+      .duration-row,
       #durationInput {
         display: none;
       }
@@ -1173,25 +1146,17 @@
   </head>
   <body>
     <div class="container">
-      <!-- Header / Toolbar -->
+      <!-- Header - Minimal -->
       <div class="header">
-        <div class="header-left"></div>
-        <div class="header-title">
-          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-            <circle cx="12" cy="12" r="10" />
-            <polyline points="9 12 11 14 15 10" />
-          </svg>
-          <h1>Task Floater</h1>
-        </div>
-        <div class="window-controls">
-          <button class="toolbar-btn" id="focusBtn" title="Focus Mode (Cmd+Shift+F)">
-            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+        <div class="header-left">
+          <button class="toolbar-btn" id="focusBtn" title="Focus Mode">
+            <svg class="icon" viewBox="0 0 24 24">
               <circle cx="12" cy="12" r="3" />
               <circle cx="12" cy="12" r="10" />
             </svg>
           </button>
-          <button class="toolbar-btn" id="themeToggle" title="Toggle Theme (Cmd+T)">
-            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <button class="toolbar-btn" id="themeToggle" title="Toggle Theme">
+            <svg class="icon" viewBox="0 0 24 24">
               <circle cx="12" cy="12" r="5" />
               <line x1="12" y1="1" x2="12" y2="3" />
               <line x1="12" y1="21" x2="12" y2="23" />
@@ -1203,76 +1168,80 @@
               <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
             </svg>
           </button>
+        </div>
+        <div class="header-title">
+          <svg class="icon" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="10" />
+            <polyline points="9 12 11 14 15 10" />
+          </svg>
+          <h1>Task Floater</h1>
+        </div>
+        <div class="header-right">
           <button class="window-btn minimize-btn" id="minimizeBtn" title="Minimize"></button>
           <button class="window-btn close-btn" id="closeBtn" title="Close"></button>
         </div>
       </div>
 
-      <!-- Stats Bar -->
-      <div class="stats-bar" id="statsBar">
-        <div class="stats-text" id="statsText">0 tasks</div>
-        <div class="stats-actions">
-          <button class="action-btn" id="clearCompletedBtn" title="Clear completed">Clear</button>
-          <button class="action-btn" id="exportBtn" title="Export tasks">Export</button>
-          <button class="action-btn" id="importBtn" title="Import tasks">Import</button>
-        </div>
-      </div>
-
-      <!-- Search Toggle -->
-      <button class="section-toggle" id="searchToggle" title="Toggle search">
-        <svg
-          class="section-toggle-icon"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-        >
-          <polyline points="6 9 12 15 18 9"></polyline>
-        </svg>
-      </button>
-
-      <!-- Search Bar -->
-      <div class="search-bar" id="searchBar">
-        <div class="search-bar-content">
-          <input type="text" id="searchInput" class="search-input" placeholder="Search tasks..." />
-        </div>
-      </div>
-
-      <!-- Input Toggle -->
-      <button class="section-toggle" id="inputToggle" title="Toggle add task">
-        <svg
-          class="section-toggle-icon"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-        >
-          <polyline points="6 9 12 15 18 9"></polyline>
-        </svg>
-      </button>
-
-      <!-- Input Section -->
+      <!-- Hero Input Section -->
       <div class="input-section" id="inputSection">
-        <div class="input-section-content">
-          <div class="input-wrapper">
-            <input type="text" id="taskInput" placeholder="Add a new task..." />
-            <button class="add-btn" id="addBtn">Add</button>
+        <div class="input-wrapper">
+          <input type="text" id="taskInput" placeholder="What needs to be done?" autofocus />
+          <button class="add-btn" id="addBtn">Add</button>
+        </div>
+        <div class="duration-section">
+          <span class="duration-label">Timer</span>
+          <div class="segmented-control" id="durationControl">
+            <button class="segment-btn" data-minutes="0">None</button>
+            <button class="segment-btn" data-minutes="15">15m</button>
+            <button class="segment-btn" data-minutes="25">25m</button>
+            <button class="segment-btn" data-minutes="45">45m</button>
+            <button class="segment-btn" data-minutes="60">1h</button>
+            <button class="segment-btn" data-minutes="90">90m</button>
           </div>
-          <div class="duration-section">
-            <div class="duration-label">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="12" cy="12" r="10" />
-                <polyline points="12 6 12 12 16 14" />
-              </svg>
-              Duration
-            </div>
-            <div class="duration-presets">
-              <!-- Dynamically populated by renderer.ts -->
-            </div>
-            <input type="number" id="durationInput" placeholder="Duration (minutes)" min="1" />
-          </div>
+          <!-- Legacy presets for renderer.ts compatibility -->
+          <div class="duration-presets"></div>
+          <input type="number" id="durationInput" style="display: none" />
         </div>
       </div>
+
+      <!-- Secondary Bar: Stats + Actions -->
+      <div class="secondary-bar" id="statsBar">
+        <div class="stats-text" id="statsText">0 active</div>
+        <div class="stats-actions">
+          <button class="action-icon-btn" id="clearCompletedBtn" title="Clear completed">
+            <svg class="icon" viewBox="0 0 24 24">
+              <polyline points="3 6 5 6 21 6" />
+              <path
+                d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
+              />
+            </svg>
+          </button>
+          <button class="action-icon-btn" id="exportBtn" title="Export">
+            <svg class="icon" viewBox="0 0 24 24">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+              <polyline points="17 8 12 3 7 8" />
+              <line x1="12" y1="3" x2="12" y2="15" />
+            </svg>
+          </button>
+          <button class="action-icon-btn" id="importBtn" title="Import">
+            <svg class="icon" viewBox="0 0 24 24">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+              <polyline points="7 10 12 15 17 10" />
+              <line x1="12" y1="15" x2="12" y2="3" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Search - Compact, secondary -->
+      <div class="search-section">
+        <input type="text" id="searchInput" class="search-input" placeholder="Search..." />
+      </div>
+
+      <!-- Legacy elements for renderer.ts compatibility -->
+      <div class="search-bar" id="searchBar" style="display: none"></div>
+      <button class="section-toggle" id="searchToggle" style="display: none"></button>
+      <button class="section-toggle" id="inputToggle" style="display: none"></button>
 
       <!-- Tasks List -->
       <div class="tasks-section" id="tasksSection" role="list" aria-label="Task list">
@@ -1284,11 +1253,13 @@
             stroke="currentColor"
             stroke-width="1.5"
           >
-            <circle cx="12" cy="12" r="10" />
-            <path d="M12 6v6l4 2" />
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+            <line x1="9" y1="9" x2="15" y2="15" />
+            <line x1="15" y1="9" x2="9" y2="15" />
           </svg>
           <div class="empty-state-title">No tasks yet</div>
-          <div class="empty-state-text">Add a task above to get started</div>
+          <div class="empty-state-text">Add your first task to get started</div>
+          <div class="empty-state-hint">Press <span class="keyboard-hint">Enter</span> to add</div>
         </div>
       </div>
     </div>
