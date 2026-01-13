@@ -25,11 +25,78 @@
       @keyframes slideIn {
         from {
           opacity: 0;
-          transform: translateX(-20px);
+          transform: translateX(-20px) scale(0.95);
         }
         to {
           opacity: 1;
+          transform: translateX(0) scale(1);
+        }
+      }
+
+      @keyframes slideOut {
+        from {
+          opacity: 1;
+          transform: translateX(0) scale(1);
+          max-height: 200px;
+        }
+        to {
+          opacity: 0;
+          transform: translateX(20px) scale(0.9);
+          max-height: 0;
+        }
+      }
+
+      @keyframes checkBounce {
+        0%,
+        100% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.15);
+        }
+      }
+
+      @keyframes ripple {
+        to {
+          transform: scale(4);
+          opacity: 0;
+        }
+      }
+
+      @keyframes shake {
+        0%,
+        100% {
           transform: translateX(0);
+        }
+        25% {
+          transform: translateX(-6px);
+        }
+        75% {
+          transform: translateX(6px);
+        }
+      }
+
+      @keyframes success {
+        0%,
+        100% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.03);
+        }
+      }
+
+      @keyframes glowPulse {
+        0%,
+        100% {
+          box-shadow:
+            0 0 20px rgba(255, 59, 48, 0.4),
+            0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+        50% {
+          box-shadow:
+            0 0 30px rgba(255, 59, 48, 0.6),
+            0 6px 16px rgba(0, 0, 0, 0.4);
         }
       }
 
@@ -166,6 +233,84 @@
         transform: rotate(20deg) scale(0.95);
       }
 
+      .focus-toggle {
+        width: 32px;
+        height: 32px;
+        padding: 0;
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 8px;
+        color: rgba(255, 255, 255, 0.8);
+        cursor: pointer;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 12px;
+        -webkit-app-region: no-drag;
+      }
+
+      .focus-toggle:hover {
+        background: rgba(255, 255, 255, 0.2);
+        border-color: rgba(255, 255, 255, 0.3);
+        color: #fff;
+        transform: scale(1.05);
+        box-shadow: 0 4px 12px rgba(100, 150, 255, 0.2);
+      }
+
+      .focus-toggle:active {
+        transform: scale(0.95);
+      }
+
+      .focus-toggle.active {
+        background: linear-gradient(
+          135deg,
+          rgba(100, 150, 255, 0.4) 0%,
+          rgba(80, 120, 220, 0.4) 100%
+        );
+        border-color: rgba(100, 150, 255, 0.6);
+        color: #fff;
+        box-shadow: 0 0 16px rgba(100, 150, 255, 0.4);
+      }
+
+      /* Focus mode styles */
+      .container.focus-mode {
+        background: rgba(20, 20, 30, 0.95);
+        border-color: rgba(100, 150, 255, 0.3);
+        box-shadow: 0 12px 48px 0 rgba(100, 150, 255, 0.2);
+      }
+
+      .container.focus-mode .stats-bar,
+      .container.focus-mode .search-bar,
+      .container.focus-mode .input-section {
+        opacity: 0;
+        height: 0;
+        overflow: hidden;
+        padding: 0;
+        margin: 0;
+        border: none;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .container:not(.focus-mode) .stats-bar,
+      .container:not(.focus-mode) .search-bar,
+      .container:not(.focus-mode) .input-section {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .container.focus-mode .task-item.completed {
+        display: none;
+      }
+
+      .container.focus-mode .task-item:not(.timer-running) {
+        opacity: 0.5;
+      }
+
+      .container.focus-mode .task-item.timer-running {
+        transform: scale(1.02);
+        box-shadow: 0 8px 24px rgba(76, 220, 100, 0.3);
+      }
+
       .stats-bar {
         display: grid;
         grid-template-columns: 1fr auto 1fr;
@@ -215,8 +360,21 @@
       }
 
       .action-btn:active {
-        transform: translateY(0);
+        transform: translateY(0) scale(0.95);
         box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+      }
+
+      .action-btn:focus-visible,
+      .timer-btn:focus-visible,
+      .delete-btn:focus-visible,
+      .preset-btn:focus-visible,
+      .section-toggle:focus-visible {
+        outline: 2px solid rgba(100, 150, 255, 0.6);
+        outline-offset: 2px;
+      }
+
+      button:focus:not(:focus-visible) {
+        outline: none;
       }
 
       .search-bar {
@@ -360,6 +518,31 @@
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         box-shadow: 0 4px 16px rgba(100, 150, 255, 0.35);
         white-space: nowrap;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .add-btn::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.3);
+        transform: translate(-50%, -50%);
+        transition:
+          width 0.6s,
+          height 0.6s;
+      }
+
+      .add-btn:active::before {
+        width: 300px;
+        height: 300px;
+        transition:
+          width 0s,
+          height 0s;
       }
 
       .add-btn:hover {
@@ -369,8 +552,17 @@
       }
 
       .add-btn:active {
-        transform: translateY(0);
+        transform: translateY(0) scale(0.98);
         box-shadow: 0 3px 12px rgba(100, 150, 255, 0.4);
+      }
+
+      .add-btn:focus-visible {
+        outline: 3px solid rgba(100, 150, 255, 0.5);
+        outline-offset: 2px;
+      }
+
+      .add-btn.success {
+        animation: success 0.4s ease-out;
       }
 
       .tasks-section {
@@ -494,6 +686,7 @@
         background: linear-gradient(135deg, rgba(76, 175, 80, 1) 0%, rgba(56, 142, 60, 1) 100%);
         border-color: rgba(76, 175, 80, 1);
         box-shadow: 0 2px 8px rgba(76, 175, 80, 0.4);
+        animation: checkBounce 0.3s ease-out;
       }
 
       .task-checkbox.completed::after {
@@ -506,6 +699,11 @@
         border: solid #fff;
         border-width: 0 2.5px 2.5px 0;
         transform: translate(-50%, -60%) rotate(45deg);
+      }
+
+      .task-checkbox:focus-visible {
+        outline: 2px solid rgba(100, 150, 255, 0.6);
+        outline-offset: 2px;
       }
 
       .task-content {
@@ -742,6 +940,27 @@
         animation: pulse 2s ease-in-out infinite;
       }
 
+      .timer-display.warning {
+        color: rgba(255, 59, 48, 1);
+        text-shadow: 0 0 20px rgba(255, 59, 48, 0.7);
+        animation: pulse 1s ease-in-out infinite;
+      }
+
+      .task-timer.warning {
+        border-color: rgba(255, 59, 48, 0.4);
+        background: rgba(255, 59, 48, 0.08);
+      }
+
+      .task-item.timer-warning {
+        border-color: rgba(255, 59, 48, 0.4);
+        animation: glowPulse 2s ease-in-out infinite;
+      }
+
+      .task-item.timer-warning::before {
+        background: linear-gradient(180deg, rgba(255, 59, 48, 1) 0%, rgba(220, 38, 38, 1) 100%);
+        box-shadow: 0 0 12px rgba(255, 59, 48, 0.6);
+      }
+
       @keyframes pulse {
         0%,
         100% {
@@ -899,6 +1118,19 @@
           <h1>Task Floater</h1>
         </div>
         <div class="window-controls">
+          <button class="focus-toggle" id="focusBtn" title="Focus Mode (Cmd+Shift+F)">
+            <svg
+              class="icon"
+              style="width: 14px; height: 14px"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <circle cx="12" cy="12" r="3" />
+              <circle cx="12" cy="12" r="10" />
+            </svg>
+          </button>
           <button class="theme-toggle" id="themeToggle" title="Toggle theme">
             <svg class="icon" style="width: 14px; height: 14px" viewBox="0 0 24 24">
               <circle cx="12" cy="12" r="5" />
@@ -917,7 +1149,7 @@
         </div>
       </div>
 
-      <div class="stats-bar">
+      <div class="stats-bar" id="statsBar">
         <div class="stats-text" id="statsText">0 tasks</div>
         <div class="stats-actions">
           <button class="action-btn" id="clearCompletedBtn" title="Clear completed tasks">
