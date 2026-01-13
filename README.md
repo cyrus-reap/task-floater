@@ -1,403 +1,324 @@
 <div align="center">
 
-# Task Floater ✨
+<img src="build/icon.svg" width="128" height="128" alt="Task Floater Icon">
 
-<p align="center">
-  <strong>A beautiful, modern floating task manager for macOS</strong>
-</p>
+# Task Floater
 
-<p align="center">
-  <a href="#features">Features</a> •
-  <a href="#installation">Installation</a> •
-  <a href="#usage">Usage</a> •
-  <a href="#development">Development</a> •
-  <a href="#contributing">Contributing</a>
-</p>
+**A minimalist, always-on-top task manager for macOS with integrated Pomodoro timer**
 
-<p align="center">
-  <img src="https://img.shields.io/badge/platform-macOS-blue.svg" alt="Platform">
-  <img src="https://img.shields.io/badge/license-MIT-green.svg" alt="License">
-  <img src="https://img.shields.io/badge/typescript-%E2%9C%93-blue.svg" alt="TypeScript">
-  <img src="https://img.shields.io/badge/electron-28.0.0-47848f.svg" alt="Electron">
-</p>
+[![macOS](https://img.shields.io/badge/platform-macOS%2010.13+-blue.svg)](https://www.apple.com/macos)
+[![License](https://img.shields.io/github/license/cyrus-reap/task-floater)](LICENSE)
+[![Latest Release](https://img.shields.io/github/v/release/cyrus-reap/task-floater)](https://github.com/cyrus-reap/task-floater/releases/latest)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.3+-3178c6.svg)](https://www.typescriptlang.org/)
+[![Electron](https://img.shields.io/badge/Electron-28.0-47848f.svg)](https://www.electronjs.org/)
+
+[Features](#features) • [Installation](#installation) • [Documentation](#documentation) • [Contributing](#contributing)
 
 </div>
 
 ---
 
-## 🎯 Overview
+## Overview
 
-Task Floater is a minimalist, always-on-top task manager for macOS featuring a stunning glassmorphism design. It floats above all your windows, giving you instant access to your tasks without disrupting your workflow.
+Task Floater is a productivity application designed to stay visible above all windows, providing instant access to your task list without disrupting your workflow. Built with modern design principles, it features a glassmorphism UI, integrated Pomodoro timer system, and focus mode for distraction-free work.
 
-## ✨ Features
+**Key Capabilities:**
+- Always-on-top floating window with glassmorphism design
+- Integrated Pomodoro timer with customizable durations
+- Focus mode for minimizing distractions
+- Automatic task persistence and updates
+- Full keyboard navigation support
 
-### Core Task Management
-- 🎨 **Glassmorphism UI** - Modern frosted glass design with smooth animations
-- 📌 **Always on Top** - Stays above all windows, never gets buried
-- 🖱️ **Draggable** - Position it anywhere on your screen
-- ✏️ **Inline Editing** - Double-click any task to edit
-- 🔄 **Drag & Drop** - Reorder tasks by dragging
-- 💾 **Auto-save** - Tasks persist automatically
-
-### Pomodoro Timer System
-- ⏱️ **Smart Timers** - Set duration for each task
-- ⚡ **Quick Presets** - One-click: 15min, 30min, 45min, 1hr, 1.5hrs
-- 📊 **Progress Bar** - Visual countdown with shimmer effect
-- 🔔 **Auto-advance** - Automatically move to next task when timer completes
-- 🎵 **Notifications** - Audio alert when timer finishes
-
-### Productivity Tools
-- 🎯 **Focus Mode** - Hide distractions, highlight active task (`Cmd+Shift+F`)
-- 🔍 **Search** - Real-time task filtering
-- 📈 **Statistics** - See active vs completed tasks
-- ⌨️ **Keyboard Shortcuts** - Full keyboard navigation
-
-### Professional Polish
-- 🎭 **Native macOS Integration** - Smooth animations and window controls
-- 🔒 **Security Hardened** - Input validation, XSS prevention, sandboxed
-- 🔄 **Auto-updates** - Automatically notifies of new versions
-- 🔐 **Privacy First** - All data stored locally, no cloud sync
-
-## 📸 Screenshots
+## Screenshots
 
 <div align="center">
 
-### Main View with Tasks
-<img width="380" alt="Main interface with glassmorphism design" src="https://github.com/user-attachments/assets/bd23cbd3-7927-4139-863b-c59005b24c7b" />
+### Main Interface
+<img width="380" alt="Task Floater main interface with glassmorphism design" src="https://github.com/user-attachments/assets/bd23cbd3-7927-4139-863b-c59005b24c7b" />
 
 <table>
   <tr>
-    <td width="50%">
-      <h3 align="center">Timer with Progress Bar</h3>
-      <img width="100%" alt="Running timer with visual progress" src="https://github.com/user-attachments/assets/cfae2ffe-8b2e-4e35-a360-d869b28c178e" />
+    <td width="50%" align="center">
+      <strong>Timer & Progress Visualization</strong><br/>
+      <img width="100%" alt="Running timer with visual progress bar" src="https://github.com/user-attachments/assets/cfae2ffe-8b2e-4e35-a360-d869b28c178e" />
     </td>
-    <td width="50%">
-      <h3 align="center">Duration Presets</h3>
-      <img width="100%" alt="Quick duration selection presets" src="https://github.com/user-attachments/assets/f837ba6c-ec94-4fdc-80a8-8e1e66951d83" />
+    <td width="50%" align="center">
+      <strong>Quick Duration Presets</strong><br/>
+      <img width="100%" alt="One-click duration selection" src="https://github.com/user-attachments/assets/f837ba6c-ec94-4fdc-80a8-8e1e66951d83" />
     </td>
   </tr>
   <tr>
-    <td width="50%">
-      <h3 align="center">Focus Mode</h3>
-      <img width="100%" alt="Focus mode for distraction-free work" src="https://github.com/user-attachments/assets/a67d12e5-ed90-466c-9563-8aeb4d73c06e" />
+    <td width="50%" align="center">
+      <strong>Focus Mode</strong><br/>
+      <img width="100%" alt="Distraction-free focus mode" src="https://github.com/user-attachments/assets/a67d12e5-ed90-466c-9563-8aeb4d73c06e" />
     </td>
-    <td width="50%">
-      <h3 align="center">Modern UI</h3>
-      <img width="100%" alt="Clean, modern interface design" src="https://github.com/user-attachments/assets/bd23cbd3-7927-4139-863b-c59005b24c7b" />
+    <td width="50%" align="center">
+      <strong>Modern Design System</strong><br/>
+      <img width="100%" alt="Clean interface with design tokens" src="https://github.com/user-attachments/assets/bd23cbd3-7927-4139-863b-c59005b24c7b" />
     </td>
   </tr>
 </table>
 
 </div>
 
-## 🚀 Installation
+## Features
 
-### Download Pre-built App (Easiest)
+### Task Management
+- **Always-on-top window** - Remains visible across all workspaces and full-screen apps
+- **Glassmorphism UI** - Modern frosted glass aesthetic with smooth animations
+- **Drag & drop reordering** - Organize tasks by dragging
+- **Inline editing** - Double-click any task to edit in place
+- **Automatic persistence** - Changes saved instantly to local storage
+- **Search functionality** - Real-time task filtering
+
+### Pomodoro Timer System
+- **Integrated timers** - Optional timer for each task
+- **Quick presets** - 15min, 25min, 30min, 45min, 1hr, 90min durations
+- **Visual progress** - Animated progress bar with real-time countdown
+- **Auto-advance** - Automatically proceeds to next task on completion
+- **Audio notifications** - Alert sounds when timers complete
+- **Persistent state** - Timer state survives app restarts
+
+### Focus Mode
+- **Distraction-free interface** - Hides completed tasks and UI chrome
+- **Active task emphasis** - Running timers highlighted with visual effects
+- **Keyboard shortcut** - Toggle with `Cmd+Shift+F`
+- **Immersive design** - Darker background for concentration
+
+### Developer Features
+- **Security hardened** - Input validation, XSS prevention, Electron sandbox
+- **Auto-updates** - Automatic update notifications via GitHub Releases
+- **Type-safe** - Built with TypeScript strict mode
+- **Well-documented** - Comprehensive guides and API documentation
+
+## Installation
+
+### Pre-built Application
 
 **[📥 Download Latest Release](https://github.com/cyrus-reap/task-floater/releases/latest)**
 
-1. Download `Task Floater-X.X.X-arm64.dmg` (Apple Silicon) or `Task Floater-X.X.X.dmg` (Intel)
-2. Double-click the DMG
-3. **First time only** - Bypass Gatekeeper warning:
-   - Click "Done" or "Cancel" on the warning
-   - **Right-click** the Task Floater app
-   - Select **"Open"**
-   - Click **"Open"** again in the dialog
-4. Drag to Applications folder
-5. Launch normally from Applications
+#### macOS Installation
 
-**After first launch, it opens normally!** The app includes auto-update, so you'll get future updates automatically.
+1. Download the appropriate DMG:
+   - **Apple Silicon** (M1/M2/M3): `Task Floater-X.X.X-arm64.dmg`
+   - **Intel**: `Task Floater-X.X.X.dmg`
+
+2. Open the DMG file
+
+3. **First launch only** - Bypass Gatekeeper:
+   ```
+   a. macOS will show: "Task Floater.app cannot be opened"
+   b. Click "Done" or "Cancel"
+   c. Right-click the app → Select "Open"
+   d. Click "Open" in the confirmation dialog
+   ```
+
+4. Drag to Applications folder
+
+5. Launch from Applications
+
+**Subsequent launches:** The app will open normally. Updates are delivered automatically.
 
 ### Build from Source
 
-**Prerequisites**: macOS 10.13+, Node.js 16+, npm
+**Requirements:** macOS 10.13+, Node.js 16+
 
 ```bash
-# Clone the repository
 git clone https://github.com/cyrus-reap/task-floater.git
 cd task-floater
-
-# Install dependencies
 npm install
-
-# Build and run
 npm start
 ```
 
-**For development:**
+**Development mode:**
 ```bash
-# Watch mode with auto-restart
-npm run dev
+npm run dev  # Watch mode with auto-reload
 ```
 
 ## Usage
 
-### Adding Tasks
+### Basic Operations
 
-1. Type your task in the input field
-2. Press **Enter** or click "Add"
-3. Task appears with a smooth slide-in animation
+**Add task:** Type in the input field and press Enter
+**Set timer:** Click a duration preset before adding the task
+**Start timer:** Click the play button (▶)
+**Complete task:** Click the checkbox
+**Delete task:** Click the delete button
+**Reorder tasks:** Drag and drop
+**Edit task:** Double-click the task title
 
-### Completing Tasks
+### Keyboard Shortcuts
 
-Click the checkbox next to any task to mark it complete. Completed tasks:
-- Show a green checkmark with animation
-- Get a strikethrough style
-- Move to the bottom of the list
-- Stay visible until you delete them
+| Shortcut | Action |
+|----------|--------|
+| `Cmd+Shift+F` | Toggle Focus Mode |
+| `Cmd+F` | Focus search |
+| `↑` / `↓` | Navigate tasks |
+| `Space` | Toggle task completion |
+| `Enter` | Edit selected task |
+| `Esc` | Clear input/selections |
 
-### Deleting Tasks
+[View all shortcuts →](docs/guides/SHORTCUTS.md)
 
-Click the **×** button on any task to remove it permanently.
+### Focus Mode
 
-### Window Controls
+Press `Cmd+Shift+F` or click the focus button to enter distraction-free mode:
+- Hides completed tasks
+- Removes UI chrome (search, stats, input)
+- Emphasizes active timer
+- Enables immersive dark theme
 
-- **Yellow button**: Minimize the window to dock
-- **Red button**: Close the app completely
-- **Drag from header**: Click and hold the header to move the window anywhere
+Perfect for deep work sessions and Pomodoro technique.
 
-## Data Storage
+[Learn more about Focus Mode →](docs/guides/FOCUS-MODE.md)
 
-All tasks are automatically saved to your local filesystem:
-- **Location**: `~/Library/Application Support/task-floater/tasks.json`
-- **Auto-save**: Tasks are saved immediately when you add, complete, or delete them
-- **Persistent**: Your tasks will be there every time you open the app
+## Architecture
 
-## File Structure
+Task Floater uses Electron's multi-process architecture with strict security boundaries:
 
-```
-task-floater/
-├── src/
-│   ├── main.ts           # Electron main process
-│   ├── preload.ts        # Secure IPC bridge
-│   ├── renderer.ts       # UI logic and interactions
-│   ├── types.d.ts        # TypeScript type definitions
-│   └── index.html        # UI with glassmorphism styles
-├── dist/                 # Compiled JavaScript (auto-generated)
-├── package.json
-├── tsconfig.json
-└── README.md
-```
+**Main Process** (`src/main.ts`)
+- Window lifecycle management
+- IPC request handlers
+- File system operations
+- Auto-update coordination
+
+**Preload Script** (`src/preload.ts`)
+- Secure IPC bridge via `contextBridge`
+- API exposure with type safety
+- Context isolation enforcement
+
+**Renderer Process** (`src/renderer.ts`)
+- UI logic and event handling
+- DOM manipulation
+- Timer state management
+
+**Security Model:**
+- Context isolation enabled
+- Node integration disabled
+- Chromium sandbox active
+- Content Security Policy enforced
+- Input validation on all operations
+
+[View security documentation →](docs/architecture/SECURITY.md)
+
+## Technology Stack
+
+| Component | Technology | Purpose |
+|-----------|-----------|---------|
+| Runtime | Electron 28.0 | Desktop application framework |
+| Language | TypeScript 5.3+ | Type-safe development |
+| UI | HTML/CSS3 | Glassmorphism design system |
+| Build | electron-builder | Production packaging |
+| Updates | electron-updater | Automatic updates |
+| Security | Custom validation | Input sanitization & XSS prevention |
+
+## Documentation
+
+Complete documentation is available in the [`docs/`](docs/) directory:
+
+**User Guides:**
+- [Building from Source](docs/guides/BUILD.md) - Development setup and compilation
+- [Release Management](docs/guides/RELEASING.md) - Version control and distribution
+- [Focus Mode](docs/guides/FOCUS-MODE.md) - Distraction-free productivity
+- [Keyboard Shortcuts](docs/guides/SHORTCUTS.md) - Complete shortcut reference
+
+**Technical Documentation:**
+- [Security Implementation](docs/architecture/SECURITY.md) - Threat model and mitigations
+- [Code Standards](docs/architecture/BEST_PRACTICES.md) - Development guidelines
+- [Feature Documentation](docs/architecture/FEATURES.md) - Technical specifications
+
+**[📖 Full Documentation Index](docs/README.md)**
 
 ## Development
 
-### Watch Mode
-
-Automatically rebuild TypeScript on file changes:
+### Commands
 
 ```bash
-npm run dev
+npm start          # Build and launch application
+npm run dev        # Development mode with auto-reload
+npm run build      # Compile TypeScript
+npm run validate   # Run type checking, linting, and formatting
+npm run dist:mac   # Build production DMG
 ```
 
-This runs TypeScript in watch mode and auto-restarts Electron when changes are detected.
+### Project Structure
 
-### Manual Build
+```
+src/
+├── main.ts          # Main process (Electron)
+├── preload.ts       # IPC bridge (security)
+├── renderer.ts      # UI logic
+├── constants.ts     # Configuration constants
+├── validation.ts    # Input validators
+├── types.d.ts       # Type definitions
+└── index.html       # UI markup
 
-```bash
-npm run build
+docs/                # Documentation
+├── guides/          # User guides
+├── architecture/    # Technical specs
+└── reports/         # Analysis reports
+
+build/               # Build assets (icons)
+scripts/             # Build scripts
 ```
 
-### Project Scripts
+## Data Storage
 
-- `npm run build` - Compile TypeScript to JavaScript
-- `npm run watch` - Watch mode for development
-- `npm start` - Build and run the app
-- `npm run dev` - Watch mode + auto-restart Electron
+Task data is stored locally in JSON format:
 
-## Keyboard Shortcuts
+**Location:** `~/Library/Application Support/task-floater/`
+- `tasks.json` - Task data
+- `settings.json` - Application preferences
 
-- **Enter** in input field: Add task
-- **macOS Command+Q**: Quit the app
+**Privacy:** All data remains on your machine. No cloud sync or telemetry.
 
-## Customization
+## Contributing
 
-### Window Position
-
-Edit `src/main.ts:22-23` to change default position:
-
-```typescript
-x: screenWidth - 400,  // 20px from right edge
-y: 50,                  // 50px from top
-```
-
-### Window Size
-
-Edit `src/main.ts:20-21`:
-
-```typescript
-width: 380,
-height: 550,
-```
-
-### Colors & Styling
-
-All styles are in `src/index.html` inside the `<style>` tag. The design uses:
-- Glassmorphism effects with `backdrop-filter`
-- Smooth CSS animations
-- Gradient backgrounds
-- Responsive hover states
-
-## Design Features
-
-### Glassmorphism
-
-The app uses modern glassmorphism design with:
-- Frosted glass background (`backdrop-filter: blur(40px)`)
-- Semi-transparent panels
-- Subtle borders and shadows
-- Gradient overlays
-
-### Animations
-
-- **Fade in**: Window appears smoothly
-- **Slide in**: Tasks animate from left when added
-- **Hover effects**: Subtle scale and position changes
-- **Transitions**: Smooth 0.3s ease transitions throughout
-
-## Troubleshooting
-
-### Window not showing
-
-1. Check if it's minimized in the dock
-2. Quit and restart the app
-3. Check if window is off-screen
-
-### Tasks not persisting
-
-1. Check file permissions in `~/Library/Application Support/task-floater/`
-2. Look for errors in the terminal/console
-3. Delete `tasks.json` and restart (will lose current tasks)
-
-### App won't start
-
-1. Make sure you ran `npm install`
-2. Check that `npm run build` completed without errors
-3. Try deleting `node_modules` and `dist` folders, then reinstall:
-   ```bash
-   rm -rf node_modules dist
-   npm install
-   npm run build
-   npm start
-   ```
-
-## 🏗️ Architecture
-
-Task Floater follows Electron's three-process architecture:
-
-- **Main Process** (`src/main.ts`) - Window management, IPC handlers, file I/O
-- **Preload Script** (`src/preload.ts`) - Secure IPC bridge via contextBridge
-- **Renderer Process** (`src/renderer.ts`) - UI logic and DOM manipulation
-
-```mermaid
-graph TB
-    subgraph "Renderer Process"
-        A[UI Layer<br/>renderer.ts]
-        B[window.electronAPI]
-    end
-
-    subgraph "Preload Script"
-        C[contextBridge<br/>preload.ts]
-    end
-
-    subgraph "Main Process"
-        D[IPC Handlers<br/>main.ts]
-        E[File System]
-        F[Window Management]
-    end
-
-    A -->|User Actions| B
-    B -->|ipcRenderer.invoke| C
-    C -->|IPC Channel| D
-    D -->|Read/Write| E
-    D -->|Control| F
-    D -->|Return Data| C
-    C -->|Response| B
-    B -->|Update UI| A
-
-    style A fill:#e1f5ff
-    style B fill:#e1f5ff
-    style C fill:#fff4e1
-    style D fill:#f0e1ff
-    style E fill:#f0e1ff
-    style F fill:#f0e1ff
-```
-
-### Tech Stack
-
-- **Electron** 28.0.0 - Cross-platform desktop framework
-- **TypeScript** 5.3+ - Type-safe development
-- **Native macOS APIs** - Window transparency, always-on-top behavior
-- **CSS3** - Glassmorphism effects with backdrop-filter
-
-## 🗺️ Roadmap
-
-- [ ] Linear integration (in progress)
-- [ ] Customizable themes
-- [ ] Cloud sync option
-- [ ] Windows/Linux support
-- [ ] Task categories and tags
-- [ ] Recurring tasks
-- [ ] Task priorities
-- [ ] Export/import functionality
-
-## 🤝 Contributing
-
-Contributions are welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct and the process for submitting pull requests.
-
-### Development Setup
+Contributions are welcome! Please follow these steps:
 
 1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Make your changes and test thoroughly
-4. Commit your changes (`git commit -m 'feat: add amazing feature'`)
-5. Push to the branch (`git push origin feature/amazing-feature`)
-6. Open a Pull Request
+2. Create a feature branch (`git checkout -b feature/your-feature`)
+3. Make your changes with tests
+4. Run validation (`npm run validate`)
+5. Commit using conventional commits (`feat:`, `fix:`, etc.)
+6. Push to your fork
+7. Open a Pull Request
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for more detailed guidelines.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines.
 
-## 📚 Documentation
+## Roadmap
 
-Complete documentation is organized in the [`docs/`](docs/) directory:
+**Planned Features:**
+- Linear issue integration
+- Custom theme support
+- Cloud backup option
+- Windows and Linux support
+- Task categories and tagging
+- Recurring task templates
+- Priority indicators
+- Import/export functionality
 
-### User Guides
-- **[Building from Source](docs/guides/BUILD.md)** - Development setup and compilation
-- **[Releasing Updates](docs/guides/RELEASING.md)** - Complete release workflow
-- **[Focus Mode Guide](docs/guides/FOCUS-MODE.md)** - Distraction-free productivity
-- **[Keyboard Shortcuts](docs/guides/SHORTCUTS.md)** - All keyboard commands
+## License
 
-### Technical Documentation
-- **[Security](docs/architecture/SECURITY.md)** - Security implementation details
-- **[Best Practices](docs/architecture/BEST_PRACTICES.md)** - Code quality standards
-- **[Features](docs/architecture/FEATURES.md)** - Technical feature overview
+This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
 
-### For Developers
-- **[CLAUDE.md](CLAUDE.md)** - AI assistant developer guidance
-- **[CHANGELOG.md](CHANGELOG.md)** - Version history
-
-**[📖 View Full Documentation Index](docs/README.md)**
-
-## 📝 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 👤 Author
+## Author
 
 **Cyrus David Pastelero**
+GitHub: [@cyrus-reap](https://github.com/cyrus-reap)
+Email: cyrus@reap.hk
 
-- GitHub: [@cyrus-reap](https://github.com/cyrus-reap)
-- Email: cyrus@reap.hk
+## Acknowledgments
 
-## 🙏 Acknowledgments
+Built with [Electron](https://www.electronjs.org/) and [TypeScript](https://www.typescriptlang.org/).
+Design inspired by macOS Big Sur glassmorphism principles.
 
-- Inspired by modern macOS design principles
-- Built with Electron and TypeScript
-- Glassmorphism UI inspired by macOS Big Sur and later
+---
 
-## 📮 Support
+<div align="center">
 
-If you like this project, please consider:
+**[Download](https://github.com/cyrus-reap/task-floater/releases/latest)** • **[Documentation](docs/README.md)** • **[Report Issue](https://github.com/cyrus-reap/task-floater/issues)**
 
-- ⭐ Starring the repository
-- 🐛 Reporting bugs via [Issues](https://github.com/cyrus-reap/task-floater/issues)
-- 💡 Suggesting features
-- 🤝 Contributing to the codebase
+Made with care for productivity enthusiasts
+
+</div>
