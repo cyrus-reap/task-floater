@@ -2046,12 +2046,17 @@ function setupTaskInput(): void {
 // COMMAND PALETTE
 // =============================================================================
 
+const COMMAND_PALETTE_MIN_HEIGHT = 500;
+
 function openCommandPalette(): void {
   if (isCommandPaletteOpen) {
     return;
   }
   isCommandPaletteOpen = true;
   commandPaletteSelectedIndex = 0;
+
+  // Ensure window is tall enough for command palette
+  window.electronAPI.resizeWindow(COMMAND_PALETTE_MIN_HEIGHT);
 
   const overlay = document.createElement('div');
   overlay.className = 'command-palette-overlay';
@@ -2122,7 +2127,11 @@ function closeCommandPalette(): void {
   const overlay = document.querySelector('.command-palette-overlay');
   if (overlay) {
     overlay.classList.add('closing');
-    setTimeout(() => overlay.remove(), 150);
+    setTimeout(() => {
+      overlay.remove();
+      // Restore window size to content
+      resizeWindowToContent();
+    }, 150);
   }
 }
 

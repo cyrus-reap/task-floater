@@ -15,6 +15,7 @@ interface Task {
   timeRemaining?: number; // Time remaining in seconds
   isTimerRunning?: boolean;
   tags?: string[];
+  pinned?: boolean;
 }
 
 interface Settings {
@@ -319,6 +320,12 @@ ipcMain.handle(
           throw new ValidationError('tags must be an array of strings');
         }
         task.tags = updates.tags.map(t => t.trim()).filter(t => t.length > 0);
+      }
+      if (updates.pinned !== undefined) {
+        if (typeof updates.pinned !== 'boolean') {
+          throw new ValidationError('pinned must be a boolean');
+        }
+        task.pinned = updates.pinned;
       }
 
       saveTasks(tasks);

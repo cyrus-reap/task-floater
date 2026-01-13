@@ -30,15 +30,24 @@ Task Floater is a productivity application designed to stay visible above all wi
 - Full keyboard navigation support
 
 ## Screenshots
-<img width="414" height="254" alt="Screenshot 2026-01-13 at 20 33 37" src="https://github.com/user-attachments/assets/0193c4d2-9d19-4ae7-86c8-571fc37e420c" />
-<img width="411" height="476" alt="Screenshot 2026-01-13 at 20 34 21" src="https://github.com/user-attachments/assets/beb7f1b6-142e-4393-a66a-c6fbbb7776e3" />
-<img width="410" height="381" alt="Screenshot 2026-01-13 at 20 34 32" src="https://github.com/user-attachments/assets/56cb9bd6-f364-42d1-bc8e-21e9bfe0f03a" />
 
-<img width="411" height="630" alt="Screenshot 2026-01-13 at 20 35 53" src="https://github.com/user-attachments/assets/bb3aa356-50db-4c30-85ba-bf19d70e3b55" />
-<img width="406" height="428" alt="Screenshot 2026-01-13 at 20 36 05" src="https://github.com/user-attachments/assets/e4dc3862-215f-4804-8c9d-9a61f3834b7d" />
-<img width="398" height="350" alt="Screenshot 2026-01-13 at 20 36 16" src="https://github.com/user-attachments/assets/c95ac21b-27db-4a95-8dcb-02d115ec64cd" />
-
-<img width="418" height="526" alt="Screenshot 2026-01-13 at 20 36 30" src="https://github.com/user-attachments/assets/314fccfe-91ef-49c9-934d-a5893111a441" />
+<div align="center">
+<table>
+<tr>
+<td align="center"><img width="280" alt="Focus Mode" src="https://github.com/user-attachments/assets/0193c4d2-9d19-4ae7-86c8-571fc37e420c" /><br><sub>Focus Mode</sub></td>
+<td align="center"><img width="280" alt="Compact Mode" src="https://github.com/user-attachments/assets/beb7f1b6-142e-4393-a66a-c6fbbb7776e3" /><br><sub>Compact Mode</sub></td>
+<td align="center"><img width="280" alt="Timer Running" src="https://github.com/user-attachments/assets/56cb9bd6-f364-42d1-bc8e-21e9bfe0f03a" /><br><sub>Timer Running</sub></td>
+</tr>
+<tr>
+<td align="center"><img width="280" alt="Full View" src="https://github.com/user-attachments/assets/bb3aa356-50db-4c30-85ba-bf19d70e3b55" /><br><sub>Full View</sub></td>
+<td align="center"><img width="280" alt="Command Palette" src="https://github.com/user-attachments/assets/e4dc3862-215f-4804-8c9d-9a61f3834b7d" /><br><sub>Command Palette</sub></td>
+<td align="center"><img width="280" alt="Context Menu" src="https://github.com/user-attachments/assets/c95ac21b-27db-4a95-8dcb-02d115ec64cd" /><br><sub>Context Menu</sub></td>
+</tr>
+<tr>
+<td colspan="3" align="center"><img width="320" alt="Light Theme" src="https://github.com/user-attachments/assets/314fccfe-91ef-49c9-934d-a5893111a441" /><br><sub>Light Theme</sub></td>
+</tr>
+</table>
+</div>
 
 ## Features
 
