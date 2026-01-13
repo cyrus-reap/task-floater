@@ -46,7 +46,7 @@ function saveSettings(settings: Settings): void {
 }
 
 function createWindow() {
-  const { width: screenWidth, height: screenHeight } = screen.getPrimaryDisplay().workAreaSize;
+  const { width: screenWidth } = screen.getPrimaryDisplay().workAreaSize;
   const settings = getSettings();
 
   const windowX = settings.windowPosition?.x ?? screenWidth - 400;

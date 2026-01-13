@@ -15,7 +15,12 @@
     "build": "tsc",
     "watch": "tsc --watch",
     "start": "npm run build && electron .",
-    "dev": "concurrently \"npm run watch\" \"wait-on dist/main.js && electron .\""
+    "dev": "concurrently \"npm run watch\" \"wait-on dist/main.js && electron .\"",
+    "clean": "rm -rf dist",
+    "rebuild": "npm run clean && npm run build",
+    "lint": "tsc --noEmit",
+    "typecheck": "tsc --noEmit",
+    "prestart": "npm run typecheck"
   },
   "keywords": [
     "electron",
