@@ -321,9 +321,3 @@ If you like this project, please consider:
 - 🐛 Reporting bugs via [Issues](https://github.com/cyrus-reap/task-floater/issues)
 - 💡 Suggesting features
 - 🤝 Contributing to the codebase
-
----
-
-<div align="center">
-  Made with ❤️ by Cyrus David Pastelero
-</div>
