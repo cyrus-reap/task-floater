@@ -13,6 +13,8 @@ interface Settings {
   windowPosition?: { x: number; y: number };
   theme?: 'light' | 'dark';
   notifications?: boolean;
+  searchCollapsed?: boolean;
+  inputCollapsed?: boolean;
 }
 
 interface ElectronAPI {

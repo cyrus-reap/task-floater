@@ -53,6 +53,10 @@ const ELEMENT_IDS = {
   EXPORT_BTN: 'exportBtn',
   IMPORT_BTN: 'importBtn',
   THEME_TOGGLE: 'themeToggle',
+  SEARCH_TOGGLE: 'searchToggle',
+  INPUT_TOGGLE: 'inputToggle',
+  SEARCH_BAR: 'searchBar',
+  INPUT_SECTION: 'inputSection',
 } as const;
 
 // CSS Selectors
@@ -84,6 +88,7 @@ const CSS_CLASSES = {
   EMPTY_STATE_ICON: 'empty-state-icon',
   EMPTY_STATE_TITLE: 'empty-state-title',
   EMPTY_STATE_TEXT: 'empty-state-text',
+  COLLAPSED: 'collapsed',
 } as const;
 
 // Data Attributes
@@ -153,6 +158,10 @@ const DOM = {
   exportBtn: document.getElementById(ELEMENT_IDS.EXPORT_BTN) as HTMLButtonElement | null,
   importBtn: document.getElementById(ELEMENT_IDS.IMPORT_BTN) as HTMLButtonElement | null,
   themeToggle: document.getElementById(ELEMENT_IDS.THEME_TOGGLE) as HTMLButtonElement | null,
+  searchToggle: document.getElementById(ELEMENT_IDS.SEARCH_TOGGLE) as HTMLButtonElement | null,
+  inputToggle: document.getElementById(ELEMENT_IDS.INPUT_TOGGLE) as HTMLButtonElement | null,
+  searchBar: document.getElementById(ELEMENT_IDS.SEARCH_BAR) as HTMLDivElement | null,
+  inputSection: document.getElementById(ELEMENT_IDS.INPUT_SECTION) as HTMLDivElement | null,
 };
 
 // =============================================================================
@@ -958,6 +967,44 @@ function setupSearch(): void {
 }
 
 // =============================================================================
+// ACCORDION CONTROLS
+// =============================================================================
+
+function setupAccordionToggles(): void {
+  // Search bar toggle
+  if (DOM.searchToggle && DOM.searchBar) {
+    DOM.searchToggle.addEventListener('click', () => {
+      const isCollapsed = DOM.searchBar!.classList.toggle(CSS_CLASSES.COLLAPSED);
+      DOM.searchToggle!.classList.toggle(CSS_CLASSES.COLLAPSED, isCollapsed);
+      // Save state
+      window.electronAPI.updateSettings({ searchCollapsed: isCollapsed });
+    });
+  }
+
+  // Input section toggle
+  if (DOM.inputToggle && DOM.inputSection) {
+    DOM.inputToggle.addEventListener('click', () => {
+      const isCollapsed = DOM.inputSection!.classList.toggle(CSS_CLASSES.COLLAPSED);
+      DOM.inputToggle!.classList.toggle(CSS_CLASSES.COLLAPSED, isCollapsed);
+      // Save state
+      window.electronAPI.updateSettings({ inputCollapsed: isCollapsed });
+    });
+  }
+
+  // Load saved states
+  window.electronAPI.getSettings().then(settings => {
+    if (settings.searchCollapsed && DOM.searchBar && DOM.searchToggle) {
+      DOM.searchBar.classList.add(CSS_CLASSES.COLLAPSED);
+      DOM.searchToggle.classList.add(CSS_CLASSES.COLLAPSED);
+    }
+    if (settings.inputCollapsed && DOM.inputSection && DOM.inputToggle) {
+      DOM.inputSection.classList.add(CSS_CLASSES.COLLAPSED);
+      DOM.inputToggle.classList.add(CSS_CLASSES.COLLAPSED);
+    }
+  });
+}
+
+// =============================================================================
 // WINDOW CONTROLS
 // =============================================================================
 
@@ -1003,6 +1050,7 @@ function initialize(): void {
   setupWindowControls();
   setupActionButtons();
   setupSearch();
+  setupAccordionToggles();
   setupKeyboardShortcuts();
 
   // Load initial data
