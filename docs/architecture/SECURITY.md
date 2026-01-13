@@ -7,12 +7,27 @@ This document outlines the security measures implemented in Task Floater.
 ### Context Isolation ✅
 - **Status**: Enabled (`contextIsolation: true`)
 - **Purpose**: Separates renderer process from Node.js/Electron APIs
-- **Location**: `src/main.ts:29`
+- **Location**: `src/main.ts:68`
 
 ### Node Integration ✅
 - **Status**: Disabled (`nodeIntegration: false`)
 - **Purpose**: Prevents renderer from accessing Node.js APIs directly
-- **Location**: `src/main.ts:29`
+- **Location**: `src/main.ts:67`
+
+### Chromium Sandbox ✅
+- **Status**: Enabled (`sandbox: true`)
+- **Purpose**: Additional process isolation via Chromium's sandbox
+- **Location**: `src/main.ts:69`
+
+### Web Security ✅
+- **Status**: Enabled (`webSecurity: true`)
+- **Purpose**: Enforces same-origin policy and other web security features
+- **Location**: `src/main.ts:70`
+
+### Additional Security Settings ✅
+- `allowRunningInsecureContent: false` - Blocks mixed content
+- `experimentalFeatures: false` - Disables experimental Chromium features
+- **Location**: `src/main.ts:71-72`
 
 ### Preload Script ✅
 - **Purpose**: Secure IPC bridge using `contextBridge`
@@ -77,14 +92,18 @@ function escapeHtml(text: string): string {
 ```
 
 ### Content Security Policy (CSP) ✅
-**Location**: `src/index.html:6`
+**Location**: `src/index.html:6-9`
 
 ```
-default-src 'none';           # Deny all by default
+default-src 'self';           # Allow same-origin by default
 script-src 'self';            # Only load scripts from app
-style-src 'unsafe-inline';    # Allow inline styles (needed for Electron)
-img-src 'self' data:;         # Only local images
-connect-src 'none';           # No external connections
+style-src 'self' 'unsafe-inline';  # Allow inline styles (needed for Electron)
+img-src 'self' data:;         # Only local images and data URIs
+font-src 'self';              # Only local fonts
+connect-src 'self';           # Only same-origin connections
+object-src 'none';            # Block plugins (Flash, etc.)
+base-uri 'self';              # Restrict base URL
+form-action 'self';           # Restrict form submissions
 ```
 
 ### X-Content-Type-Options ✅
@@ -125,7 +144,7 @@ The `save-tasks` IPC handler validates every task:
 
 ### Update Operations ✅
 The `update-task` handler uses whitelisting:
-- Only specific fields can be updated (title, duration, completed, tags)
+- Only specific fields can be updated (title, duration, completed, tags, pinned)
 - Each field individually validated
 - **No** `Object.assign(task, updates)` which would allow arbitrary properties
 
@@ -190,6 +209,8 @@ Custom `ValidationError` class for validation failures:
 
 - [x] Context isolation enabled
 - [x] Node integration disabled
+- [x] Chromium sandbox enabled
+- [x] Web security enabled
 - [x] Content Security Policy configured
 - [x] All user inputs validated
 - [x] HTML output escaped
