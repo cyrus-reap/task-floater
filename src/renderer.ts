@@ -469,7 +469,7 @@ function attachDragHandlers(): void {
   let draggedTaskId: string | null = null;
 
   document.querySelectorAll('.task-item').forEach((item) => {
-    item.addEventListener('dragstart', (e) => {
+    item.addEventListener('dragstart', () => {
       draggedTaskId = (item as HTMLElement).getAttribute('data-id');
       (item as HTMLElement).style.opacity = '0.4';
     });

@@ -3,6 +3,13 @@ node_modules/
 
 # Build output
 dist/
+*.js
+*.js.map
+*.d.ts
+*.d.ts.map
+
+# But keep config files in root if needed
+!*.config.js
 
 # IDE
 .vscode/
