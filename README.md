@@ -31,14 +31,32 @@ Task Floater is a minimalist, always-on-top task manager for macOS featuring a s
 
 ## ✨ Features
 
+### Core Task Management
 - 🎨 **Glassmorphism UI** - Modern frosted glass design with smooth animations
 - 📌 **Always on Top** - Stays above all windows, never gets buried
 - 🖱️ **Draggable** - Position it anywhere on your screen
-- ⏱️ **Pomodoro Timers** - Optional timer for each task with audio notifications
-- 💾 **Auto-save** - Tasks persist automatically to local storage
-- ⌨️ **Keyboard Shortcuts** - Quick task entry with Enter key
-- 🎭 **Native macOS Integration** - Smooth animations and native window controls
-- 🔒 **Privacy First** - All data stored locally, no cloud sync
+- ✏️ **Inline Editing** - Double-click any task to edit
+- 🔄 **Drag & Drop** - Reorder tasks by dragging
+- 💾 **Auto-save** - Tasks persist automatically
+
+### Pomodoro Timer System
+- ⏱️ **Smart Timers** - Set duration for each task
+- ⚡ **Quick Presets** - One-click: 15min, 30min, 45min, 1hr, 1.5hrs
+- 📊 **Progress Bar** - Visual countdown with shimmer effect
+- 🔔 **Auto-advance** - Automatically move to next task when timer completes
+- 🎵 **Notifications** - Audio alert when timer finishes
+
+### Productivity Tools
+- 🎯 **Focus Mode** - Hide distractions, highlight active task (`Cmd+Shift+F`)
+- 🔍 **Search** - Real-time task filtering
+- 📈 **Statistics** - See active vs completed tasks
+- ⌨️ **Keyboard Shortcuts** - Full keyboard navigation
+
+### Professional Polish
+- 🎭 **Native macOS Integration** - Smooth animations and window controls
+- 🔒 **Security Hardened** - Input validation, XSS prevention, sandboxed
+- 🔄 **Auto-updates** - Automatically notifies of new versions
+- 🔐 **Privacy First** - All data stored locally, no cloud sync
 
 ## 📸 Screenshots
 
@@ -295,6 +313,27 @@ Contributions are welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) for de
 6. Open a Pull Request
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for more detailed guidelines.
+
+## 📚 Documentation
+
+Complete documentation is organized in the [`docs/`](docs/) directory:
+
+### User Guides
+- **[Building from Source](docs/guides/BUILD.md)** - Development setup and compilation
+- **[Releasing Updates](docs/guides/RELEASING.md)** - Complete release workflow
+- **[Focus Mode Guide](docs/guides/FOCUS-MODE.md)** - Distraction-free productivity
+- **[Keyboard Shortcuts](docs/guides/SHORTCUTS.md)** - All keyboard commands
+
+### Technical Documentation
+- **[Security](docs/architecture/SECURITY.md)** - Security implementation details
+- **[Best Practices](docs/architecture/BEST_PRACTICES.md)** - Code quality standards
+- **[Features](docs/architecture/FEATURES.md)** - Technical feature overview
+
+### For Developers
+- **[CLAUDE.md](CLAUDE.md)** - AI assistant developer guidance
+- **[CHANGELOG.md](CHANGELOG.md)** - Version history
+
+**[📖 View Full Documentation Index](docs/README.md)**
 
 ## 📝 License
 

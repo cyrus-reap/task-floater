@@ -86,6 +86,11 @@
     "appId": "com.reap.task-floater",
     "productName": "Task Floater",
     "copyright": "Copyright © 2026 Cyrus David Pastelero",
+    "publish": {
+      "provider": "github",
+      "owner": "cyrus-reap",
+      "repo": "task-floater"
+    },
     "directories": {
       "output": "release",
       "buildResources": "build"
@@ -154,5 +159,8 @@
       "category": "Utility",
       "icon": "build/icon.png"
     }
+  },
+  "dependencies": {
+    "electron-updater": "^6.7.3"
   }
 }
