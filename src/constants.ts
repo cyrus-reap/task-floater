@@ -21,6 +21,8 @@ export const CSS_CLASSES = {
   SELECTED: 'selected',
   RUNNING: 'running',
   PAUSED: 'paused',
+  FOCUS_MODE: 'focus-mode',
+  HIDDEN: 'hidden',
 } as const;
 
 // Data attributes
@@ -72,10 +74,14 @@ export const ELEMENT_IDS = {
   CLOSE_BTN: 'closeBtn',
   SEARCH_INPUT: 'searchInput',
   STATS_TEXT: 'statsText',
+  STATS_BAR: 'statsBar',
+  SEARCH_BAR: 'searchBar',
+  INPUT_SECTION: 'inputSection',
   CLEAR_COMPLETED_BTN: 'clearCompletedBtn',
   EXPORT_BTN: 'exportBtn',
   IMPORT_BTN: 'importBtn',
   THEME_TOGGLE: 'themeToggle',
+  FOCUS_BTN: 'focusBtn',
 } as const;
 
 // CSS Selectors
