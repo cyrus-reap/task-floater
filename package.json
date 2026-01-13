@@ -18,9 +18,23 @@
     "dev": "concurrently \"npm run watch\" \"wait-on dist/main.js && electron .\"",
     "clean": "rm -rf dist",
     "rebuild": "npm run clean && npm run build",
-    "lint": "tsc --noEmit",
     "typecheck": "tsc --noEmit",
-    "prestart": "npm run typecheck"
+    "lint": "eslint src/**/*.ts",
+    "lint:fix": "eslint src/**/*.ts --fix",
+    "format": "prettier --write \"src/**/*.{ts,html}\"",
+    "format:check": "prettier --check \"src/**/*.{ts,html}\"",
+    "validate": "npm run typecheck && npm run lint && npm run format:check",
+    "precommit": "lint-staged",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "src/**/*.ts": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "src/**/*.html": [
+      "prettier --write"
+    ]
   },
   "keywords": [
     "electron",
@@ -42,8 +56,16 @@
   "license": "MIT",
   "devDependencies": {
     "@types/node": "^20.10.0",
+    "@typescript-eslint/eslint-plugin": "^8.53.0",
+    "@typescript-eslint/parser": "^8.53.0",
     "concurrently": "^8.2.2",
     "electron": "^28.0.0",
+    "eslint": "^9.39.2",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.4",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.7",
+    "prettier": "^3.7.4",
     "typescript": "^5.3.2",
     "wait-on": "^7.2.0"
   },

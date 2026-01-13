@@ -62,12 +62,12 @@ function createWindow() {
     alwaysOnTop: true,
     resizable: false,
     webPreferences: {
-      nodeIntegration: false,           // Prevent Node.js access in renderer
-      contextIsolation: true,            // Isolate renderer from Node.js
-      sandbox: true,                     // Enable Chromium sandbox
-      webSecurity: true,                 // Enable web security
+      nodeIntegration: false, // Prevent Node.js access in renderer
+      contextIsolation: true, // Isolate renderer from Node.js
+      sandbox: true, // Enable Chromium sandbox
+      webSecurity: true, // Enable web security
       allowRunningInsecureContent: false, // Block mixed content
-      experimentalFeatures: false,       // Disable experimental features
+      experimentalFeatures: false, // Disable experimental features
       preload: path.join(__dirname, 'preload.js'),
     },
   });
@@ -232,7 +232,7 @@ ipcMain.handle('toggle-task', async (_event, taskId: string): Promise<void> => {
   try {
     const validatedId = Validators.taskId(taskId);
     const tasks = getTasks();
-    const task = tasks.find((t) => t.id === validatedId);
+    const task = tasks.find(t => t.id === validatedId);
     if (!task) {
       throw new ValidationError('Task not found');
     }
@@ -248,7 +248,7 @@ ipcMain.handle('delete-task', async (_event, taskId: string): Promise<void> => {
   try {
     const validatedId = Validators.taskId(taskId);
     let tasks = getTasks();
-    tasks = tasks.filter((t) => t.id !== validatedId);
+    tasks = tasks.filter(t => t.id !== validatedId);
     saveTasks(tasks);
   } catch (error) {
     console.error('Error deleting task:', error);
@@ -256,75 +256,81 @@ ipcMain.handle('delete-task', async (_event, taskId: string): Promise<void> => {
   }
 });
 
-ipcMain.handle('update-task-timer', async (_event, taskId: string, timerData: Partial<Task>): Promise<void> => {
-  try {
-    const validatedId = Validators.taskId(taskId);
-    const tasks = getTasks();
-    const task = tasks.find((t) => t.id === validatedId);
-    if (!task) {
-      throw new ValidationError('Task not found');
-    }
-
-    // Validate timer data
-    if (timerData.timeRemaining !== undefined) {
-      task.timeRemaining = Validators.timeRemaining(timerData.timeRemaining);
-    }
-    if (timerData.isTimerRunning !== undefined) {
-      if (typeof timerData.isTimerRunning !== 'boolean') {
-        throw new ValidationError('isTimerRunning must be a boolean');
+ipcMain.handle(
+  'update-task-timer',
+  async (_event, taskId: string, timerData: Partial<Task>): Promise<void> => {
+    try {
+      const validatedId = Validators.taskId(taskId);
+      const tasks = getTasks();
+      const task = tasks.find(t => t.id === validatedId);
+      if (!task) {
+        throw new ValidationError('Task not found');
       }
-      task.isTimerRunning = timerData.isTimerRunning;
-    }
-    if (timerData.duration !== undefined) {
-      task.duration = Validators.duration(timerData.duration);
-    }
 
-    saveTasks(tasks);
-  } catch (error) {
-    console.error('Error updating task timer:', error);
-    throw error;
+      // Validate timer data
+      if (timerData.timeRemaining !== undefined) {
+        task.timeRemaining = Validators.timeRemaining(timerData.timeRemaining);
+      }
+      if (timerData.isTimerRunning !== undefined) {
+        if (typeof timerData.isTimerRunning !== 'boolean') {
+          throw new ValidationError('isTimerRunning must be a boolean');
+        }
+        task.isTimerRunning = timerData.isTimerRunning;
+      }
+      if (timerData.duration !== undefined) {
+        task.duration = Validators.duration(timerData.duration);
+      }
+
+      saveTasks(tasks);
+    } catch (error) {
+      console.error('Error updating task timer:', error);
+      throw error;
+    }
   }
-});
+);
 
-ipcMain.handle('update-task', async (_event, taskId: string, updates: Partial<Task>): Promise<void> => {
-  try {
-    const validatedId = Validators.taskId(taskId);
-    const tasks = getTasks();
-    const task = tasks.find((t) => t.id === validatedId);
-    if (!task) {
-      throw new ValidationError('Task not found');
-    }
-
-    // Only allow specific fields to be updated
-    if (updates.title !== undefined) {
-      task.title = Validators.taskTitle(updates.title);
-    }
-    if (updates.duration !== undefined) {
-      task.duration = Validators.duration(updates.duration);
-    }
-    if (updates.completed !== undefined) {
-      if (typeof updates.completed !== 'boolean') {
-        throw new ValidationError('completed must be a boolean');
+ipcMain.handle(
+  'update-task',
+  async (_event, taskId: string, updates: Partial<Task>): Promise<void> => {
+    try {
+      const validatedId = Validators.taskId(taskId);
+      const tasks = getTasks();
+      const task = tasks.find(t => t.id === validatedId);
+      if (!task) {
+        throw new ValidationError('Task not found');
       }
-      task.completed = updates.completed;
-    }
-    if (updates.tags !== undefined) {
-      if (!Array.isArray(updates.tags) || !updates.tags.every(t => typeof t === 'string')) {
-        throw new ValidationError('tags must be an array of strings');
-      }
-      task.tags = updates.tags.map(t => t.trim()).filter(t => t.length > 0);
-    }
 
-    saveTasks(tasks);
-  } catch (error) {
-    console.error('Error updating task:', error);
-    throw error;
+      // Only allow specific fields to be updated
+      if (updates.title !== undefined) {
+        task.title = Validators.taskTitle(updates.title);
+      }
+      if (updates.duration !== undefined) {
+        task.duration = Validators.duration(updates.duration);
+      }
+      if (updates.completed !== undefined) {
+        if (typeof updates.completed !== 'boolean') {
+          throw new ValidationError('completed must be a boolean');
+        }
+        task.completed = updates.completed;
+      }
+      if (updates.tags !== undefined) {
+        if (!Array.isArray(updates.tags) || !updates.tags.every(t => typeof t === 'string')) {
+          throw new ValidationError('tags must be an array of strings');
+        }
+        task.tags = updates.tags.map(t => t.trim()).filter(t => t.length > 0);
+      }
+
+      saveTasks(tasks);
+    } catch (error) {
+      console.error('Error updating task:', error);
+      throw error;
+    }
   }
-});
+);
 
 ipcMain.handle('clear-completed', async (): Promise<void> => {
   let tasks = getTasks();
-  tasks = tasks.filter((t) => !t.completed);
+  tasks = tasks.filter(t => !t.completed);
   saveTasks(tasks);
 });
 
@@ -399,4 +405,3 @@ ipcMain.handle('minimize', () => {
 ipcMain.handle('close', () => {
   app.quit();
 });
-

@@ -1,0 +1,13 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+echo "Running pre-commit checks..."
+
+# Run lint-staged (formats and lints changed files)
+npx lint-staged
+
+# Run type checking on entire project
+echo "Type checking..."
+npm run typecheck
+
+echo "✅ Pre-commit checks passed!"

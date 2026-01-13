@@ -34,7 +34,9 @@ export const Validators = {
     }
 
     if (trimmed.length > SECURITY_LIMITS.MAX_TITLE_LENGTH) {
-      throw new ValidationError(`Task title too long (max ${SECURITY_LIMITS.MAX_TITLE_LENGTH} characters)`);
+      throw new ValidationError(
+        `Task title too long (max ${SECURITY_LIMITS.MAX_TITLE_LENGTH} characters)`
+      );
     }
 
     // Remove any potential HTML/script tags to prevent XSS
@@ -60,7 +62,9 @@ export const Validators = {
     }
 
     if (duration < 1 || duration > SECURITY_LIMITS.MAX_DURATION_MINUTES) {
-      throw new ValidationError(`Duration must be between 1 and ${SECURITY_LIMITS.MAX_DURATION_MINUTES} minutes`);
+      throw new ValidationError(
+        `Duration must be between 1 and ${SECURITY_LIMITS.MAX_DURATION_MINUTES} minutes`
+      );
     }
 
     if (!Number.isInteger(duration)) {
@@ -113,7 +117,9 @@ export const Validators = {
     }
 
     if (seconds < 0 || seconds > SECURITY_LIMITS.MAX_TIME_SECONDS) {
-      throw new ValidationError(`Time remaining must be between 0 and ${SECURITY_LIMITS.MAX_TIME_SECONDS} seconds`);
+      throw new ValidationError(
+        `Time remaining must be between 0 and ${SECURITY_LIMITS.MAX_TIME_SECONDS} seconds`
+      );
     }
 
     return Math.floor(seconds);
@@ -124,7 +130,9 @@ export const Validators = {
    * Uses browser's built-in text content escaping
    */
   sanitizeHtml(html: string): string {
-    if (typeof html !== 'string') return '';
+    if (typeof html !== 'string') {
+      return '';
+    }
     const div = document.createElement('div');
     div.textContent = html;
     return div.innerHTML;

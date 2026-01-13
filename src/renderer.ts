@@ -22,6 +22,14 @@ interface Task {
 // CONSTANTS
 // =============================================================================
 
+// Timer constants
+const TIMER_SAVE_INTERVAL_SECONDS = 10;
+const SECONDS_PER_MINUTE = 60;
+const AUTO_ADVANCE_DELAY_MS = 2000;
+const SEARCH_DEBOUNCE_MS = 300;
+const TIMER_TICK_INTERVAL_MS = 1000;
+
+// Duration presets (in minutes)
 const DURATION_PRESETS = [
   { label: '15 min', minutes: 15 },
   { label: '30 min', minutes: 30 },
@@ -30,12 +38,98 @@ const DURATION_PRESETS = [
   { label: '1.5 hrs', minutes: 90 },
 ];
 
+// DOM Element IDs
+const ELEMENT_IDS = {
+  TASK_INPUT: 'taskInput',
+  DURATION_INPUT: 'durationInput',
+  ADD_BTN: 'addBtn',
+  TASKS_SECTION: 'tasksSection',
+  MINIMIZE_BTN: 'minimizeBtn',
+  CLOSE_BTN: 'closeBtn',
+  SEARCH_INPUT: 'searchInput',
+  STATS_TEXT: 'statsText',
+  CLEAR_COMPLETED_BTN: 'clearCompletedBtn',
+  EXPORT_BTN: 'exportBtn',
+  IMPORT_BTN: 'importBtn',
+  THEME_TOGGLE: 'themeToggle',
+} as const;
+
+// CSS Selectors
+const SELECTORS = {
+  PRESET_BTN: '.preset-btn',
+  TASK_CHECKBOX: '.task-checkbox',
+  DELETE_BTN: '.delete-btn',
+  TIMER_BTN: '.timer-btn',
+  TIMER_DISPLAY: '.timer-display',
+  TIMER_PROGRESS_BAR: '.timer-progress-bar',
+  TIMER_PROGRESS_FILL: '.timer-progress-fill',
+  TASK_ITEM: '.task-item',
+  TASK_TITLE: '.task-title',
+  TASK_ITEM_NOT_COMPLETED: '.task-item:not(.completed)',
+  DURATION_PRESETS: '.duration-presets',
+} as const;
+
+// CSS Classes
+const CSS_CLASSES = {
+  TIMER_RUNNING: 'timer-running',
+  COMPLETED: 'completed',
+  SELECTED: 'selected',
+  RUNNING: 'running',
+  PAUSED: 'paused',
+  EDITING: 'editing',
+  LIGHT_THEME: 'light-theme',
+  TASK_EDIT_INPUT: 'task-edit-input',
+  EMPTY_STATE: 'empty-state',
+  EMPTY_STATE_ICON: 'empty-state-icon',
+  EMPTY_STATE_TITLE: 'empty-state-title',
+  EMPTY_STATE_TEXT: 'empty-state-text',
+} as const;
+
+// Data Attributes
+const ATTR_ID = 'data-id';
+const ATTR_MINUTES = 'data-minutes';
+
+// Timer Actions
+const TIMER_ACTION_PLAY = 'play';
+const TIMER_ACTION_PAUSE = 'pause';
+const TIMER_ACTION_RESET = 'reset';
+
+// Keyboard Keys
+const KEY_ESCAPE = 'Escape';
+const KEY_ENTER = 'Enter';
+const KEY_ARROW_UP = 'ArrowUp';
+const KEY_ARROW_DOWN = 'ArrowDown';
+const KEY_SPACE = ' ';
+
+// Audio settings
+const AUDIO_FREQUENCY = 800;
+const AUDIO_GAIN = 0.3;
+const AUDIO_DURATION = 0.5;
+const AUDIO_TYPE_SINE = 'sine';
+
+// Scroll behavior
+const SCROLL_BEHAVIOR_SMOOTH = 'smooth';
+const SCROLL_BLOCK_NEAREST = 'nearest';
+
+// Theme values
+const THEME_LIGHT = 'light';
+const THEME_DARK = 'dark';
+
+// Messages
+const MSG_TIMER_COMPLETE_TITLE = '⏰ Timer Complete';
+const MSG_ALL_DONE_TITLE = '🎉 All Done!';
+const MSG_ALL_DONE_BODY = 'No more tasks with timers. Great work!';
+const MSG_CLEARED_TITLE = '🗑️ Cleared';
+const MSG_EXPORT_TITLE = '📤 Export Complete';
+const MSG_EXPORT_BODY = 'Tasks exported successfully!';
+const MSG_IMPORT_TITLE = '📥 Import Complete';
+
 // =============================================================================
 // STATE
 // =============================================================================
 
 let tasks: Task[] = [];
-let timerIntervals: Map<string, number> = new Map();
+const timerIntervals: Map<string, number> = new Map();
 let selectedDuration: number | undefined = undefined;
 let selectedTaskIndex = -1;
 
@@ -44,18 +138,20 @@ let selectedTaskIndex = -1;
 // =============================================================================
 
 const DOM = {
-  taskInput: document.getElementById('taskInput') as HTMLInputElement,
-  durationInput: document.getElementById('durationInput') as HTMLInputElement,
-  addBtn: document.getElementById('addBtn') as HTMLButtonElement,
-  tasksSection: document.getElementById('tasksSection') as HTMLDivElement,
-  minimizeBtn: document.getElementById('minimizeBtn') as HTMLButtonElement,
-  closeBtn: document.getElementById('closeBtn') as HTMLButtonElement,
-  searchInput: document.getElementById('searchInput') as HTMLInputElement | null,
-  statsText: document.getElementById('statsText') as HTMLDivElement | null,
-  clearCompletedBtn: document.getElementById('clearCompletedBtn') as HTMLButtonElement | null,
-  exportBtn: document.getElementById('exportBtn') as HTMLButtonElement | null,
-  importBtn: document.getElementById('importBtn') as HTMLButtonElement | null,
-  themeToggle: document.getElementById('themeToggle') as HTMLButtonElement | null,
+  taskInput: document.getElementById(ELEMENT_IDS.TASK_INPUT) as HTMLInputElement,
+  durationInput: document.getElementById(ELEMENT_IDS.DURATION_INPUT) as HTMLInputElement,
+  addBtn: document.getElementById(ELEMENT_IDS.ADD_BTN) as HTMLButtonElement,
+  tasksSection: document.getElementById(ELEMENT_IDS.TASKS_SECTION) as HTMLDivElement,
+  minimizeBtn: document.getElementById(ELEMENT_IDS.MINIMIZE_BTN) as HTMLButtonElement,
+  closeBtn: document.getElementById(ELEMENT_IDS.CLOSE_BTN) as HTMLButtonElement,
+  searchInput: document.getElementById(ELEMENT_IDS.SEARCH_INPUT) as HTMLInputElement | null,
+  statsText: document.getElementById(ELEMENT_IDS.STATS_TEXT) as HTMLDivElement | null,
+  clearCompletedBtn: document.getElementById(
+    ELEMENT_IDS.CLEAR_COMPLETED_BTN
+  ) as HTMLButtonElement | null,
+  exportBtn: document.getElementById(ELEMENT_IDS.EXPORT_BTN) as HTMLButtonElement | null,
+  importBtn: document.getElementById(ELEMENT_IDS.IMPORT_BTN) as HTMLButtonElement | null,
+  themeToggle: document.getElementById(ELEMENT_IDS.THEME_TOGGLE) as HTMLButtonElement | null,
 };
 
 // =============================================================================
@@ -69,28 +165,36 @@ function escapeHtml(text: string): string {
 }
 
 function formatTime(seconds: number): string {
-  const mins = Math.floor(seconds / 60);
-  const secs = seconds % 60;
+  const mins = Math.floor(seconds / SECONDS_PER_MINUTE);
+  const secs = seconds % SECONDS_PER_MINUTE;
   return `${mins}:${secs.toString().padStart(2, '0')}`;
 }
 
 function playNotificationSound(): void {
   try {
-    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    // Use webkit prefixed AudioContext for older browsers
+    const AudioContextConstructor =
+      window.AudioContext ||
+      (window as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+    if (!AudioContextConstructor) {
+      return;
+    }
+
+    const audioContext = new AudioContextConstructor();
     const oscillator = audioContext.createOscillator();
     const gainNode = audioContext.createGain();
 
     oscillator.connect(gainNode);
     gainNode.connect(audioContext.destination);
 
-    oscillator.frequency.value = 800;
-    oscillator.type = 'sine';
+    oscillator.frequency.value = AUDIO_FREQUENCY;
+    oscillator.type = AUDIO_TYPE_SINE as OscillatorType;
 
-    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+    gainNode.gain.setValueAtTime(AUDIO_GAIN, audioContext.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + AUDIO_DURATION);
 
     oscillator.start(audioContext.currentTime);
-    oscillator.stop(audioContext.currentTime + 0.5);
+    oscillator.stop(audioContext.currentTime + AUDIO_DURATION);
   } catch (error) {
     console.error('Could not play notification sound:', error);
   }
@@ -108,7 +212,9 @@ async function loadTasks(): Promise<void> {
 }
 
 function updateStats(): void {
-  if (!DOM.statsText) return;
+  if (!DOM.statsText) {
+    return;
+  }
 
   const totalTasks = tasks.length;
   const completedTasks = tasks.filter(t => t.completed).length;
@@ -119,7 +225,9 @@ function updateStats(): void {
 
 async function addTask(): Promise<void> {
   const title = DOM.taskInput.value.trim();
-  if (!title) return;
+  if (!title) {
+    return;
+  }
 
   await window.electronAPI.addTask(title, selectedDuration);
 
@@ -150,7 +258,9 @@ async function reorderTasks(draggedId: string, targetId: string): Promise<void> 
   const draggedIndex = tasks.findIndex(t => t.id === draggedId);
   const targetIndex = tasks.findIndex(t => t.id === targetId);
 
-  if (draggedIndex === -1 || targetIndex === -1) return;
+  if (draggedIndex === -1 || targetIndex === -1) {
+    return;
+  }
 
   const [draggedTask] = tasks.splice(draggedIndex, 1);
   tasks.splice(targetIndex, 0, draggedTask);
@@ -173,7 +283,9 @@ function restartRunningTimers(): void {
 
 async function startTimer(taskId: string): Promise<void> {
   const task = tasks.find(t => t.id === taskId);
-  if (!task || !task.duration) return;
+  if (!task || !task.duration) {
+    return;
+  }
 
   // Stop other timers
   tasks.forEach(t => {
@@ -190,7 +302,7 @@ async function startTimer(taskId: string): Promise<void> {
 
   const intervalId = window.setInterval(async () => {
     await tickTimer(taskId);
-  }, 1000);
+  }, TIMER_TICK_INTERVAL_MS);
 
   timerIntervals.set(taskId, intervalId);
   renderTasks();
@@ -198,7 +310,9 @@ async function startTimer(taskId: string): Promise<void> {
 
 async function pauseTimer(taskId: string): Promise<void> {
   const task = tasks.find(t => t.id === taskId);
-  if (!task) return;
+  if (!task) {
+    return;
+  }
 
   stopTimer(taskId);
 
@@ -212,7 +326,9 @@ async function pauseTimer(taskId: string): Promise<void> {
 
 async function resetTimer(taskId: string): Promise<void> {
   const task = tasks.find(t => t.id === taskId);
-  if (!task || !task.duration) return;
+  if (!task || !task.duration) {
+    return;
+  }
 
   stopTimer(taskId);
 
@@ -246,7 +362,7 @@ async function tickTimer(taskId: string): Promise<void> {
   updateTimerDisplay(taskId, task.timeRemaining, task.duration || 0);
 
   // Save periodically
-  if (task.timeRemaining % 10 === 0) {
+  if (task.timeRemaining % TIMER_SAVE_INTERVAL_SECONDS === 0) {
     await window.electronAPI.updateTaskTimer(taskId, { timeRemaining: task.timeRemaining });
   }
 
@@ -263,13 +379,15 @@ async function tickTimer(taskId: string): Promise<void> {
 }
 
 function updateTimerDisplay(taskId: string, timeRemaining: number, duration: number): void {
-  const timerDisplay = document.querySelector(`.timer-display[data-id="${taskId}"]`);
+  const timerDisplay = document.querySelector(`${SELECTORS.TIMER_DISPLAY}[${ATTR_ID}="${taskId}"]`);
   if (timerDisplay) {
     timerDisplay.textContent = formatTime(timeRemaining);
   }
 
-  const progressPercent = (timeRemaining / (duration * 60)) * 100;
-  const progressBar = document.querySelector(`.timer-progress-bar[data-id="${taskId}"] .timer-progress-fill`);
+  const progressPercent = (timeRemaining / (duration * SECONDS_PER_MINUTE)) * 100;
+  const progressBar = document.querySelector(
+    `${SELECTORS.TIMER_PROGRESS_BAR}[${ATTR_ID}="${taskId}"] ${SELECTORS.TIMER_PROGRESS_FILL}`
+  );
   if (progressBar) {
     (progressBar as HTMLElement).style.width = `${progressPercent}%`;
   }
@@ -277,14 +395,13 @@ function updateTimerDisplay(taskId: string, timeRemaining: number, duration: num
 
 async function handleTimerComplete(taskId: string): Promise<void> {
   const task = tasks.find(t => t.id === taskId);
-  if (!task) return;
+  if (!task) {
+    return;
+  }
 
   playNotificationSound();
 
-  await window.electronAPI.showNotification(
-    '⏰ Timer Complete',
-    `Finished: ${task.title}`
-  );
+  await window.electronAPI.showNotification(MSG_TIMER_COMPLETE_TITLE, `Finished: ${task.title}`);
 
   // Auto-advance to next task
   const currentIndex = tasks.findIndex(t => t.id === taskId);
@@ -293,12 +410,9 @@ async function handleTimerComplete(taskId: string): Promise<void> {
     .find(t => !t.completed && t.duration && t.duration > 0);
 
   if (nextTask) {
-    setTimeout(() => startTimer(nextTask.id), 2000);
+    setTimeout(() => startTimer(nextTask.id), AUTO_ADVANCE_DELAY_MS);
   } else {
-    await window.electronAPI.showNotification(
-      '🎉 All Done!',
-      'No more tasks with timers. Great work!'
-    );
+    await window.electronAPI.showNotification(MSG_ALL_DONE_TITLE, MSG_ALL_DONE_BODY);
   }
 }
 
@@ -323,7 +437,9 @@ function renderTasks(): void {
 }
 
 function filterTasks(query: string): Task[] {
-  if (!query) return tasks;
+  if (!query) {
+    return tasks;
+  }
   return tasks.filter(task => task.title.toLowerCase().includes(query));
 }
 
@@ -387,9 +503,11 @@ function renderTaskHTML(task: Task): string {
 }
 
 function renderTimerHTML(task: Task): string {
-  if (!task.duration || task.duration <= 0) return '';
+  if (!task.duration || task.duration <= 0) {
+    return '';
+  }
 
-  const progressPercent = (task.timeRemaining || 0) / (task.duration * 60) * 100;
+  const progressPercent = ((task.timeRemaining || 0) / (task.duration * 60)) * 100;
 
   return `
     <div class="task-timer">
@@ -398,9 +516,10 @@ function renderTimerHTML(task: Task): string {
           ${formatTime(task.timeRemaining || 0)}
         </span>
         <div class="timer-controls">
-          ${task.isTimerRunning
-            ? `<button class="timer-btn pause" data-id="${task.id}" data-action="pause" title="Pause">⏸</button>`
-            : `<button class="timer-btn play" data-id="${task.id}" data-action="play" title="Start">▶</button>`
+          ${
+            task.isTimerRunning
+              ? `<button class="timer-btn pause" data-id="${task.id}" data-action="pause" title="Pause">⏸</button>`
+              : `<button class="timer-btn play" data-id="${task.id}" data-action="play" title="Start">▶</button>`
           }
           <button class="timer-btn reset" data-id="${task.id}" data-action="reset" title="Reset">↺</button>
         </div>
@@ -418,25 +537,27 @@ function renderTimerHTML(task: Task): string {
 
 function attachTaskEventHandlers(): void {
   // Checkbox toggle
-  document.querySelectorAll('.task-checkbox').forEach((checkbox) => {
-    checkbox.addEventListener('click', async (e) => {
+  document.querySelectorAll(SELECTORS.TASK_CHECKBOX).forEach(checkbox => {
+    checkbox.addEventListener('click', async e => {
       const taskId = (e.currentTarget as HTMLElement).dataset.id!;
       await toggleTask(taskId);
     });
   });
 
   // Double-click to edit
-  document.querySelectorAll('.task-title').forEach((title) => {
-    title.addEventListener('dblclick', (e) => {
-      const taskItem = (e.target as HTMLElement).closest('.task-item');
-      const taskId = taskItem?.querySelector('[data-id]')?.getAttribute('data-id');
-      if (taskId) enterEditMode(taskId);
+  document.querySelectorAll(SELECTORS.TASK_TITLE).forEach(title => {
+    title.addEventListener('dblclick', e => {
+      const taskItem = (e.target as HTMLElement).closest(SELECTORS.TASK_ITEM);
+      const taskId = taskItem?.querySelector(`[${ATTR_ID}]`)?.getAttribute(ATTR_ID);
+      if (taskId) {
+        enterEditMode(taskId);
+      }
     });
   });
 
   // Delete button
-  document.querySelectorAll('.delete-btn').forEach((btn) => {
-    btn.addEventListener('click', async (e) => {
+  document.querySelectorAll(SELECTORS.DELETE_BTN).forEach(btn => {
+    btn.addEventListener('click', async e => {
       const taskId = (e.currentTarget as HTMLElement).dataset.id!;
       await deleteTask(taskId);
     });
@@ -448,15 +569,19 @@ function attachTaskEventHandlers(): void {
 // =============================================================================
 
 function attachTimerEventHandlers(): void {
-  document.querySelectorAll('.timer-btn').forEach((btn) => {
-    btn.addEventListener('click', async (e) => {
+  document.querySelectorAll(SELECTORS.TIMER_BTN).forEach(btn => {
+    btn.addEventListener('click', async e => {
       const target = e.currentTarget as HTMLElement;
       const taskId = target.dataset.id!;
       const action = target.dataset.action!;
 
-      if (action === 'play') await startTimer(taskId);
-      else if (action === 'pause') await pauseTimer(taskId);
-      else if (action === 'reset') await resetTimer(taskId);
+      if (action === TIMER_ACTION_PLAY) {
+        await startTimer(taskId);
+      } else if (action === TIMER_ACTION_PAUSE) {
+        await pauseTimer(taskId);
+      } else if (action === TIMER_ACTION_RESET) {
+        await resetTimer(taskId);
+      }
     });
   });
 }
@@ -468,34 +593,39 @@ function attachTimerEventHandlers(): void {
 function attachDragHandlers(): void {
   let draggedTaskId: string | null = null;
 
-  document.querySelectorAll('.task-item').forEach((item) => {
+  const DRAG_OPACITY_DRAGGING = '0.4';
+  const DRAG_OPACITY_NORMAL = '1';
+  const DRAG_BORDER_HIGHLIGHT = '2px solid rgba(100, 150, 255, 0.6)';
+  const DRAG_BORDER_NORMAL = '';
+
+  document.querySelectorAll(SELECTORS.TASK_ITEM).forEach(item => {
     item.addEventListener('dragstart', () => {
-      draggedTaskId = (item as HTMLElement).getAttribute('data-id');
-      (item as HTMLElement).style.opacity = '0.4';
+      draggedTaskId = (item as HTMLElement).getAttribute(ATTR_ID);
+      (item as HTMLElement).style.opacity = DRAG_OPACITY_DRAGGING;
     });
 
     item.addEventListener('dragend', () => {
-      (item as HTMLElement).style.opacity = '1';
+      (item as HTMLElement).style.opacity = DRAG_OPACITY_NORMAL;
       draggedTaskId = null;
     });
 
-    item.addEventListener('dragover', (e) => {
+    item.addEventListener('dragover', e => {
       e.preventDefault();
-      const taskId = (item as HTMLElement).getAttribute('data-id');
+      const taskId = (item as HTMLElement).getAttribute(ATTR_ID);
       if (draggedTaskId && taskId && draggedTaskId !== taskId) {
-        (item as HTMLElement).style.borderTop = '2px solid rgba(100, 150, 255, 0.6)';
+        (item as HTMLElement).style.borderTop = DRAG_BORDER_HIGHLIGHT;
       }
     });
 
     item.addEventListener('dragleave', () => {
-      (item as HTMLElement).style.borderTop = '';
+      (item as HTMLElement).style.borderTop = DRAG_BORDER_NORMAL;
     });
 
-    item.addEventListener('drop', async (e) => {
+    item.addEventListener('drop', async e => {
       e.preventDefault();
-      (item as HTMLElement).style.borderTop = '';
+      (item as HTMLElement).style.borderTop = DRAG_BORDER_NORMAL;
 
-      const targetTaskId = (item as HTMLElement).getAttribute('data-id');
+      const targetTaskId = (item as HTMLElement).getAttribute(ATTR_ID);
       if (draggedTaskId && targetTaskId && draggedTaskId !== targetTaskId) {
         await reorderTasks(draggedTaskId, targetTaskId);
       }
@@ -515,18 +645,24 @@ function attachEventHandlers(): void {
 
 function enterEditMode(taskId: string): void {
   const task = tasks.find(t => t.id === taskId);
-  if (!task) return;
+  if (!task) {
+    return;
+  }
 
-  const taskItem = document.querySelector(`.task-item[data-id="${taskId}"]`);
-  if (!taskItem) return;
+  const taskItem = document.querySelector(`${SELECTORS.TASK_ITEM}[${ATTR_ID}="${taskId}"]`);
+  if (!taskItem) {
+    return;
+  }
 
-  taskItem.classList.add('editing');
-  const titleEl = taskItem.querySelector('.task-title');
-  if (!titleEl) return;
+  taskItem.classList.add(CSS_CLASSES.EDITING);
+  const titleEl = taskItem.querySelector(SELECTORS.TASK_TITLE);
+  if (!titleEl) {
+    return;
+  }
 
   const input = document.createElement('input');
   input.type = 'text';
-  input.className = 'task-edit-input';
+  input.className = CSS_CLASSES.TASK_EDIT_INPUT;
   input.value = task.title;
 
   titleEl.after(input);
@@ -538,15 +674,16 @@ function enterEditMode(taskId: string): void {
     if (newTitle && newTitle !== task.title) {
       await updateTaskTitle(taskId, newTitle);
     }
-    taskItem.classList.remove('editing');
+    taskItem.classList.remove(CSS_CLASSES.EDITING);
     input.remove();
   };
 
   input.addEventListener('blur', saveEdit);
-  input.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') saveEdit();
-    else if (e.key === 'Escape') {
-      taskItem.classList.remove('editing');
+  input.addEventListener('keydown', e => {
+    if (e.key === KEY_ENTER) {
+      saveEdit();
+    } else if (e.key === KEY_ESCAPE) {
+      taskItem.classList.remove(CSS_CLASSES.EDITING);
       input.remove();
     }
   });
@@ -557,25 +694,32 @@ function enterEditMode(taskId: string): void {
 // =============================================================================
 
 function setupKeyboardShortcuts(): void {
-  document.addEventListener('keydown', async (e) => {
+  document.addEventListener('keydown', async e => {
     await handleKeyboardShortcut(e);
   });
 }
 
 async function handleKeyboardShortcut(e: KeyboardEvent): Promise<void> {
+  const TAG_INPUT = 'INPUT';
+  const TAG_TEXTAREA = 'TEXTAREA';
+  const TAG_BUTTON = 'BUTTON';
+
   const activeElement = document.activeElement;
-  const isInputFocused = activeElement?.tagName === 'INPUT' ||
-                        activeElement?.tagName === 'TEXTAREA' ||
-                        activeElement?.tagName === 'BUTTON';
+  const isInputFocused =
+    activeElement?.tagName === TAG_INPUT ||
+    activeElement?.tagName === TAG_TEXTAREA ||
+    activeElement?.tagName === TAG_BUTTON;
 
   // Esc - Always works
-  if (e.key === 'Escape') {
+  if (e.key === KEY_ESCAPE) {
     clearInputs();
     return;
   }
 
   // Don't trigger navigation when typing
-  if (isInputFocused && e.key !== 'Escape') return;
+  if (isInputFocused && e.key !== KEY_ESCAPE) {
+    return;
+  }
 
   const incompleteTasks = tasks.filter(t => !t.completed);
 
@@ -630,26 +774,26 @@ async function handleModifierShortcut(e: KeyboardEvent, incompleteTasks: Task[])
 
 async function handleNavigationKey(e: KeyboardEvent, incompleteTasks: Task[]): Promise<void> {
   switch (e.key) {
-    case 'ArrowDown':
+    case KEY_ARROW_DOWN:
       e.preventDefault();
       selectedTaskIndex = Math.min(incompleteTasks.length - 1, selectedTaskIndex + 1);
       highlightSelectedTask();
       break;
 
-    case 'ArrowUp':
+    case KEY_ARROW_UP:
       e.preventDefault();
       selectedTaskIndex = Math.max(0, selectedTaskIndex - 1);
       highlightSelectedTask();
       break;
 
-    case ' ':
+    case KEY_SPACE:
       e.preventDefault();
       if (selectedTaskIndex >= 0 && incompleteTasks[selectedTaskIndex]) {
         await toggleTask(incompleteTasks[selectedTaskIndex].id);
       }
       break;
 
-    case 'Enter':
+    case KEY_ENTER:
       if (selectedTaskIndex >= 0 && incompleteTasks[selectedTaskIndex]) {
         enterEditMode(incompleteTasks[selectedTaskIndex].id);
       }
@@ -658,21 +802,28 @@ async function handleNavigationKey(e: KeyboardEvent, incompleteTasks: Task[]): P
 }
 
 function highlightSelectedTask(): void {
-  document.querySelectorAll('.task-item:not(.completed)').forEach((item, index) => {
+  document.querySelectorAll(SELECTORS.TASK_ITEM_NOT_COMPLETED).forEach((item, index) => {
     if (index === selectedTaskIndex) {
-      item.classList.add('selected');
-      item.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      item.classList.add(CSS_CLASSES.SELECTED);
+      item.scrollIntoView({
+        behavior: SCROLL_BEHAVIOR_SMOOTH as ScrollBehavior,
+        block: SCROLL_BLOCK_NEAREST as ScrollLogicalPosition,
+      });
     } else {
-      item.classList.remove('selected');
+      item.classList.remove(CSS_CLASSES.SELECTED);
     }
   });
 }
 
 function clearInputs(): void {
-  DOM.taskInput.value = '';
+  const EMPTY_STRING = '';
+
+  DOM.taskInput.value = EMPTY_STRING;
   selectedDuration = undefined;
   selectedTaskIndex = -1;
-  if (DOM.searchInput) DOM.searchInput.value = '';
+  if (DOM.searchInput) {
+    DOM.searchInput.value = EMPTY_STRING;
+  }
   clearPresetSelection();
   renderTasks();
 }
@@ -682,33 +833,36 @@ function clearInputs(): void {
 // =============================================================================
 
 function initializePresetButtons(): void {
-  const presetsContainer = document.querySelector('.duration-presets');
-  if (!presetsContainer) return;
+  const presetsContainer = document.querySelector(SELECTORS.DURATION_PRESETS);
+  if (!presetsContainer) {
+    return;
+  }
 
-  presetsContainer.innerHTML = DURATION_PRESETS
-    .map(preset => `<button class="preset-btn" data-minutes="${preset.minutes}">${preset.label}</button>`)
-    .join('');
+  presetsContainer.innerHTML = DURATION_PRESETS.map(
+    preset =>
+      `<button class="${SELECTORS.PRESET_BTN.slice(1)}" ${ATTR_MINUTES}="${preset.minutes}">${preset.label}</button>`
+  ).join('');
 
   attachPresetHandlers();
 }
 
 function attachPresetHandlers(): void {
-  document.querySelectorAll('.preset-btn').forEach(btn => {
-    btn.addEventListener('click', (e) => {
+  document.querySelectorAll(SELECTORS.PRESET_BTN).forEach(btn => {
+    btn.addEventListener('click', e => {
       const target = e.currentTarget as HTMLElement;
-      const minutes = parseInt(target.getAttribute('data-minutes') || '0');
+      const minutes = parseInt(target.getAttribute(ATTR_MINUTES) || '0');
       togglePresetSelection(target, minutes);
     });
   });
 }
 
 function togglePresetSelection(clickedBtn: HTMLElement, minutes: number): void {
-  const wasSelected = clickedBtn.classList.contains('selected');
+  const wasSelected = clickedBtn.classList.contains(CSS_CLASSES.SELECTED);
 
   clearPresetSelection();
 
   if (!wasSelected) {
-    clickedBtn.classList.add('selected');
+    clickedBtn.classList.add(CSS_CLASSES.SELECTED);
     selectedDuration = minutes;
   } else {
     selectedDuration = undefined;
@@ -716,8 +870,8 @@ function togglePresetSelection(clickedBtn: HTMLElement, minutes: number): void {
 }
 
 function clearPresetSelection(): void {
-  document.querySelectorAll('.preset-btn').forEach(btn => {
-    btn.classList.remove('selected');
+  document.querySelectorAll(SELECTORS.PRESET_BTN).forEach(btn => {
+    btn.classList.remove(CSS_CLASSES.SELECTED);
   });
 }
 
@@ -730,11 +884,13 @@ function setupActionButtons(): void {
   if (DOM.clearCompletedBtn) {
     DOM.clearCompletedBtn.addEventListener('click', async () => {
       const completedCount = tasks.filter(t => t.completed).length;
-      if (completedCount === 0) return;
+      if (completedCount === 0) {
+        return;
+      }
 
       await window.electronAPI.clearCompleted();
       await window.electronAPI.showNotification(
-        '🗑️ Cleared',
+        MSG_CLEARED_TITLE,
         `Removed ${completedCount} completed task${completedCount > 1 ? 's' : ''}`
       );
       await loadTasks();
@@ -746,7 +902,7 @@ function setupActionButtons(): void {
     DOM.exportBtn.addEventListener('click', async () => {
       const result = await window.electronAPI.exportTasks();
       if (result) {
-        await window.electronAPI.showNotification('📤 Export Complete', 'Tasks exported successfully!');
+        await window.electronAPI.showNotification(MSG_EXPORT_TITLE, MSG_EXPORT_BODY);
       }
     });
   }
@@ -756,7 +912,10 @@ function setupActionButtons(): void {
     DOM.importBtn.addEventListener('click', async () => {
       const count = await window.electronAPI.importTasks();
       if (count > 0) {
-        await window.electronAPI.showNotification('📥 Import Complete', `Imported ${count} task${count > 1 ? 's' : ''}!`);
+        await window.electronAPI.showNotification(
+          MSG_IMPORT_TITLE,
+          `Imported ${count} task${count > 1 ? 's' : ''}!`
+        );
         await loadTasks();
       }
     });
@@ -765,15 +924,17 @@ function setupActionButtons(): void {
   // Theme toggle
   if (DOM.themeToggle) {
     DOM.themeToggle.addEventListener('click', async () => {
-      document.body.classList.toggle('light-theme');
-      const theme = document.body.classList.contains('light-theme') ? 'light' : 'dark';
+      document.body.classList.toggle(CSS_CLASSES.LIGHT_THEME);
+      const theme = document.body.classList.contains(CSS_CLASSES.LIGHT_THEME)
+        ? THEME_LIGHT
+        : THEME_DARK;
       await window.electronAPI.updateSettings({ theme });
     });
 
     // Load saved theme
     window.electronAPI.getSettings().then(settings => {
-      if (settings.theme === 'light') {
-        document.body.classList.add('light-theme');
+      if (settings.theme === THEME_LIGHT) {
+        document.body.classList.add(CSS_CLASSES.LIGHT_THEME);
       }
     });
   }
@@ -784,12 +945,14 @@ function setupActionButtons(): void {
 // =============================================================================
 
 function setupSearch(): void {
-  if (!DOM.searchInput) return;
+  if (!DOM.searchInput) {
+    return;
+  }
 
   let searchTimeout: number;
   DOM.searchInput.addEventListener('input', () => {
     clearTimeout(searchTimeout);
-    searchTimeout = window.setTimeout(() => renderTasks(), 300);
+    searchTimeout = window.setTimeout(() => renderTasks(), SEARCH_DEBOUNCE_MS);
   });
 }
 
@@ -814,8 +977,10 @@ function setupWindowControls(): void {
 function setupTaskInput(): void {
   DOM.addBtn.addEventListener('click', addTask);
 
-  DOM.taskInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') addTask();
+  DOM.taskInput.addEventListener('keypress', e => {
+    if (e.key === 'Enter') {
+      addTask();
+    }
   });
 }
 
@@ -824,8 +989,6 @@ function setupTaskInput(): void {
 // =============================================================================
 
 function initialize(): void {
-  console.log('Initializing Task Floater...');
-
   // Verify electronAPI exists
   if (!window.electronAPI) {
     console.error('CRITICAL: electronAPI not available!');
@@ -843,8 +1006,6 @@ function initialize(): void {
 
   // Load initial data
   loadTasks();
-
-  console.log('Task Floater initialized successfully');
 }
 
 // Start the app
