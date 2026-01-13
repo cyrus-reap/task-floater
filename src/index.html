@@ -115,7 +115,7 @@
         background: rgba(30, 30, 30, 0.92);
         backdrop-filter: blur(60px) saturate(200%);
         -webkit-backdrop-filter: blur(60px) saturate(200%);
-        border-radius: 20px;
+        border-radius: 8px;
         border: 1px solid rgba(255, 255, 255, 0.2);
         box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
         display: flex;
@@ -133,6 +133,12 @@
         background: rgba(35, 35, 35, 0.96);
         border-color: rgba(255, 255, 255, 0.25);
         box-shadow: 0 12px 48px 0 rgba(0, 0, 0, 0.5);
+      }
+
+      .container.focus-mode .search-bar,
+      .container.focus-mode .input-section,
+      .container.focus-mode .section-toggle {
+        display: none;
       }
 
       .header {
@@ -393,7 +399,7 @@
         padding: 14px 20px;
         background: rgba(40, 40, 40, 0.98);
         border: 1px solid rgba(255, 255, 255, 0.2);
-        border-radius: 12px;
+        border-radius: 8px;
         color: #fff;
         font-size: 13px;
         font-weight: 500;
@@ -506,7 +512,7 @@
         padding: 12px 18px 12px 42px;
         background: rgba(255, 255, 255, 0.08);
         border: 1.5px solid rgba(255, 255, 255, 0.15);
-        border-radius: 14px;
+        border-radius: 10px;
         color: #fff;
         font-size: 13px;
         outline: none;
@@ -587,7 +593,7 @@
         padding: 14px 18px;
         background: rgba(255, 255, 255, 0.1);
         border: 1.5px solid rgba(255, 255, 255, 0.2);
-        border-radius: 14px;
+        border-radius: 10px;
         color: #fff;
         font-size: 14px;
         outline: none;
@@ -612,7 +618,7 @@
           rgba(80, 120, 220, 0.9) 100%
         );
         border: none;
-        border-radius: 14px;
+        border-radius: 10px;
         color: #fff;
         font-size: 14px;
         font-weight: 700;
@@ -699,7 +705,7 @@
         padding: 16px 18px;
         background: rgba(255, 255, 255, 0.08);
         border: 1px solid rgba(255, 255, 255, 0.12);
-        border-radius: 16px;
+        border-radius: 10px;
         margin-bottom: 12px;
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         animation: slideIn 0.3s ease-out;
@@ -948,7 +954,7 @@
         padding: 12px 8px;
         background: rgba(255, 255, 255, 0.08);
         border: 1px solid rgba(255, 255, 255, 0.15);
-        border-radius: 12px;
+        border-radius: 8px;
         color: rgba(255, 255, 255, 0.7);
         font-size: 12px;
         font-weight: 600;
@@ -992,7 +998,7 @@
         padding: 10px 14px;
         background: rgba(255, 255, 255, 0.1);
         border: 1.5px solid rgba(255, 255, 255, 0.2);
-        border-radius: 12px;
+        border-radius: 8px;
         color: #fff;
         font-size: 13px;
         outline: none;
@@ -1016,7 +1022,7 @@
         width: 100%;
         padding: 12px 14px;
         background: rgba(0, 0, 0, 0.15);
-        border-radius: 12px;
+        border-radius: 8px;
         border: 1px solid rgba(255, 255, 255, 0.08);
       }
 
@@ -1221,7 +1227,7 @@
           <h1>Task Floater</h1>
         </div>
         <div class="window-controls">
-          <button class="focus-toggle" id="focusBtn" title="Focus Mode (Cmd+Shift+F)">
+          <button class="focus-toggle" id="focusBtn" title="Focus">
             <svg
               class="icon"
               style="width: 14px; height: 14px"
@@ -1234,7 +1240,7 @@
               <circle cx="12" cy="12" r="10" />
             </svg>
           </button>
-          <button class="theme-toggle" id="themeToggle" title="Toggle theme">
+          <button class="theme-toggle" id="themeToggle" title="Theme">
             <svg class="icon" style="width: 14px; height: 14px" viewBox="0 0 24 24">
               <circle cx="12" cy="12" r="5" />
               <line x1="12" y1="1" x2="12" y2="3" />
