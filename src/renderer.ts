@@ -16,6 +16,7 @@ interface Task {
   timeRemaining?: number;
   isTimerRunning?: boolean;
   tags?: string[];
+  pinned?: boolean;
 }
 
 // =============================================================================
@@ -117,6 +118,11 @@ const CSS_CLASSES = {
   FOCUS_MODE: 'focus-mode',
   COMPACT_MODE: 'compact-mode',
   HAS_TIMER: 'has-timer',
+  PINNED: 'pinned',
+  COMPLETING: 'completing',
+  TASK_GROUP: 'task-group',
+  TASK_GROUP_HEADER: 'task-group-header',
+  TASK_GROUP_ITEMS: 'task-group-items',
 } as const;
 
 // App modes
@@ -173,6 +179,7 @@ let selectedDuration: number | undefined = undefined;
 let selectedTaskIndex = -1;
 let currentMode: AppMode = APP_MODES.FULL;
 let contextMenuTarget: string | null = null;
+let isDoneSectionCollapsed = true;
 
 // =============================================================================
 // DOM ELEMENTS
@@ -370,8 +377,7 @@ async function addTask(): Promise<void> {
   showToast('Task added!', 'success');
 
   DOM.taskInput.value = '';
-  selectedDuration = undefined;
-  clearPresetSelection();
+  selectNoneOption();
 
   await loadTasks();
 
@@ -380,6 +386,19 @@ async function addTask(): Promise<void> {
 }
 
 async function toggleTask(taskId: string): Promise<void> {
+  const task = tasks.find(t => t.id === taskId);
+  const isBeingCompleted = task && !task.completed;
+
+  // Add completing animation if task is being marked as complete
+  if (isBeingCompleted) {
+    const taskElement = document.querySelector(`${SELECTORS.TASK_ITEM}[${ATTR_ID}="${taskId}"]`);
+    if (taskElement) {
+      taskElement.classList.add(CSS_CLASSES.COMPLETING);
+      // Wait for animation to complete before updating
+      await new Promise(resolve => setTimeout(resolve, 350));
+    }
+  }
+
   await window.electronAPI.toggleTask(taskId);
   await loadTasks();
 
@@ -408,6 +427,17 @@ async function deleteTask(taskId: string): Promise<void> {
 
 async function updateTaskTitle(taskId: string, newTitle: string): Promise<void> {
   await window.electronAPI.updateTask(taskId, { title: newTitle });
+  await loadTasks();
+}
+
+async function togglePin(taskId: string): Promise<void> {
+  const task = tasks.find(t => t.id === taskId);
+  if (!task) {
+    return;
+  }
+
+  await window.electronAPI.updateTask(taskId, { pinned: !task.pinned });
+  showToast(task.pinned ? 'Task unpinned' : 'Task pinned', 'info');
   await loadTasks();
 }
 
@@ -549,6 +579,12 @@ function updateTimerDisplay(taskId: string, timeRemaining: number, duration: num
     timerTime.textContent = formatTime(timeRemaining);
   }
 
+  // Focus mode timer display
+  const focusTimerDisplay = document.querySelector(`.focus-timer-display[${ATTR_ID}="${taskId}"]`);
+  if (focusTimerDisplay) {
+    focusTimerDisplay.textContent = formatTime(timeRemaining);
+  }
+
   const progressPercent = (timeRemaining / (duration * SECONDS_PER_MINUTE)) * 100;
 
   // Support both old and new progress bar selectors
@@ -563,6 +599,12 @@ function updateTimerDisplay(taskId: string, timeRemaining: number, duration: num
   }
   if (progressFill) {
     (progressFill as HTMLElement).style.width = `${progressPercent}%`;
+  }
+
+  // Focus mode progress bar
+  const focusProgressFill = document.querySelector('.focus-timer-progress-fill');
+  if (focusProgressFill) {
+    (focusProgressFill as HTMLElement).style.width = `${progressPercent}%`;
   }
 }
 
@@ -605,14 +647,126 @@ function renderTasks(): void {
 
   if (filteredTasks.length === 0) {
     DOM.tasksSection.innerHTML = renderEmptyState(searchQuery);
+    resizeWindowToContent();
     return;
   }
 
-  const sortedTasks = sortTasks(filteredTasks);
-  DOM.tasksSection.innerHTML = sortedTasks.map(renderTaskHTML).join('');
+  // Focus mode: check if any timer is running
+  if (currentMode === APP_MODES.FOCUS) {
+    const runningTask = filteredTasks.find(t => t.isTimerRunning);
+    if (runningTask) {
+      DOM.tasksSection.innerHTML = renderFocusTimerView(runningTask);
+      attachFocusTimerHandlers(runningTask.id);
+      resizeWindowToContent();
+      return;
+    } else {
+      DOM.tasksSection.innerHTML = renderFocusModeEmptyState();
+      resizeWindowToContent();
+      return;
+    }
+  }
+
+  // Render task sections (Active / Done)
+  DOM.tasksSection.innerHTML = renderTaskSections(filteredTasks);
 
   attachEventHandlers();
+  attachSectionHandlers();
   updateStats();
+  resizeWindowToContent();
+}
+
+function renderTaskSections(taskList: Task[]): string {
+  const activeTasks = getActiveTasks(taskList);
+  const completedTasks = getCompletedTasks(taskList);
+
+  // Sort active tasks by priority
+  const sortedActive = sortTasks(activeTasks);
+
+  const caretIcon = `<svg class="caret-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <polyline points="6 9 12 15 18 9"></polyline>
+  </svg>`;
+
+  let html = '';
+
+  // Active section (always visible)
+  if (sortedActive.length > 0) {
+    html += `
+      <div class="task-group" data-group="active">
+        <div class="task-group-header">
+          <span class="task-group-label">Active</span>
+          <span class="task-group-count">${sortedActive.length}</span>
+        </div>
+        <div class="task-group-items">
+          ${sortedActive.map(renderTaskHTML).join('')}
+        </div>
+      </div>
+    `;
+  }
+
+  // Done section (collapsible)
+  if (completedTasks.length > 0) {
+    const collapsedClass = isDoneSectionCollapsed ? CSS_CLASSES.COLLAPSED : '';
+    html += `
+      <div class="task-group task-group-done ${collapsedClass}" data-group="done">
+        <div class="task-group-header" role="button" tabindex="0" aria-expanded="${!isDoneSectionCollapsed}">
+          ${caretIcon}
+          <span class="task-group-label">Done</span>
+          <span class="task-group-count">${completedTasks.length}</span>
+        </div>
+        <div class="task-group-items">
+          ${completedTasks.map(renderTaskHTML).join('')}
+        </div>
+      </div>
+    `;
+  }
+
+  // If no tasks at all, show empty state
+  if (sortedActive.length === 0 && completedTasks.length === 0) {
+    return renderEmptyState();
+  }
+
+  return html;
+}
+
+function attachSectionHandlers(): void {
+  const doneHeader = document.querySelector('.task-group-done .task-group-header');
+  if (doneHeader) {
+    doneHeader.addEventListener('click', toggleDoneSection);
+    doneHeader.addEventListener('keydown', (e: Event) => {
+      const keyEvent = e as KeyboardEvent;
+      if (keyEvent.key === KEY_ENTER || keyEvent.key === KEY_SPACE) {
+        e.preventDefault();
+        toggleDoneSection();
+      }
+    });
+  }
+}
+
+function toggleDoneSection(): void {
+  isDoneSectionCollapsed = !isDoneSectionCollapsed;
+  const doneGroup = document.querySelector('.task-group-done');
+  if (doneGroup) {
+    doneGroup.classList.toggle(CSS_CLASSES.COLLAPSED, isDoneSectionCollapsed);
+    const header = doneGroup.querySelector('.task-group-header');
+    header?.setAttribute('aria-expanded', String(!isDoneSectionCollapsed));
+  }
+  // Save preference
+  window.electronAPI.updateSettings({ doneSectionCollapsed: isDoneSectionCollapsed });
+  resizeWindowToContent();
+}
+
+function resizeWindowToContent(): void {
+  // Use requestAnimationFrame to ensure DOM has updated
+  requestAnimationFrame(() => {
+    const container = DOM.container;
+    if (container) {
+      // Get the actual content height
+      const contentHeight = container.scrollHeight;
+      // Add some padding for visual comfort
+      const padding = 10;
+      window.electronAPI.resizeWindow(contentHeight + padding);
+    }
+  });
 }
 
 function filterTasks(query: string): Task[] {
@@ -623,12 +777,21 @@ function filterTasks(query: string): Task[] {
 }
 
 function sortTasks(taskList: Task[]): Task[] {
-  return taskList.sort((a, b) => {
-    if (a.completed !== b.completed) {
-      return a.completed ? 1 : -1;
-    }
-    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-  });
+  // Sort priority: pinned → running timer → active → completed
+  // Preserve manual order within each priority group
+  const pinned = taskList.filter(t => !t.completed && t.pinned);
+  const running = taskList.filter(t => !t.completed && !t.pinned && t.isTimerRunning);
+  const active = taskList.filter(t => !t.completed && !t.pinned && !t.isTimerRunning);
+  const completed = taskList.filter(t => t.completed);
+  return [...pinned, ...running, ...active, ...completed];
+}
+
+function getActiveTasks(taskList: Task[]): Task[] {
+  return taskList.filter(t => !t.completed);
+}
+
+function getCompletedTasks(taskList: Task[]): Task[] {
+  return taskList.filter(t => t.completed);
 }
 
 function renderEmptyState(searchQuery?: string): string {
@@ -662,23 +825,133 @@ function renderEmptyState(searchQuery?: string): string {
   `;
 }
 
+function renderFocusModeEmptyState(): string {
+  const incompleteTasks = tasks.filter(t => !t.completed);
+  const tasksWithTimers = incompleteTasks.filter(t => t.duration && t.duration > 0);
+
+  if (incompleteTasks.length === 0) {
+    return `
+      <div class="empty-state focus-empty">
+        <svg class="empty-state-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <circle cx="12" cy="12" r="10"/>
+          <polyline points="12,6 12,12 16,14"/>
+        </svg>
+        <div class="empty-state-title">All done!</div>
+        <div class="empty-state-text">No tasks to focus on</div>
+        <div class="empty-state-hint">
+          Press <span class="keyboard-hint">Esc</span> to exit focus mode
+        </div>
+      </div>
+    `;
+  }
+
+  if (tasksWithTimers.length === 0) {
+    return `
+      <div class="empty-state focus-empty">
+        <svg class="empty-state-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <circle cx="12" cy="12" r="10"/>
+          <polyline points="12,6 12,12 16,14"/>
+        </svg>
+        <div class="empty-state-title">No timers set</div>
+        <div class="empty-state-text">Add a timer to a task to use focus mode</div>
+        <div class="empty-state-hint">
+          Press <span class="keyboard-hint">Esc</span> to exit
+        </div>
+      </div>
+    `;
+  }
+
+  return `
+    <div class="empty-state focus-empty">
+      <svg class="empty-state-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <polygon points="5,3 19,12 5,21 5,3"/>
+      </svg>
+      <div class="empty-state-title">Ready to focus</div>
+      <div class="empty-state-text">Start a timer on any task to begin</div>
+      <div class="empty-state-hint">
+        Press <span class="keyboard-hint">Esc</span> to exit focus mode
+      </div>
+    </div>
+  `;
+}
+
+function renderFocusTimerView(task: Task): string {
+  const progressPercent = task.duration
+    ? ((task.timeRemaining || 0) / (task.duration * SECONDS_PER_MINUTE)) * 100
+    : 0;
+
+  const playIcon = `<svg class="icon" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="6 4 18 12 6 20 6 4"></polygon></svg>`;
+  const pauseIcon = `<svg class="icon" viewBox="0 0 24 24" fill="currentColor" stroke="none"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>`;
+  const resetIcon = `<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>`;
+  const stopIcon = `<svg class="icon" viewBox="0 0 24 24" fill="currentColor" stroke="none"><rect x="6" y="6" width="12" height="12" rx="1"></rect></svg>`;
+
+  return `
+    <div class="focus-timer-view">
+      <div class="focus-timer-display ${task.isTimerRunning ? 'running' : ''}" data-id="${task.id}">
+        ${formatTime(task.timeRemaining || 0)}
+      </div>
+      <div class="focus-timer-title">${escapeHtml(task.title)}</div>
+      <div class="focus-timer-progress">
+        <div class="focus-timer-progress-fill ${task.isTimerRunning ? '' : 'paused'}" style="width: ${progressPercent}%"></div>
+      </div>
+      <div class="focus-timer-controls">
+        ${
+          task.isTimerRunning
+            ? `<button class="focus-timer-btn primary" data-id="${task.id}" data-action="${TIMER_ACTION_PAUSE}" title="Pause">${pauseIcon} Pause</button>`
+            : `<button class="focus-timer-btn primary" data-id="${task.id}" data-action="${TIMER_ACTION_PLAY}" title="Start">${playIcon} Start</button>`
+        }
+        <button class="focus-timer-btn secondary" data-id="${task.id}" data-action="${TIMER_ACTION_RESET}" title="Reset">${resetIcon}</button>
+        <button class="focus-timer-btn tertiary" data-id="${task.id}" data-action="stop" title="Stop & Complete">${stopIcon}</button>
+      </div>
+      <div class="focus-timer-hint">Press <span class="keyboard-hint">Esc</span> to exit</div>
+    </div>
+  `;
+}
+
+function attachFocusTimerHandlers(taskId: string): void {
+  document.querySelectorAll('.focus-timer-btn').forEach(btn => {
+    btn.addEventListener('click', async e => {
+      const target = e.currentTarget as HTMLElement;
+      const action = target.dataset.action;
+
+      switch (action) {
+        case TIMER_ACTION_PLAY:
+          await startTimer(taskId);
+          break;
+        case TIMER_ACTION_PAUSE:
+          await pauseTimer(taskId);
+          break;
+        case TIMER_ACTION_RESET:
+          await resetTimer(taskId);
+          break;
+        case 'stop':
+          await pauseTimer(taskId);
+          await toggleTask(taskId);
+          break;
+      }
+    });
+  });
+}
+
 function renderTaskHTML(task: Task): string {
   const timerHTML = renderTimerHTML(task);
   const completedClass = task.completed ? CSS_CLASSES.COMPLETED : '';
   const timerRunningClass = task.isTimerRunning ? CSS_CLASSES.TIMER_RUNNING : '';
   const hasTimerClass = task.duration && task.duration > 0 ? CSS_CLASSES.HAS_TIMER : '';
+  const pinnedClass = task.pinned ? CSS_CLASSES.PINNED : '';
 
   // SVG icons
   const dragIcon = `<svg class="icon" viewBox="0 0 24 24"><circle cx="9" cy="6" r="1.5"/><circle cx="15" cy="6" r="1.5"/><circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/><circle cx="9" cy="18" r="1.5"/><circle cx="15" cy="18" r="1.5"/></svg>`;
   const deleteIcon = `<svg class="icon" viewBox="0 0 24 24"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>`;
   const moreIcon = `<svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>`;
+  const pinIcon = `<svg class="pin-indicator icon" viewBox="0 0 24 24"><path d="M12 2L12 8M12 8L16 4M12 8L8 4M12 8L12 22" stroke-width="2"/></svg>`;
 
   return `
-    <div class="task-item ${completedClass} ${timerRunningClass} ${hasTimerClass}"
+    <div class="task-item ${completedClass} ${timerRunningClass} ${hasTimerClass} ${pinnedClass}"
          draggable="true"
          data-id="${task.id}"
          role="listitem"
-         aria-label="${escapeHtml(task.title)}${task.completed ? ' (completed)' : ''}">
+         aria-label="${escapeHtml(task.title)}${task.completed ? ' (completed)' : ''}${task.pinned ? ' (pinned)' : ''}">
       <div class="drag-handle" title="Drag to reorder">
         ${dragIcon}
       </div>
@@ -690,6 +963,7 @@ function renderTaskHTML(task: Task): string {
            aria-label="Mark as ${task.completed ? 'incomplete' : 'complete'}"></div>
       <div class="task-content">
         <div class="task-main">
+          ${task.pinned ? pinIcon : ''}
           <div class="task-title">${escapeHtml(task.title)}</div>
           <div class="task-actions">
             <button class="task-action-btn more-btn" data-id="${task.id}" title="More actions">
@@ -770,6 +1044,16 @@ function attachTaskEventHandlers(): void {
       await deleteTask(taskId);
     });
   });
+
+  // More button (overflow menu)
+  document.querySelectorAll('.more-btn').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      const taskId = (e.currentTarget as HTMLElement).dataset.id!;
+      const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+      showTaskContextMenu({ clientX: rect.right, clientY: rect.bottom } as MouseEvent, taskId);
+    });
+  });
 }
 
 // =============================================================================
@@ -801,41 +1085,58 @@ function attachTimerEventHandlers(): void {
 function attachDragHandlers(): void {
   let draggedTaskId: string | null = null;
 
-  const DRAG_OPACITY_DRAGGING = '0.4';
+  const DRAG_OPACITY_DRAGGING = '0.5';
   const DRAG_OPACITY_NORMAL = '1';
-  const DRAG_BORDER_HIGHLIGHT = '2px solid rgba(100, 150, 255, 0.6)';
-  const DRAG_BORDER_NORMAL = '';
+  const DRAG_CLASS = 'dragging';
+  const DRAG_OVER_CLASS = 'drag-over';
 
   document.querySelectorAll(SELECTORS.TASK_ITEM).forEach(item => {
-    item.addEventListener('dragstart', () => {
-      draggedTaskId = (item as HTMLElement).getAttribute(ATTR_ID);
-      (item as HTMLElement).style.opacity = DRAG_OPACITY_DRAGGING;
+    const element = item as HTMLElement;
+
+    element.addEventListener('dragstart', (e: DragEvent) => {
+      draggedTaskId = element.getAttribute(ATTR_ID);
+      if (e.dataTransfer && draggedTaskId) {
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', draggedTaskId);
+      }
+      element.style.opacity = DRAG_OPACITY_DRAGGING;
+      element.classList.add(DRAG_CLASS);
     });
 
-    item.addEventListener('dragend', () => {
-      (item as HTMLElement).style.opacity = DRAG_OPACITY_NORMAL;
+    element.addEventListener('dragend', () => {
+      element.style.opacity = DRAG_OPACITY_NORMAL;
+      element.classList.remove(DRAG_CLASS);
       draggedTaskId = null;
+      // Clean up any drag-over classes
+      document.querySelectorAll(`.${DRAG_OVER_CLASS}`).forEach(el => {
+        el.classList.remove(DRAG_OVER_CLASS);
+      });
     });
 
-    item.addEventListener('dragover', e => {
+    element.addEventListener('dragover', (e: DragEvent) => {
       e.preventDefault();
-      const taskId = (item as HTMLElement).getAttribute(ATTR_ID);
+      if (e.dataTransfer) {
+        e.dataTransfer.dropEffect = 'move';
+      }
+      const taskId = element.getAttribute(ATTR_ID);
       if (draggedTaskId && taskId && draggedTaskId !== taskId) {
-        (item as HTMLElement).style.borderTop = DRAG_BORDER_HIGHLIGHT;
+        element.classList.add(DRAG_OVER_CLASS);
       }
     });
 
-    item.addEventListener('dragleave', () => {
-      (item as HTMLElement).style.borderTop = DRAG_BORDER_NORMAL;
+    element.addEventListener('dragleave', () => {
+      element.classList.remove(DRAG_OVER_CLASS);
     });
 
-    item.addEventListener('drop', async e => {
+    element.addEventListener('drop', async (e: DragEvent) => {
       e.preventDefault();
-      (item as HTMLElement).style.borderTop = DRAG_BORDER_NORMAL;
+      element.classList.remove(DRAG_OVER_CLASS);
 
-      const targetTaskId = (item as HTMLElement).getAttribute(ATTR_ID);
-      if (draggedTaskId && targetTaskId && draggedTaskId !== targetTaskId) {
-        await reorderTasks(draggedTaskId, targetTaskId);
+      const targetTaskId = element.getAttribute(ATTR_ID);
+      const droppedTaskId = e.dataTransfer?.getData('text/plain') || draggedTaskId;
+
+      if (droppedTaskId && targetTaskId && droppedTaskId !== targetTaskId) {
+        await reorderTasks(droppedTaskId, targetTaskId);
       }
     });
   });
@@ -918,26 +1219,29 @@ async function handleKeyboardShortcut(e: KeyboardEvent): Promise<void> {
     activeElement?.tagName === TAG_TEXTAREA ||
     activeElement?.tagName === TAG_BUTTON;
 
-  // Esc - Always works
+  // Esc - Always works (blur input and clear)
   if (e.key === KEY_ESCAPE) {
+    if (isInputFocused && activeElement instanceof HTMLElement) {
+      activeElement.blur();
+    }
     clearInputs();
-    return;
-  }
-
-  // Don't trigger navigation when typing
-  if (isInputFocused && e.key !== KEY_ESCAPE) {
     return;
   }
 
   const incompleteTasks = tasks.filter(t => !t.completed);
 
-  // Cmd/Ctrl shortcuts
+  // Cmd/Ctrl shortcuts - work even when input is focused
   if (e.metaKey || e.ctrlKey) {
     await handleModifierShortcut(e, incompleteTasks);
     return;
   }
 
-  // Arrow & action keys
+  // Don't trigger navigation/action keys when typing in input
+  if (isInputFocused) {
+    return;
+  }
+
+  // Arrow & action keys (only when not in input)
   await handleNavigationKey(e, incompleteTasks);
 }
 
@@ -1055,12 +1359,11 @@ function clearInputs(): void {
   const EMPTY_STRING = '';
 
   DOM.taskInput.value = EMPTY_STRING;
-  selectedDuration = undefined;
   selectedTaskIndex = -1;
   if (DOM.searchInput) {
     DOM.searchInput.value = EMPTY_STRING;
   }
-  clearPresetSelection();
+  selectNoneOption();
   renderTasks();
 }
 
@@ -1167,11 +1470,6 @@ function clearPresetSelection(): void {
   document.querySelectorAll(SELECTORS.DURATION_OPTION).forEach(btn => {
     btn.classList.remove(CSS_CLASSES.SELECTED);
   });
-  // Select "None" option by default
-  const noneOption = document.querySelector(`${SELECTORS.DURATION_OPTION}[${ATTR_MINUTES}="0"]`);
-  if (noneOption) {
-    noneOption.classList.add(CSS_CLASSES.SELECTED);
-  }
 
   // Clear both segment buttons and legacy preset buttons
   document.querySelectorAll(SELECTORS.SEGMENT_BTN).forEach(btn => {
@@ -1180,6 +1478,15 @@ function clearPresetSelection(): void {
   document.querySelectorAll(SELECTORS.PRESET_BTN).forEach(btn => {
     btn.classList.remove(CSS_CLASSES.SELECTED);
   });
+}
+
+function selectNoneOption(): void {
+  clearPresetSelection();
+  const noneOption = document.querySelector(`${SELECTORS.DURATION_OPTION}[${ATTR_MINUTES}="0"]`);
+  if (noneOption) {
+    noneOption.classList.add(CSS_CLASSES.SELECTED);
+  }
+  selectedDuration = undefined;
 }
 
 // =============================================================================
@@ -1474,6 +1781,13 @@ function showTaskContextMenu(e: MouseEvent, taskId: string): void {
         </div>`
       : '';
 
+  const pinAction = !task.completed
+    ? `<div class="context-menu-item" data-action="pin">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M12 2v10M12 12l4-4M12 12l-4-4M12 12v10" stroke-width="2"/></svg>
+        <span>${task.pinned ? 'Unpin Task' : 'Pin to Top'}</span>
+      </div>`
+    : '';
+
   menu.innerHTML = `
     <div class="context-menu-item" data-action="edit">
       <svg class="icon" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
@@ -1485,6 +1799,7 @@ function showTaskContextMenu(e: MouseEvent, taskId: string): void {
       <span>${task.completed ? 'Mark Incomplete' : 'Mark Complete'}</span>
       <span class="shortcut">⌘D</span>
     </div>
+    ${pinAction}
     ${timerAction}
     <div class="context-menu-divider"></div>
     <div class="context-menu-item danger" data-action="delete">
@@ -1516,6 +1831,9 @@ function showTaskContextMenu(e: MouseEvent, taskId: string): void {
         break;
       case 'toggle':
         await toggleTask(contextMenuTarget);
+        break;
+      case 'pin':
+        await togglePin(contextMenuTarget);
         break;
       case 'play':
         await startTimer(contextMenuTarget);
@@ -1604,6 +1922,10 @@ function setupAccordionToggles(): void {
     if (settings.inputCollapsed && DOM.inputSection && DOM.inputToggle) {
       DOM.inputSection.classList.add(CSS_CLASSES.COLLAPSED);
       DOM.inputToggle.classList.add(CSS_CLASSES.COLLAPSED);
+    }
+    // Load done section collapsed state
+    if (settings.doneSectionCollapsed !== undefined) {
+      isDoneSectionCollapsed = settings.doneSectionCollapsed;
     }
   });
 }

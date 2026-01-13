@@ -7,6 +7,7 @@ interface Task {
   timeRemaining?: number;
   isTimerRunning?: boolean;
   tags?: string[];
+  pinned?: boolean;
 }
 
 interface Settings {
@@ -15,6 +16,8 @@ interface Settings {
   notifications?: boolean;
   searchCollapsed?: boolean;
   inputCollapsed?: boolean;
+  doneSectionCollapsed?: boolean;
+  soundEnabled?: boolean;
 }
 
 interface ElectronAPI {
@@ -33,6 +36,7 @@ interface ElectronAPI {
   updateSettings: (settings: Partial<Settings>) => Promise<void>;
   minimize: () => Promise<void>;
   close: () => Promise<void>;
+  resizeWindow: (height: number) => Promise<void>;
 }
 
 declare global {
