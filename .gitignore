@@ -31,3 +31,16 @@ config.json
 
 # User data
 tasks.json
+settings.json
+
+# Build artifacts
+release/
+*.dmg
+*.zip
+*.exe
+*.AppImage
+*.deb
+*.rpm
+
+# electron-builder
+.electron-builder-cache/
