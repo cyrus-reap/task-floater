@@ -29,13 +29,14 @@ const AUTO_ADVANCE_DELAY_MS = 2000;
 const SEARCH_DEBOUNCE_MS = 300;
 const TIMER_TICK_INTERVAL_MS = 1000;
 
-// Duration presets (in minutes)
+// Duration presets (in minutes) - 3×2 grid for symmetry
 const DURATION_PRESETS = [
   { label: '15 min', minutes: 15 },
+  { label: '25 min', minutes: 25 },
   { label: '30 min', minutes: 30 },
   { label: '45 min', minutes: 45 },
   { label: '1 hour', minutes: 60 },
-  { label: '1.5 hrs', minutes: 90 },
+  { label: '90 min', minutes: 90 },
 ];
 
 // DOM Element IDs
