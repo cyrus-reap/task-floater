@@ -176,11 +176,6 @@ Custom `ValidationError` class for validation failures:
 
 ## Configuration Security
 
-### API Keys
-- Linear API key stored in separate config file
-- **Never** in code or version control
-- User's responsibility to secure
-
 ### No Remote Code
 - No `eval()` or `Function()` constructors
 - No dynamic script loading
@@ -202,8 +197,7 @@ Custom `ValidationError` class for validation failures:
 2. **Malicious Tasks File** - Validated on load, defaults to empty array
 
 ### ⚠️ User Responsibility:
-1. **API Key Security** - User must secure their Linear API key
-2. **Physical Access** - App doesn't encrypt stored tasks
+1. **Physical Access** - App doesn't encrypt stored tasks locally
 
 ## Security Checklist
 
