@@ -60,7 +60,11 @@ Task Floater is a minimalist, always-on-top task manager for macOS featuring a s
 
 ## 📸 Screenshots
 
-_Screenshots coming soon_
+<img width="408" height="641" alt="Screenshot 2026-01-13 at 19 12 21" src="https://github.com/user-attachments/assets/bd23cbd3-7927-4139-863b-c59005b24c7b" />
+
+<img width="456" height="658" alt="Screenshot 2026-01-13 at 19 13 24" src="https://github.com/user-attachments/assets/cfae2ffe-8b2e-4e35-a360-d869b28c178e" />
+<img width="418" height="630" alt="Screenshot 2026-01-13 at 19 13 46" src="https://github.com/user-attachments/assets/f837ba6c-ec94-4fdc-80a8-8e1e66951d83" />
+<img width="413" height="620" alt="Screenshot 2026-01-13 at 19 14 06" src="https://github.com/user-attachments/assets/a67d12e5-ed90-466c-9563-8aeb4d73c06e" />
 
 ## 🚀 Installation
 
