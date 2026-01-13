@@ -37,4 +37,5 @@ contextBridge.exposeInMainWorld('electronAPI', {
     ipcRenderer.invoke('update-settings', settings),
   minimize: (): Promise<void> => ipcRenderer.invoke('minimize'),
   close: (): Promise<void> => ipcRenderer.invoke('close'),
+  resizeWindow: (height: number): Promise<void> => ipcRenderer.invoke('resize-window', height),
 });

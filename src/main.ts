@@ -406,3 +406,13 @@ ipcMain.handle('minimize', () => {
 ipcMain.handle('close', () => {
   app.quit();
 });
+
+ipcMain.handle('resize-window', (_event, height: number) => {
+  if (mainWindow) {
+    const MIN_HEIGHT = 150;
+    const MAX_HEIGHT = 700;
+    const clampedHeight = Math.max(MIN_HEIGHT, Math.min(MAX_HEIGHT, height));
+    const [width] = mainWindow.getSize();
+    mainWindow.setSize(width, clampedHeight);
+  }
+});
