@@ -35,5 +35,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Secure preload script pattern
 - Local JSON storage
 
-[Unreleased]: https://github.com/yourusername/task-floater/compare/v1.0.0...HEAD
-[1.0.0]: https://github.com/yourusername/task-floater/releases/tag/v1.0.0
+[Unreleased]: https://github.com/cyrus-reap/task-floater/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/cyrus-reap/task-floater/releases/tag/v1.0.0
