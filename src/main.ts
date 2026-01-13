@@ -61,6 +61,7 @@ function createWindow() {
     transparent: true,
     alwaysOnTop: true,
     resizable: false,
+    icon: path.join(__dirname, '..', 'build', 'icon.png'),
     webPreferences: {
       nodeIntegration: false, // Prevent Node.js access in renderer
       contextIsolation: true, // Isolate renderer from Node.js
