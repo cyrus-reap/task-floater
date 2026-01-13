@@ -47,6 +47,13 @@ Task Floater is a productivity application designed to stay visible above all wi
 
 </div>
 
+light theme
+<img width="411" height="360" alt="Screenshot 2026-01-13 at 20 40 58" src="https://github.com/user-attachments/assets/38fab15d-b163-4a8e-9f75-bcd9a2bec75a" />
+<img width="408" height="426" alt="Screenshot 2026-01-13 at 20 40 49" src="https://github.com/user-attachments/assets/beab797e-2940-4a1c-b6fa-fef701d74288" />
+<img width="432" height="641" alt="Screenshot 2026-01-13 at 20 40 32" src="https://github.com/user-attachments/assets/16e8d26e-eeef-4bf5-82aa-da8c7cc8467e" />
+
+
+
 ## Features
 
 ### Task Management
