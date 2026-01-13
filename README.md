@@ -37,22 +37,17 @@ Task Floater is a productivity application designed to stay visible above all wi
 |:-:|:-:|
 | <img width="340" alt="Full View" src="https://github.com/user-attachments/assets/bb3aa356-50db-4c30-85ba-bf19d70e3b55" /> | <img width="340" alt="Command Palette" src="https://github.com/user-attachments/assets/e4dc3862-215f-4804-8c9d-9a61f3834b7d" /> |
 
-| Focus Timer | Light Theme |
-|:-:|:-:|
-| <img width="340" alt="Focus Timer" src="https://github.com/user-attachments/assets/c95ac21b-27db-4a95-8dcb-02d115ec64cd" /> | <img width="340" alt="Light Theme" src="https://github.com/user-attachments/assets/314fccfe-91ef-49c9-934d-a5893111a441" /> |
-
-| Focus Mode | Compact Mode | Empty State |
+| Focus Timer | Focus Mode | Compact Mode |
 |:-:|:-:|:-:|
-| <img width="240" alt="Focus Mode" src="https://github.com/user-attachments/assets/0193c4d2-9d19-4ae7-86c8-571fc37e420c" /> | <img width="240" alt="Compact Mode" src="https://github.com/user-attachments/assets/beb7f1b6-142e-4393-a66a-c6fbbb7776e3" /> | <img width="240" alt="Empty State" src="https://github.com/user-attachments/assets/56cb9bd6-f364-42d1-bc8e-21e9bfe0f03a" /> |
+| <img width="260" alt="Focus Timer" src="https://github.com/user-attachments/assets/c95ac21b-27db-4a95-8dcb-02d115ec64cd" /> | <img width="260" alt="Focus Mode" src="https://github.com/user-attachments/assets/0193c4d2-9d19-4ae7-86c8-571fc37e420c" /> | <img width="260" alt="Compact Mode" src="https://github.com/user-attachments/assets/beb7f1b6-142e-4393-a66a-c6fbbb7776e3" /> |
+
+### Light Theme
+
+| Full View | Compact | Focus Timer |
+|:-:|:-:|:-:|
+| <img width="280" alt="Light Full View" src="https://github.com/user-attachments/assets/16e8d26e-eeef-4bf5-82aa-da8c7cc8467e" /> | <img width="280" alt="Light Compact" src="https://github.com/user-attachments/assets/beab797e-2940-4a1c-b6fa-fef701d74288" /> | <img width="280" alt="Light Focus Timer" src="https://github.com/user-attachments/assets/38fab15d-b163-4a8e-9f75-bcd9a2bec75a" /> |
 
 </div>
-
-light theme
-<img width="411" height="360" alt="Screenshot 2026-01-13 at 20 40 58" src="https://github.com/user-attachments/assets/38fab15d-b163-4a8e-9f75-bcd9a2bec75a" />
-<img width="408" height="426" alt="Screenshot 2026-01-13 at 20 40 49" src="https://github.com/user-attachments/assets/beab797e-2940-4a1c-b6fa-fef701d74288" />
-<img width="432" height="641" alt="Screenshot 2026-01-13 at 20 40 32" src="https://github.com/user-attachments/assets/16e8d26e-eeef-4bf5-82aa-da8c7cc8467e" />
-
-
 
 ## Features
 
