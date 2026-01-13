@@ -83,11 +83,14 @@ const SELECTORS = {
 // CSS Classes
 const CSS_CLASSES = {
   TIMER_RUNNING: 'timer-running',
+  TIMER_WARNING: 'timer-warning',
   COMPLETED: 'completed',
   SELECTED: 'selected',
   RUNNING: 'running',
   PAUSED: 'paused',
+  WARNING: 'warning',
   EDITING: 'editing',
+  ACTIVE: 'active',
   LIGHT_THEME: 'light-theme',
   TASK_EDIT_INPUT: 'task-edit-input',
   EMPTY_STATE: 'empty-state',
@@ -277,18 +280,18 @@ function showSuccessAnimation(element: HTMLElement): void {
  * Update timer warning visual state
  */
 function updateTimerWarning(taskId: string, timeRemaining: number): void {
-  const taskItem = document.querySelector(`[data-id="${taskId}"]`)?.closest('.task-item');
-  const timerDisplay = document.querySelector(`.timer-display[data-id="${taskId}"]`);
+  const taskItem = document.querySelector(`[data-id="${taskId}"]`)?.closest(SELECTORS.TASK_ITEM);
+  const timerDisplay = document.querySelector(`${SELECTORS.TIMER_DISPLAY}[data-id="${taskId}"]`);
   const timerContainer = taskItem?.querySelector('.task-timer');
 
   if (timeRemaining <= TIMER_WARNING_THRESHOLD_SECONDS && timeRemaining > 0) {
-    taskItem?.classList.add('timer-warning');
-    timerDisplay?.classList.add('warning');
-    timerContainer?.classList.add('warning');
+    taskItem?.classList.add(CSS_CLASSES.TIMER_WARNING);
+    timerDisplay?.classList.add(CSS_CLASSES.WARNING);
+    timerContainer?.classList.add(CSS_CLASSES.WARNING);
   } else {
-    taskItem?.classList.remove('timer-warning');
-    timerDisplay?.classList.remove('warning');
-    timerContainer?.classList.remove('warning');
+    taskItem?.classList.remove(CSS_CLASSES.TIMER_WARNING);
+    timerDisplay?.classList.remove(CSS_CLASSES.WARNING);
+    timerContainer?.classList.remove(CSS_CLASSES.WARNING);
   }
 }
 
@@ -599,14 +602,16 @@ function renderEmptyState(searchQuery?: string): string {
 
 function renderTaskHTML(task: Task): string {
   const timerHTML = renderTimerHTML(task);
+  const completedClass = task.completed ? CSS_CLASSES.COMPLETED : '';
+  const timerRunningClass = task.isTimerRunning ? CSS_CLASSES.TIMER_RUNNING : '';
 
   return `
-    <div class="task-item ${task.completed ? 'completed' : ''} ${task.isTimerRunning ? 'timer-running' : ''}"
+    <div class="task-item ${completedClass} ${timerRunningClass}"
          draggable="true"
          data-id="${task.id}"
          role="listitem"
          aria-label="${escapeHtml(task.title)}${task.completed ? ' (completed)' : ''}">
-      <div class="task-checkbox ${task.completed ? 'completed' : ''}"
+      <div class="task-checkbox ${completedClass}"
            data-id="${task.id}"
            role="checkbox"
            aria-checked="${task.completed}"
@@ -620,7 +625,7 @@ function renderTaskHTML(task: Task): string {
               data-id="${task.id}"
               title="Delete task"
               aria-label="Delete ${escapeHtml(task.title)}">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
           <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
         </svg>
       </button>
@@ -635,23 +640,28 @@ function renderTimerHTML(task: Task): string {
 
   const progressPercent = ((task.timeRemaining || 0) / (task.duration * 60)) * 100;
 
+  // SVG icons for timer controls
+  const playIcon = `<svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>`;
+  const pauseIcon = `<svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>`;
+  const resetIcon = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>`;
+
   return `
     <div class="task-timer">
       <div class="timer-row">
-        <span class="timer-display ${task.isTimerRunning ? 'running' : ''}" data-id="${task.id}">
+        <span class="timer-display ${task.isTimerRunning ? CSS_CLASSES.RUNNING : ''}" data-id="${task.id}">
           ${formatTime(task.timeRemaining || 0)}
         </span>
         <div class="timer-controls">
           ${
             task.isTimerRunning
-              ? `<button class="timer-btn pause" data-id="${task.id}" data-action="pause" title="Pause">⏸</button>`
-              : `<button class="timer-btn play" data-id="${task.id}" data-action="play" title="Start">▶</button>`
+              ? `<button class="timer-btn pause" data-id="${task.id}" data-action="${TIMER_ACTION_PAUSE}" title="Pause">${pauseIcon}</button>`
+              : `<button class="timer-btn play" data-id="${task.id}" data-action="${TIMER_ACTION_PLAY}" title="Start">${playIcon}</button>`
           }
-          <button class="timer-btn reset" data-id="${task.id}" data-action="reset" title="Reset">↺</button>
+          <button class="timer-btn reset" data-id="${task.id}" data-action="${TIMER_ACTION_RESET}" title="Reset">${resetIcon}</button>
         </div>
       </div>
       <div class="timer-progress-bar" data-id="${task.id}">
-        <div class="timer-progress-fill ${task.isTimerRunning ? '' : 'paused'}" style="width: ${progressPercent}%"></div>
+        <div class="timer-progress-fill ${task.isTimerRunning ? '' : CSS_CLASSES.PAUSED}" style="width: ${progressPercent}%"></div>
       </div>
     </div>
   `;
@@ -1090,7 +1100,7 @@ function toggleFocusMode(): void {
 
   if (isFocusMode) {
     DOM.container.classList.add(CSS_CLASSES.FOCUS_MODE);
-    DOM.focusBtn?.classList.add('active');
+    DOM.focusBtn?.classList.add(CSS_CLASSES.ACTIVE);
 
     // Show notification
     if (window.electronAPI.showNotification) {
@@ -1101,7 +1111,7 @@ function toggleFocusMode(): void {
     }
   } else {
     DOM.container.classList.remove(CSS_CLASSES.FOCUS_MODE);
-    DOM.focusBtn?.classList.remove('active');
+    DOM.focusBtn?.classList.remove(CSS_CLASSES.ACTIVE);
   }
 
   renderTasks();
