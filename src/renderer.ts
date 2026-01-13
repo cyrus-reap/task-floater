@@ -180,6 +180,85 @@ let selectedTaskIndex = -1;
 let currentMode: AppMode = APP_MODES.FULL;
 let contextMenuTarget: string | null = null;
 let isDoneSectionCollapsed = true;
+let isCommandPaletteOpen = false;
+let commandPaletteSelectedIndex = 0;
+
+// =============================================================================
+// COMMAND PALETTE DEFINITIONS
+// =============================================================================
+
+interface Command {
+  id: string;
+  label: string;
+  shortcut?: string;
+  icon: string;
+  action: () => void | Promise<void>;
+}
+
+const COMMANDS: Command[] = [
+  {
+    id: 'add-task',
+    label: 'Add new task',
+    shortcut: '⌘N',
+    icon: '<svg class="icon" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>',
+    action: () => DOM.taskInput.focus(),
+  },
+  {
+    id: 'search',
+    label: 'Search tasks',
+    shortcut: '⌘F',
+    icon: '<svg class="icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>',
+    action: () => DOM.searchInput?.focus(),
+  },
+  {
+    id: 'full-mode',
+    label: 'Full mode',
+    shortcut: '⌘1',
+    icon: '<svg class="icon" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/></svg>',
+    action: () => setAppMode(APP_MODES.FULL),
+  },
+  {
+    id: 'compact-mode',
+    label: 'Compact mode',
+    shortcut: '⌘2',
+    icon: '<svg class="icon" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="12" x2="21" y2="12"/></svg>',
+    action: () => setAppMode(APP_MODES.COMPACT),
+  },
+  {
+    id: 'focus-mode',
+    label: 'Focus mode',
+    shortcut: '⌘3',
+    icon: '<svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>',
+    action: () => setAppMode(APP_MODES.FOCUS),
+  },
+  {
+    id: 'toggle-theme',
+    label: 'Toggle theme',
+    shortcut: '⌘T',
+    icon: '<svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>',
+    action: () => DOM.themeToggle?.click(),
+  },
+  {
+    id: 'export',
+    label: 'Export tasks',
+    shortcut: '⌘E',
+    icon: '<svg class="icon" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>',
+    action: handleExport,
+  },
+  {
+    id: 'import',
+    label: 'Import tasks',
+    shortcut: '⌘I',
+    icon: '<svg class="icon" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>',
+    action: handleImport,
+  },
+  {
+    id: 'clear-completed',
+    label: 'Clear completed',
+    icon: '<svg class="icon" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>',
+    action: handleClearCompleted,
+  },
+];
 
 // =============================================================================
 // DOM ELEMENTS
@@ -1309,6 +1388,11 @@ async function handleModifierShortcut(e: KeyboardEvent, incompleteTasks: Task[])
       e.preventDefault();
       DOM.themeToggle?.click();
       break;
+
+    case 'k':
+      e.preventDefault();
+      openCommandPalette();
+      break;
   }
 }
 
@@ -1959,6 +2043,192 @@ function setupTaskInput(): void {
 }
 
 // =============================================================================
+// COMMAND PALETTE
+// =============================================================================
+
+function openCommandPalette(): void {
+  if (isCommandPaletteOpen) {
+    return;
+  }
+  isCommandPaletteOpen = true;
+  commandPaletteSelectedIndex = 0;
+
+  const overlay = document.createElement('div');
+  overlay.className = 'command-palette-overlay';
+  overlay.innerHTML = `
+    <div class="command-palette">
+      <div class="command-palette-search">
+        <div class="command-palette-search-wrapper">
+          <svg class="command-palette-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"/>
+            <path d="m21 21-4.35-4.35"/>
+          </svg>
+          <input type="text" class="command-palette-input" placeholder="Type a command..." autofocus>
+        </div>
+      </div>
+      <div class="command-palette-list">
+        ${renderCommandList(COMMANDS)}
+      </div>
+      <div class="command-palette-hint">
+        <span class="kbd">↑↓</span> navigate
+        <span class="kbd">↵</span> select
+        <span class="kbd">esc</span> close
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(overlay);
+
+  // Get elements
+  const input = overlay.querySelector('.command-palette-input') as HTMLInputElement;
+  const list = overlay.querySelector('.command-palette-list') as HTMLDivElement;
+
+  // Focus input
+  setTimeout(() => input?.focus(), 50);
+
+  // Handle input filtering
+  input?.addEventListener('input', () => {
+    const query = input.value.toLowerCase();
+    const filtered = filterCommands(query);
+    list.innerHTML = renderCommandList(filtered);
+    commandPaletteSelectedIndex = 0;
+    updateCommandPaletteSelection(list);
+    attachCommandClickHandlers(list, overlay);
+  });
+
+  // Handle keyboard navigation
+  input?.addEventListener('keydown', e => {
+    handleCommandPaletteKeyboard(e, list, overlay);
+  });
+
+  // Close on overlay click
+  overlay.addEventListener('click', e => {
+    if (e.target === overlay) {
+      closeCommandPalette();
+    }
+  });
+
+  // Update selection and attach click handlers
+  updateCommandPaletteSelection(list);
+  attachCommandClickHandlers(list, overlay);
+}
+
+function closeCommandPalette(): void {
+  if (!isCommandPaletteOpen) {
+    return;
+  }
+  isCommandPaletteOpen = false;
+
+  const overlay = document.querySelector('.command-palette-overlay');
+  if (overlay) {
+    overlay.classList.add('closing');
+    setTimeout(() => overlay.remove(), 150);
+  }
+}
+
+function filterCommands(query: string): Command[] {
+  if (!query) {
+    return COMMANDS;
+  }
+  return COMMANDS.filter(
+    cmd => cmd.label.toLowerCase().includes(query) || cmd.id.toLowerCase().includes(query)
+  );
+}
+
+function renderCommandList(commands: Command[]): string {
+  if (commands.length === 0) {
+    return `<div class="command-palette-empty">No matching commands</div>`;
+  }
+
+  return commands
+    .map(
+      (cmd, index) => `
+      <div class="command-palette-item ${index === commandPaletteSelectedIndex ? 'selected' : ''}" data-command-id="${cmd.id}">
+        ${cmd.icon}
+        <div class="command-palette-item-content">
+          <span class="command-palette-item-label">${cmd.label}</span>
+        </div>
+        ${cmd.shortcut ? `<span class="command-palette-shortcut">${cmd.shortcut}</span>` : ''}
+      </div>
+    `
+    )
+    .join('');
+}
+
+function updateCommandPaletteSelection(list: HTMLElement): void {
+  const items = list.querySelectorAll('.command-palette-item');
+  items.forEach((item, index) => {
+    item.classList.toggle('selected', index === commandPaletteSelectedIndex);
+    if (index === commandPaletteSelectedIndex) {
+      item.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    }
+  });
+}
+
+function handleCommandPaletteKeyboard(
+  e: KeyboardEvent,
+  list: HTMLElement,
+  overlay: HTMLElement
+): void {
+  const items = list.querySelectorAll('.command-palette-item');
+  const itemCount = items.length;
+
+  switch (e.key) {
+    case KEY_ARROW_DOWN:
+      e.preventDefault();
+      commandPaletteSelectedIndex = (commandPaletteSelectedIndex + 1) % itemCount;
+      updateCommandPaletteSelection(list);
+      break;
+
+    case KEY_ARROW_UP:
+      e.preventDefault();
+      commandPaletteSelectedIndex = (commandPaletteSelectedIndex - 1 + itemCount) % itemCount;
+      updateCommandPaletteSelection(list);
+      break;
+
+    case KEY_ENTER:
+      e.preventDefault();
+      executeSelectedCommand(overlay);
+      break;
+
+    case KEY_ESCAPE:
+      e.preventDefault();
+      closeCommandPalette();
+      break;
+  }
+}
+
+function attachCommandClickHandlers(list: HTMLElement, overlay: HTMLElement): void {
+  list.querySelectorAll('.command-palette-item').forEach((item, index) => {
+    item.addEventListener('click', () => {
+      commandPaletteSelectedIndex = index;
+      executeSelectedCommand(overlay);
+    });
+    item.addEventListener('mouseenter', () => {
+      commandPaletteSelectedIndex = index;
+      updateCommandPaletteSelection(list);
+    });
+  });
+}
+
+function executeSelectedCommand(overlay: HTMLElement): void {
+  const input = overlay.querySelector('.command-palette-input') as HTMLInputElement;
+  const query = input?.value.toLowerCase() || '';
+  const filtered = filterCommands(query);
+
+  if (filtered[commandPaletteSelectedIndex]) {
+    const command = filtered[commandPaletteSelectedIndex];
+    closeCommandPalette();
+    command.action();
+  }
+}
+
+function setupCommandPalette(): void {
+  // Cmd+K is handled in handleModifierShortcut
+  // This function exists for any additional setup if needed
+}
+
+// =============================================================================
 // INITIALIZATION
 // =============================================================================
 
@@ -1983,6 +2253,7 @@ function initialize(): void {
   setupModeSelector();
   setupOverflowMenu();
   setupContextMenu();
+  setupCommandPalette();
 
   // Load initial data
   loadTasks();
