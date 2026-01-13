@@ -62,14 +62,27 @@ Task Floater is a minimalist, always-on-top task manager for macOS featuring a s
 
 _Screenshots coming soon_
 
-## 🚀 Quick Start
+## 🚀 Installation
 
-### Prerequisites
+### Download Pre-built App (Easiest)
 
-- macOS 10.13 or later
-- Node.js 16+ and npm
+**[📥 Download Latest Release](https://github.com/cyrus-reap/task-floater/releases/latest)**
 
-### Installation
+1. Download `Task Floater-X.X.X-arm64.dmg` (Apple Silicon) or `Task Floater-X.X.X.dmg` (Intel)
+2. Double-click the DMG
+3. **First time only** - Bypass Gatekeeper warning:
+   - Click "Done" or "Cancel" on the warning
+   - **Right-click** the Task Floater app
+   - Select **"Open"**
+   - Click **"Open"** again in the dialog
+4. Drag to Applications folder
+5. Launch normally from Applications
+
+**After first launch, it opens normally!** The app includes auto-update, so you'll get future updates automatically.
+
+### Build from Source
+
+**Prerequisites**: macOS 10.13+, Node.js 16+, npm
 
 ```bash
 # Clone the repository
