@@ -1,39 +1,47 @@
 # Changelog
 
-All notable changes to this project will be documented in this file.
+All notable changes to Task Floater will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
-### Planned
-- Linear integration
-- Customizable themes
-- Cloud sync option
-- Windows/Linux support
+### Added
+- 🎯 **Focus Mode** - Minimize distractions and concentrate on active tasks
+  - Hides completed tasks, search, stats, and input sections
+  - Highlights active timer task
+  - Dims inactive tasks
+  - Darker, immersive background
+  - Toggle with focus button or `Cmd+Shift+F`
+  - Notification on enable
 
-## [1.0.0] - 2024-01-13
+## [1.0.0] - 2026-01-13
 
 ### Added
-- Initial release
-- Floating window with glassmorphism design
-- Always-on-top functionality
-- Task creation and management
-- Pomodoro-style timers for tasks
-- Auto-save to local storage
-- Drag-to-move window
-- Native macOS window controls
-- Keyboard shortcuts (Enter to add tasks)
-- Task completion tracking
-- Timer notifications with audio
+- Floating, always-on-top task window for macOS
+- Pomodoro-style timer for each task
+- Duration preset buttons (15min, 30min, 45min, 1hr, 1.5hrs)
+- Progress bar for running timers
+- Auto-advance to next task when timer completes
+- Task search functionality
+- Stats bar showing active/completed tasks
+- Drag-and-drop task reordering
+- Professional SVG icons throughout
+- Glassmorphism UI design
+- Auto-update functionality via GitHub Releases
+- Comprehensive input validation and security hardening
 
-### Technical
-- Electron 28.0.0
-- TypeScript with strict mode
-- IPC communication via contextBridge
-- Secure preload script pattern
-- Local JSON storage
+### Security
+- Input validation for all user inputs
+- XSS prevention with HTML escaping and CSP
+- Path traversal protection
+- File permission hardening (0o600)
+- Electron security hardening (sandbox, context isolation)
+- Max task limits to prevent DoS
 
-[Unreleased]: https://github.com/cyrus-reap/task-floater/compare/v1.0.0...HEAD
-[1.0.0]: https://github.com/cyrus-reap/task-floater/releases/tag/v1.0.0
+---
+
+## How to Update
+
+See [UPDATE.md](UPDATE.md) for the complete update workflow.
