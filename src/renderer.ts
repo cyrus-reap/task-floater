@@ -28,6 +28,10 @@ const SECONDS_PER_MINUTE = 60;
 const AUTO_ADVANCE_DELAY_MS = 2000;
 const SEARCH_DEBOUNCE_MS = 300;
 const TIMER_TICK_INTERVAL_MS = 1000;
+const TIMER_WARNING_THRESHOLD_SECONDS = 300; // 5 minutes
+const TOAST_DURATION_MS = 3000;
+const SUCCESS_ANIMATION_DURATION_MS = 400;
+const CONFETTI_COUNT = 50;
 
 // Duration presets (in minutes) - 3×2 grid for symmetry
 const DURATION_PRESETS = [
@@ -49,10 +53,12 @@ const ELEMENT_IDS = {
   CLOSE_BTN: 'closeBtn',
   SEARCH_INPUT: 'searchInput',
   STATS_TEXT: 'statsText',
+  STATS_BAR: 'statsBar',
   CLEAR_COMPLETED_BTN: 'clearCompletedBtn',
   EXPORT_BTN: 'exportBtn',
   IMPORT_BTN: 'importBtn',
   THEME_TOGGLE: 'themeToggle',
+  FOCUS_BTN: 'focusBtn',
   SEARCH_TOGGLE: 'searchToggle',
   INPUT_TOGGLE: 'inputToggle',
   SEARCH_BAR: 'searchBar',
@@ -89,6 +95,7 @@ const CSS_CLASSES = {
   EMPTY_STATE_TITLE: 'empty-state-title',
   EMPTY_STATE_TEXT: 'empty-state-text',
   COLLAPSED: 'collapsed',
+  FOCUS_MODE: 'focus-mode',
 } as const;
 
 // Data Attributes
@@ -125,10 +132,6 @@ const THEME_DARK = 'dark';
 const MSG_TIMER_COMPLETE_TITLE = '⏰ Timer Complete';
 const MSG_ALL_DONE_TITLE = '🎉 All Done!';
 const MSG_ALL_DONE_BODY = 'No more tasks with timers. Great work!';
-const MSG_CLEARED_TITLE = '🗑️ Cleared';
-const MSG_EXPORT_TITLE = '📤 Export Complete';
-const MSG_EXPORT_BODY = 'Tasks exported successfully!';
-const MSG_IMPORT_TITLE = '📥 Import Complete';
 
 // =============================================================================
 // STATE
@@ -138,12 +141,14 @@ let tasks: Task[] = [];
 const timerIntervals: Map<string, number> = new Map();
 let selectedDuration: number | undefined = undefined;
 let selectedTaskIndex = -1;
+let isFocusMode = false;
 
 // =============================================================================
 // DOM ELEMENTS
 // =============================================================================
 
 const DOM = {
+  container: document.querySelector('.container') as HTMLDivElement,
   taskInput: document.getElementById(ELEMENT_IDS.TASK_INPUT) as HTMLInputElement,
   durationInput: document.getElementById(ELEMENT_IDS.DURATION_INPUT) as HTMLInputElement,
   addBtn: document.getElementById(ELEMENT_IDS.ADD_BTN) as HTMLButtonElement,
@@ -152,12 +157,14 @@ const DOM = {
   closeBtn: document.getElementById(ELEMENT_IDS.CLOSE_BTN) as HTMLButtonElement,
   searchInput: document.getElementById(ELEMENT_IDS.SEARCH_INPUT) as HTMLInputElement | null,
   statsText: document.getElementById(ELEMENT_IDS.STATS_TEXT) as HTMLDivElement | null,
+  statsBar: document.getElementById(ELEMENT_IDS.STATS_BAR) as HTMLDivElement | null,
   clearCompletedBtn: document.getElementById(
     ELEMENT_IDS.CLEAR_COMPLETED_BTN
   ) as HTMLButtonElement | null,
   exportBtn: document.getElementById(ELEMENT_IDS.EXPORT_BTN) as HTMLButtonElement | null,
   importBtn: document.getElementById(ELEMENT_IDS.IMPORT_BTN) as HTMLButtonElement | null,
   themeToggle: document.getElementById(ELEMENT_IDS.THEME_TOGGLE) as HTMLButtonElement | null,
+  focusBtn: document.getElementById(ELEMENT_IDS.FOCUS_BTN) as HTMLButtonElement | null,
   searchToggle: document.getElementById(ELEMENT_IDS.SEARCH_TOGGLE) as HTMLButtonElement | null,
   inputToggle: document.getElementById(ELEMENT_IDS.INPUT_TOGGLE) as HTMLButtonElement | null,
   searchBar: document.getElementById(ELEMENT_IDS.SEARCH_BAR) as HTMLDivElement | null,
@@ -210,6 +217,81 @@ function playNotificationSound(): void {
   }
 }
 
+/**
+ * Show toast notification
+ */
+function showToast(message: string, type: 'success' | 'error' | 'info' = 'info'): void {
+  let toastContainer = document.querySelector('.toast-container') as HTMLDivElement;
+  if (!toastContainer) {
+    toastContainer = document.createElement('div');
+    toastContainer.className = 'toast-container';
+    document.body.appendChild(toastContainer);
+  }
+
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+
+  const icons = { success: '✓', error: '✕', info: 'ℹ' };
+  toast.innerHTML = `
+    <span style="font-size: 16px;">${icons[type]}</span>
+    <span>${message}</span>
+  `;
+
+  toastContainer.appendChild(toast);
+
+  setTimeout(() => {
+    toast.style.animation = 'slideOut 0.3s ease-out forwards';
+    setTimeout(() => toast.remove(), 300);
+  }, TOAST_DURATION_MS);
+}
+
+/**
+ * Trigger confetti celebration
+ */
+function triggerConfetti(): void {
+  const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8', '#F7DC6F', '#BB8FCE'];
+
+  for (let i = 0; i < CONFETTI_COUNT; i++) {
+    const confetti = document.createElement('div');
+    confetti.className = 'confetti';
+    confetti.style.left = Math.random() * 100 + '%';
+    confetti.style.top = '-10px';
+    confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+    confetti.style.animationDelay = Math.random() * 0.5 + 's';
+    confetti.style.animationDuration = 2 + Math.random() * 2 + 's';
+
+    document.body.appendChild(confetti);
+    setTimeout(() => confetti.remove(), 4000);
+  }
+}
+
+/**
+ * Show success animation on element
+ */
+function showSuccessAnimation(element: HTMLElement): void {
+  element.classList.add('success');
+  setTimeout(() => element.classList.remove('success'), SUCCESS_ANIMATION_DURATION_MS);
+}
+
+/**
+ * Update timer warning visual state
+ */
+function updateTimerWarning(taskId: string, timeRemaining: number): void {
+  const taskItem = document.querySelector(`[data-id="${taskId}"]`)?.closest('.task-item');
+  const timerDisplay = document.querySelector(`.timer-display[data-id="${taskId}"]`);
+  const timerContainer = taskItem?.querySelector('.task-timer');
+
+  if (timeRemaining <= TIMER_WARNING_THRESHOLD_SECONDS && timeRemaining > 0) {
+    taskItem?.classList.add('timer-warning');
+    timerDisplay?.classList.add('warning');
+    timerContainer?.classList.add('warning');
+  } else {
+    taskItem?.classList.remove('timer-warning');
+    timerDisplay?.classList.remove('warning');
+    timerContainer?.classList.remove('warning');
+  }
+}
+
 // =============================================================================
 // TASK MANAGEMENT
 // =============================================================================
@@ -236,26 +318,51 @@ function updateStats(): void {
 async function addTask(): Promise<void> {
   const title = DOM.taskInput.value.trim();
   if (!title) {
+    DOM.taskInput.style.animation = 'shake 0.3s ease-out';
+    setTimeout(() => (DOM.taskInput.style.animation = ''), 300);
     return;
   }
 
   await window.electronAPI.addTask(title, selectedDuration);
+
+  // Success feedback
+  showSuccessAnimation(DOM.addBtn);
+  showToast('Task added!', 'success');
 
   DOM.taskInput.value = '';
   selectedDuration = undefined;
   clearPresetSelection();
 
   await loadTasks();
+
+  // Auto-focus for quick entry
+  setTimeout(() => DOM.taskInput.focus(), 100);
 }
 
 async function toggleTask(taskId: string): Promise<void> {
   await window.electronAPI.toggleTask(taskId);
   await loadTasks();
+
+  // Check if all tasks are complete
+  const allComplete = tasks.length > 0 && tasks.every(t => t.completed);
+  if (allComplete) {
+    triggerConfetti();
+    showToast('🎉 All tasks complete! Great work!', 'success');
+  }
 }
 
 async function deleteTask(taskId: string): Promise<void> {
   stopTimer(taskId);
+
+  // Smooth removal animation
+  const taskElement = document.querySelector(`[data-id="${taskId}"]`)?.closest('.task-item');
+  if (taskElement) {
+    (taskElement as HTMLElement).style.animation = 'slideOut 0.3s ease-out forwards';
+    await new Promise(resolve => setTimeout(resolve, 300));
+  }
+
   await window.electronAPI.deleteTask(taskId);
+  showToast('Task deleted', 'info');
   await loadTasks();
 }
 
@@ -371,6 +478,9 @@ async function tickTimer(taskId: string): Promise<void> {
   // Update UI
   updateTimerDisplay(taskId, task.timeRemaining, task.duration || 0);
 
+  // Update warning state for low time
+  updateTimerWarning(taskId, task.timeRemaining);
+
   // Save periodically
   if (task.timeRemaining % TIMER_SAVE_INTERVAL_SECONDS === 0) {
     await window.electronAPI.updateTaskTimer(taskId, { timeRemaining: task.timeRemaining });
@@ -410,7 +520,9 @@ async function handleTimerComplete(taskId: string): Promise<void> {
   }
 
   playNotificationSound();
+  showToast(`⏰ Timer complete: ${task.title}`, 'success');
 
+  // System notification as backup
   await window.electronAPI.showNotification(MSG_TIMER_COMPLETE_TITLE, `Finished: ${task.title}`);
 
   // Auto-advance to next task
@@ -420,8 +532,12 @@ async function handleTimerComplete(taskId: string): Promise<void> {
     .find(t => !t.completed && t.duration && t.duration > 0);
 
   if (nextTask) {
+    showToast(`▶ Starting: ${nextTask.title}`, 'info');
     setTimeout(() => startTimer(nextTask.id), AUTO_ADVANCE_DELAY_MS);
   } else {
+    // All timers done - celebrate!
+    triggerConfetti();
+    showToast('🎉 All timers complete! Awesome work!', 'success');
     await window.electronAPI.showNotification(MSG_ALL_DONE_TITLE, MSG_ALL_DONE_BODY);
   }
 }
@@ -772,7 +888,13 @@ async function handleModifierShortcut(e: KeyboardEvent, incompleteTasks: Task[])
 
     case 'f':
       e.preventDefault();
-      DOM.searchInput?.focus();
+      if (e.shiftKey) {
+        // Cmd+Shift+F: Toggle focus mode
+        toggleFocusMode();
+      } else {
+        // Cmd+F: Focus search
+        DOM.searchInput?.focus();
+      }
       break;
 
     case 't':
@@ -895,13 +1017,14 @@ function setupActionButtons(): void {
     DOM.clearCompletedBtn.addEventListener('click', async () => {
       const completedCount = tasks.filter(t => t.completed).length;
       if (completedCount === 0) {
+        showToast('No completed tasks to clear', 'info');
         return;
       }
 
       await window.electronAPI.clearCompleted();
-      await window.electronAPI.showNotification(
-        MSG_CLEARED_TITLE,
-        `Removed ${completedCount} completed task${completedCount > 1 ? 's' : ''}`
+      showToast(
+        `Cleared ${completedCount} completed task${completedCount > 1 ? 's' : ''}`,
+        'success'
       );
       await loadTasks();
     });
@@ -910,9 +1033,10 @@ function setupActionButtons(): void {
   // Export
   if (DOM.exportBtn) {
     DOM.exportBtn.addEventListener('click', async () => {
+      showToast('Exporting tasks...', 'info');
       const result = await window.electronAPI.exportTasks();
       if (result) {
-        await window.electronAPI.showNotification(MSG_EXPORT_TITLE, MSG_EXPORT_BODY);
+        showToast('Tasks exported successfully!', 'success');
       }
     });
   }
@@ -920,13 +1044,13 @@ function setupActionButtons(): void {
   // Import
   if (DOM.importBtn) {
     DOM.importBtn.addEventListener('click', async () => {
+      showToast('Importing tasks...', 'info');
       const count = await window.electronAPI.importTasks();
       if (count > 0) {
-        await window.electronAPI.showNotification(
-          MSG_IMPORT_TITLE,
-          `Imported ${count} task${count > 1 ? 's' : ''}!`
-        );
+        showToast(`Imported ${count} task${count > 1 ? 's' : ''}!`, 'success');
         await loadTasks();
+      } else {
+        showToast('No tasks imported', 'info');
       }
     });
   }
@@ -948,6 +1072,39 @@ function setupActionButtons(): void {
       }
     });
   }
+
+  // Focus mode toggle
+  if (DOM.focusBtn) {
+    DOM.focusBtn.addEventListener('click', () => {
+      toggleFocusMode();
+    });
+  }
+}
+
+// =============================================================================
+// FOCUS MODE
+// =============================================================================
+
+function toggleFocusMode(): void {
+  isFocusMode = !isFocusMode;
+
+  if (isFocusMode) {
+    DOM.container.classList.add(CSS_CLASSES.FOCUS_MODE);
+    DOM.focusBtn?.classList.add('active');
+
+    // Show notification
+    if (window.electronAPI.showNotification) {
+      window.electronAPI.showNotification(
+        '🎯 Focus Mode',
+        'Completed tasks hidden. Distractions minimized.'
+      );
+    }
+  } else {
+    DOM.container.classList.remove(CSS_CLASSES.FOCUS_MODE);
+    DOM.focusBtn?.classList.remove('active');
+  }
+
+  renderTasks();
 }
 
 // =============================================================================
