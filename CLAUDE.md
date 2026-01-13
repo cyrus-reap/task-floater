@@ -184,9 +184,78 @@ The window is configured for macOS floating behavior:
 - **Draggable**: Header has `-webkit-app-region: drag`
 - **Non-draggable elements**: Must have `-webkit-app-region: no-drag`
 
+## Security Architecture
+
+### Input Validation ✅
+**File**: `src/validation.ts`
+
+All user inputs validated before processing:
+- **Task titles**: Length limits (500 chars), HTML tag stripping
+- **Durations**: Range limits (1-1440 mins), integer validation
+- **Task IDs**: Alphanumeric format validation
+- **DoS Prevention**: Max 1000 tasks limit
+
+### XSS Prevention ✅
+- HTML escaping via `escapeHtml()` for all user content
+- CSP headers prevent inline script execution
+- No `eval()` or `Function()` constructors
+- SVG icons are hardcoded (no user-provided SVG)
+
+### File System Security ✅
+- Path traversal protection via `path.normalize()` validation
+- Files written with restrictive permissions (0o600)
+- All operations sandboxed to `userData` directory
+- Array validation on JSON parse
+
+### Electron Security ✅
+- `contextIsolation: true` - Renderer isolated from Node.js
+- `nodeIntegration: false` - No direct Node.js access
+- `sandbox: true` - Chromium sandbox enabled
+- `webSecurity: true` - Web security features enabled
+- Content Security Policy configured
+
+**See**: `SECURITY.md` for complete security documentation
+
+## Code Organization
+
+### Constants ✅
+**File**: `src/constants.ts`
+
+Centralized configuration (no magic strings/numbers):
+- Timer settings (intervals, conversions)
+- Duration presets (15min, 30min, etc.)
+- CSS class names
+- Data attributes
+- User messages
+- Audio settings
+- Security limits
+- DOM element IDs
+- CSS selectors
+
+### Validation ✅
+**File**: `src/validation.ts`
+
+Type-safe validators for all inputs:
+- Prevents injection attacks
+- Enforces business rules
+- Provides clear error messages
+- Guards against resource exhaustion
+
+## Best Practices Applied
+
+1. **No magic strings/numbers** - All values in constants.ts
+2. **Input validation** - All IPC handlers validate inputs
+3. **Type safety** - Strict TypeScript with proper types
+4. **Error handling** - Try-catch on all IPC handlers
+5. **Security first** - Multiple layers of defense
+6. **Code organization** - Clear separation of concerns
+7. **XSS prevention** - HTML escaping + CSP
+8. **Path validation** - Prevent file system attacks
+
 ## Known Limitations
 
 1. **Linear Integration**: Service exists but not fully wired into IPC handlers
 2. **macOS Only**: Window positioning and always-on-top behavior optimized for macOS
 3. **No undo**: Task deletions are immediate and permanent
 4. **Single user**: No multi-user or sync between devices
+5. **No encryption**: Tasks stored in plaintext (future enhancement)

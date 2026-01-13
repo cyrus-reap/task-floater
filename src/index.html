@@ -327,6 +327,11 @@
       animation: slideIn 0.3s ease-out;
       position: relative;
       overflow: hidden;
+      cursor: grab;
+    }
+
+    .task-item:active {
+      cursor: grabbing;
     }
 
     .task-item::before {
@@ -771,7 +776,7 @@
       </div>
     </div>
 
-    <div class="tasks-section" id="tasksSection">
+    <div class="tasks-section" id="tasksSection" role="list" aria-label="Task list">
       <div class="empty-state">No tasks yet. Add one above!</div>
     </div>
   </div>
