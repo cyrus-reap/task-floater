@@ -40,4 +40,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
   minimize: (): Promise<void> => ipcRenderer.invoke('minimize'),
   close: (): Promise<void> => ipcRenderer.invoke('close'),
   resizeWindow: (height: number): Promise<void> => ipcRenderer.invoke('resize-window', height),
+  showConfirmDialog: (title: string, message: string): Promise<boolean> =>
+    ipcRenderer.invoke('show-confirm-dialog', title, message),
 });

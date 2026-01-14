@@ -423,3 +423,23 @@ ipcMain.handle('resize-window', (_event, height: number) => {
     mainWindow.setSize(width, clampedHeight);
   }
 });
+
+ipcMain.handle(
+  'show-confirm-dialog',
+  async (_event, title: string, message: string): Promise<boolean> => {
+    if (!mainWindow) {
+      return false;
+    }
+
+    const { response } = await dialog.showMessageBox(mainWindow, {
+      type: 'question',
+      buttons: ['Yes', 'No'],
+      defaultId: 0,
+      cancelId: 1,
+      title,
+      message,
+    });
+
+    return response === 0;
+  }
+);

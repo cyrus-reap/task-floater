@@ -694,24 +694,32 @@ async function handleTimerComplete(taskId: string): Promise<void> {
   }
 
   playNotificationSound();
-  showToast(`⏰ Timer complete: ${task.title}`, 'success');
 
-  // System notification as backup
-  await window.electronAPI.showNotification(MSG_TIMER_COMPLETE_TITLE, `Finished: ${task.title}`);
+  // Automatically mark the task as done
+  await toggleTask(taskId);
+  showToast(`✓ Completed: ${task.title}`, 'success');
 
-  // Auto-advance to next task
-  const currentIndex = tasks.findIndex(t => t.id === taskId);
-  const nextTask = tasks
-    .slice(currentIndex + 1)
-    .find(t => !t.completed && t.duration && t.duration > 0);
+  // System notification
+  await window.electronAPI.showNotification(MSG_TIMER_COMPLETE_TITLE, `Completed: ${task.title}`);
+
+  // Find next task with timer
+  const nextTask = tasks.find(t => !t.completed && t.id !== taskId && t.duration && t.duration > 0);
 
   if (nextTask) {
-    showToast(`▶ Starting: ${nextTask.title}`, 'info');
-    setTimeout(() => startTimer(nextTask.id), AUTO_ADVANCE_DELAY_MS);
+    // Ask user if they want to continue to next task
+    const shouldContinue = await window.electronAPI.showConfirmDialog(
+      'Continue to next task?',
+      `Start timer for "${nextTask.title}"?`
+    );
+
+    if (shouldContinue) {
+      showToast(`▶ Starting: ${nextTask.title}`, 'info');
+      setTimeout(() => startTimer(nextTask.id), AUTO_ADVANCE_DELAY_MS);
+    }
   } else {
     // All timers done - celebrate!
     triggerConfetti();
-    showToast('🎉 All timers complete! Awesome work!', 'success');
+    showToast('🎉 All tasks complete! Awesome work!', 'success');
     await window.electronAPI.showNotification(MSG_ALL_DONE_TITLE, MSG_ALL_DONE_BODY);
   }
 }
