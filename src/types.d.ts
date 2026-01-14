@@ -37,6 +37,7 @@ interface ElectronAPI {
   minimize: () => Promise<void>;
   close: () => Promise<void>;
   resizeWindow: (height: number) => Promise<void>;
+  showConfirmDialog: (title: string, message: string) => Promise<boolean>;
 }
 
 declare global {
