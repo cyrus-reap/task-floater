@@ -19,6 +19,11 @@ interface Task {
   pinned?: boolean;
 }
 
+interface ParsedTask {
+  title: string;
+  duration?: number;
+}
+
 // =============================================================================
 // CONSTANTS
 // =============================================================================
@@ -2246,6 +2251,227 @@ function setupCommandPalette(): void {
 }
 
 // =============================================================================
+// SCREENSHOT CAPTURE
+// =============================================================================
+
+let previewTasks: ParsedTask[] = [];
+let screenshotSetupComplete = false; // Prevent duplicate setup
+
+function setupScreenshotCapture(): void {
+  // Only setup once to prevent duplicate event listeners
+  if (screenshotSetupComplete) {
+    return;
+  }
+  screenshotSetupComplete = true;
+
+  const screenshotBtn = document.getElementById('screenshotBtn');
+  const modal = document.getElementById('screenshotModal');
+  const modalCloseBtn = document.getElementById('modalCloseBtn');
+  const modalCancelBtn = document.getElementById('modalCancelBtn');
+  const modalAddBtn = document.getElementById('modalAddBtn');
+  const previewTaskList = document.getElementById('previewTaskList');
+  const modalLoading = document.getElementById('modalLoading');
+  const modalFooter = document.getElementById('modalFooter');
+  const modalEmptyState = document.getElementById('modalEmptyState');
+  const modalAddCount = document.getElementById('modalAddCount');
+
+  if (!screenshotBtn || !modal) {
+    console.warn('Screenshot elements not found');
+    return;
+  }
+
+  // Screenshot button click handler
+  const handleButtonClick = async () => {
+    await handleScreenshotCapture();
+  };
+
+  // Screenshot button click
+  screenshotBtn.addEventListener('click', handleButtonClick);
+
+  // Listen for keyboard shortcut trigger (only once)
+  window.electronAPI.onScreenshotTrigger(async () => {
+    await handleScreenshotCapture();
+  });
+
+  // Close modal handlers
+  modalCloseBtn?.addEventListener('click', closeModal);
+  modalCancelBtn?.addEventListener('click', closeModal);
+
+  // Close modal on overlay click
+  modal.addEventListener('click', e => {
+    if (e.target === modal) {
+      closeModal();
+    }
+  });
+
+  // Add tasks button
+  modalAddBtn?.addEventListener('click', async () => {
+    if (previewTasks.length === 0) {
+      return;
+    }
+
+    try {
+      if (modalAddBtn) {
+        (modalAddBtn as HTMLButtonElement).disabled = true;
+      }
+      const addedTasks = await window.electronAPI.addTasksBatch(previewTasks);
+
+      // Close modal and refresh task list
+      closeModal();
+      await loadTasks();
+
+      // Show success toast
+      showToast(`Added ${addedTasks.length} task${addedTasks.length === 1 ? '' : 's'}!`, 'success');
+    } catch (error) {
+      console.error('Error adding tasks:', error);
+      showToast('Failed to add tasks', 'error');
+    } finally {
+      if (modalAddBtn) {
+        (modalAddBtn as HTMLButtonElement).disabled = false;
+      }
+    }
+  });
+
+  async function handleScreenshotCapture(): Promise<void> {
+    try {
+      // Trigger native macOS screenshot tool (like Cmd+Shift+4)
+      const imagePath = await window.electronAPI.captureNativeScreenshot();
+
+      if (!imagePath) {
+        // User canceled (pressed Esc) or no screenshot taken
+        return;
+      }
+
+      // Show modal in loading state while processing
+      openModal();
+      showLoadingState();
+
+      // Process screenshot file with OCR
+      const tasks = await window.electronAPI.processScreenshotFile(imagePath);
+
+      if (tasks.length === 0) {
+        showEmptyState();
+      } else {
+        previewTasks = tasks;
+        showPreviewTasks(tasks);
+      }
+    } catch (error) {
+      console.error('Screenshot capture error:', error);
+      closeModal();
+      showToast('Failed to process screenshot', 'error');
+    }
+  }
+
+  function openModal(): void {
+    modal?.classList.add('active');
+  }
+
+  function closeModal(): void {
+    modal?.classList.remove('active');
+    previewTasks = [];
+  }
+
+  function showLoadingState(): void {
+    if (modalLoading) {
+      modalLoading.style.display = 'flex';
+    }
+    if (previewTaskList) {
+      previewTaskList.style.display = 'none';
+    }
+    if (modalFooter) {
+      modalFooter.style.display = 'none';
+    }
+    if (modalEmptyState) {
+      modalEmptyState.style.display = 'none';
+    }
+  }
+
+  function showEmptyState(): void {
+    if (modalLoading) {
+      modalLoading.style.display = 'none';
+    }
+    if (previewTaskList) {
+      previewTaskList.style.display = 'none';
+    }
+    if (modalFooter) {
+      modalFooter.style.display = 'none';
+    }
+    if (modalEmptyState) {
+      modalEmptyState.style.display = 'block';
+    }
+  }
+
+  function showPreviewTasks(tasks: ParsedTask[]): void {
+    if (modalLoading) {
+      modalLoading.style.display = 'none';
+    }
+    if (modalEmptyState) {
+      modalEmptyState.style.display = 'none';
+    }
+    if (previewTaskList) {
+      previewTaskList.style.display = 'flex';
+    }
+    if (modalFooter) {
+      modalFooter.style.display = 'flex';
+    }
+
+    // Render task preview list
+    if (previewTaskList) {
+      previewTaskList.innerHTML = tasks
+        .map(
+          (task, index) => `
+        <div class="preview-task-item" data-index="${index}">
+          <button class="preview-task-remove" data-index="${index}">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+          <div class="preview-task-content">
+            <div class="preview-task-title">${escapeHtml(task.title)}</div>
+            ${task.duration ? `<div class="preview-task-duration">${task.duration} min</div>` : ''}
+          </div>
+        </div>
+      `
+        )
+        .join('');
+
+      // Setup remove buttons
+      previewTaskList.querySelectorAll('.preview-task-remove').forEach(btn => {
+        btn.addEventListener('click', e => {
+          const index = parseInt((e.currentTarget as HTMLElement).dataset.index || '0', 10);
+          removePreviewTask(index);
+        });
+      });
+    }
+
+    updateAddButtonCount();
+  }
+
+  function removePreviewTask(index: number): void {
+    previewTasks.splice(index, 1);
+
+    if (previewTasks.length === 0) {
+      showEmptyState();
+    } else {
+      showPreviewTasks(previewTasks);
+    }
+  }
+
+  function updateAddButtonCount(): void {
+    if (modalAddCount) {
+      modalAddCount.textContent = previewTasks.length.toString();
+    }
+  }
+
+  function escapeHtml(text: string): string {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
+}
+
+// =============================================================================
 // INITIALIZATION
 // =============================================================================
 
@@ -2271,6 +2497,7 @@ function initialize(): void {
   setupOverflowMenu();
   setupContextMenu();
   setupCommandPalette();
+  setupScreenshotCapture();
 
   // Load initial data
   loadTasks();

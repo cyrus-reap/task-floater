@@ -1,6 +1,6 @@
 {
   "name": "task-floater",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "description": "A beautiful, modern floating task manager for macOS with glassmorphism design",
   "main": "dist/main.js",
   "repository": {
@@ -95,17 +95,15 @@
       "output": "release",
       "buildResources": "build"
     },
-    "asar": true,
+    "asar": false,
     "compression": "maximum",
     "files": [
       "dist/**/*",
       "src/index.html",
       "build/icon.png",
       "build/icon.icns",
-      "package.json",
-      "!node_modules/**/*"
+      "package.json"
     ],
-    "asarUnpack": [],
     "mac": {
       "category": "public.app-category.productivity",
       "target": [
@@ -168,6 +166,7 @@
     }
   },
   "dependencies": {
-    "electron-updater": "^6.7.3"
+    "electron-updater": "^6.7.3",
+    "tesseract.js": "^7.0.0"
   }
 }

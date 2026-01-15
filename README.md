@@ -24,6 +24,7 @@ Task Floater is a productivity application designed to stay visible above all wi
 
 **Key Capabilities:**
 - Always-on-top floating window with glassmorphism design
+- **NEW:** Screenshot-based task capture with OCR (bulk import tasks from images)
 - Integrated Pomodoro timer with customizable durations
 - Focus mode for minimizing distractions
 - Automatic task persistence and updates
@@ -54,6 +55,7 @@ Task Floater is a productivity application designed to stay visible above all wi
 
 ### Task Management
 - **Always-on-top window** - Remains visible across all workspaces and full-screen apps
+- **Screenshot-based capture** - Bulk import tasks from screenshots using local OCR
 - **Glassmorphism UI** - Modern frosted glass aesthetic with smooth animations
 - **Drag & drop reordering** - Organize tasks by dragging
 - **Inline editing** - Double-click any task to edit in place
@@ -129,6 +131,7 @@ npm run dev  # Watch mode with auto-reload
 ### Basic Operations
 
 **Add task:** Type in the input field and press Enter
+**Add from screenshot:** Click camera icon or press `Cmd+Shift+S`
 **Set timer:** Click a duration preset before adding the task
 **Start timer:** Click the play button (▶)
 **Complete task:** Click the checkbox
@@ -136,11 +139,32 @@ npm run dev  # Watch mode with auto-reload
 **Reorder tasks:** Drag and drop
 **Edit task:** Double-click the task title
 
+### Screenshot-Based Task Capture
+
+Quickly bulk-add tasks from any screen content using native macOS screenshot tool:
+
+1. **Trigger capture:** Click the camera icon OR press `Cmd+Shift+S`
+2. **Select region:** Just like `Cmd+Shift+4`, drag to select area containing tasks
+3. **Review tasks:** Preview extracted tasks in modal (remove unwanted items)
+4. **Bulk add:** Click "Add X Tasks" to import all at once
+
+**Supported formats:**
+- Plain text (each line becomes a task)
+- Bullet points (-, •, *, ‣)
+- Numbered lists (1., 2., etc.)
+- Checkboxes ([ ], [x], ☐, ☑)
+- Duration extraction (e.g., "30min", "1h", "45m" automatically parsed)
+
+**Native UX:** Uses macOS's built-in screenshot tool for familiar, fast region selection. Press `Esc` to cancel anytime.
+
+**Privacy:** Uses local OCR (Tesseract.js) - no cloud services, all processing happens on your machine.
+
 ### Keyboard Shortcuts
 
 | Shortcut | Action |
 |----------|--------|
 | `Cmd+K` | Open Command Palette |
+| `Cmd+Shift+S` | Capture tasks from screenshot |
 | `Cmd+Shift+F` | Toggle Focus Mode |
 | `Cmd+F` | Focus search |
 | `↑` / `↓` | Navigate tasks |
@@ -198,6 +222,7 @@ Task Floater uses Electron's multi-process architecture with strict security bou
 | Runtime | Electron 28.0 | Desktop application framework |
 | Language | TypeScript 5.3+ | Type-safe development |
 | UI | HTML/CSS3 | Glassmorphism design system |
+| OCR | Tesseract.js 7.0 | Local screenshot text extraction |
 | Build | electron-builder | Production packaging |
 | Updates | electron-updater | Automatic updates |
 | Security | Custom validation | Input sanitization & XSS prevention |

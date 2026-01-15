@@ -12,6 +12,11 @@ interface Task {
   pinned?: boolean;
 }
 
+interface ParsedTask {
+  title: string;
+  duration?: number;
+}
+
 interface Settings {
   windowPosition?: { x: number; y: number };
   theme?: 'light' | 'dark';
@@ -42,4 +47,15 @@ contextBridge.exposeInMainWorld('electronAPI', {
   resizeWindow: (height: number): Promise<void> => ipcRenderer.invoke('resize-window', height),
   showConfirmDialog: (title: string, message: string): Promise<boolean> =>
     ipcRenderer.invoke('show-confirm-dialog', title, message),
+
+  // Screenshot-based task capture
+  captureNativeScreenshot: (): Promise<string | null> =>
+    ipcRenderer.invoke('capture-native-screenshot'),
+  processScreenshotFile: (imagePath: string): Promise<ParsedTask[]> =>
+    ipcRenderer.invoke('process-screenshot-file', imagePath),
+  addTasksBatch: (tasks: ParsedTask[]): Promise<Task[]> =>
+    ipcRenderer.invoke('add-tasks-batch', tasks),
+  onScreenshotTrigger: (callback: () => void) => {
+    ipcRenderer.on('trigger-screenshot-capture', callback);
+  },
 });
