@@ -96,17 +96,29 @@ Task Floater is a productivity application designed to stay visible above all wi
 
 2. Open the DMG file
 
-3. **First launch only** - Bypass Gatekeeper:
+3. **⚠️ First launch only** - Bypass Gatekeeper (one-time setup):
+
+   This app is unsigned (free distribution). macOS will show a security warning:
+
    ```
-   a. macOS will show: "Task Floater.app cannot be opened"
-   b. Click "Done" or "Cancel"
-   c. Right-click the app → Select "Open"
-   d. Click "Open" in the confirmation dialog
+   a. macOS shows: "Apple could not verify Task Floater.app"
+   b. Click "Cancel" or "Done"
+   c. Go to Applications folder
+   d. Right-click (or Control+click) Task Floater.app
+   e. Select "Open" from the menu
+   f. Click "Open" in the confirmation dialog
+   ```
+
+   **Alternative (Terminal):**
+   ```bash
+   xattr -cr "/Applications/Task Floater.app" && open "/Applications/Task Floater.app"
    ```
 
 4. Drag to Applications folder
 
 5. Launch from Applications
+
+**Why unsigned?** This is a free, open-source app. Code signing requires a $99/year Apple Developer membership. The app is 100% safe - review the [source code](https://github.com/cyrus-reap/task-floater) yourself!
 
 **Subsequent launches:** The app will open normally. Updates are delivered automatically.
 
