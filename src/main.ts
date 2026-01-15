@@ -1,7 +1,20 @@
-import { app, BrowserWindow, ipcMain, screen, Notification, dialog } from 'electron';
+import {
+  app,
+  BrowserWindow,
+  ipcMain,
+  screen,
+  Notification,
+  dialog,
+  globalShortcut,
+} from 'electron';
 import * as path from 'path';
 import * as fs from 'fs';
+import { exec } from 'child_process';
+import { promisify } from 'util';
 import { Validators, ValidationError } from './validation';
+import { parseTasksFromText, ParsedTask } from './ocrService';
+
+const execAsync = promisify(exec);
 
 const STORE_PATH = path.join(app.getPath('userData'), 'tasks.json');
 const SETTINGS_PATH = path.join(app.getPath('userData'), 'settings.json');
@@ -96,11 +109,27 @@ function createWindow() {
 app.whenReady().then(() => {
   createWindow();
 
+  // Register global shortcut for screenshot capture (Cmd+Shift+S)
+  const shortcutRegistered = globalShortcut.register('CommandOrControl+Shift+S', () => {
+    if (mainWindow) {
+      mainWindow.webContents.send('trigger-screenshot-capture');
+    }
+  });
+
+  if (!shortcutRegistered) {
+    console.warn('Failed to register screenshot shortcut');
+  }
+
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
       createWindow();
     }
   });
+});
+
+app.on('will-quit', () => {
+  // Unregister all shortcuts
+  globalShortcut.unregisterAll();
 });
 
 app.on('window-all-closed', () => {
@@ -404,6 +433,123 @@ ipcMain.handle('update-settings', async (_event, settings: Partial<Settings>): P
   const current = getSettings();
   const updated = { ...current, ...settings };
   saveSettings(updated);
+});
+
+// Screenshot-based task capture
+/**
+ * Triggers native macOS screenshot tool (like Cmd+Shift+4)
+ * Returns path to captured image file, or null if canceled
+ */
+ipcMain.handle('capture-native-screenshot', async (): Promise<string | null> => {
+  try {
+    // Check if we're on macOS
+    if (process.platform !== 'darwin') {
+      throw new Error('Native screenshot capture is only supported on macOS');
+    }
+
+    // Create temp file path for screenshot
+    const tempDir = app.getPath('temp');
+    const tempFile = path.join(tempDir, `task-floater-screenshot-${Date.now()}.png`);
+
+    // Use screencapture command: -i = interactive, save to file
+    // This approach doesn't require Screen Recording permission
+    try {
+      await execAsync(`screencapture -i "${tempFile}"`);
+    } catch {
+      // screencapture returns exit code 1 when user cancels
+      return null;
+    }
+
+    // Check if file was created (user didn't cancel)
+    if (fs.existsSync(tempFile)) {
+      const stats = fs.statSync(tempFile);
+      if (stats.size > 0) {
+        return tempFile;
+      } else {
+        // Empty file means user canceled
+        try {
+          fs.unlinkSync(tempFile);
+        } catch {
+          // Ignore cleanup error
+        }
+        return null;
+      }
+    } else {
+      return null;
+    }
+  } catch (error) {
+    // Unexpected error
+    console.error('Unexpected error during screenshot capture:', error);
+    return null;
+  }
+});
+
+/**
+ * Process screenshot file with OCR and parse tasks
+ */
+ipcMain.handle(
+  'process-screenshot-file',
+  async (_event, imagePath: string): Promise<ParsedTask[]> => {
+    try {
+      // Process OCR directly from file
+      const { processImageOCR } = await import('./ocrService');
+      const text = await processImageOCR(imagePath);
+      const tasks = parseTasksFromText(text);
+
+      // Clean up temp file
+      try {
+        fs.unlinkSync(imagePath);
+      } catch (error) {
+        console.warn('Failed to delete temp screenshot file:', error);
+      }
+
+      return tasks;
+    } catch (error) {
+      console.error('Error processing screenshot:', error);
+      throw error;
+    }
+  }
+);
+
+ipcMain.handle('add-tasks-batch', async (_event, tasks: ParsedTask[]): Promise<Task[]> => {
+  try {
+    if (!Array.isArray(tasks)) {
+      throw new ValidationError('Tasks must be an array');
+    }
+
+    const currentTasks = getTasks();
+
+    // Prevent DoS: Limit total number of tasks
+    if (currentTasks.length + tasks.length > 1000) {
+      throw new ValidationError(`Cannot add ${tasks.length} tasks. Maximum total is 1000 tasks.`);
+    }
+
+    const addedTasks: Task[] = [];
+
+    for (const task of tasks) {
+      const validatedTitle = Validators.taskTitle(task.title);
+      const validatedDuration = Validators.duration(task.duration);
+
+      const newTask: Task = {
+        id: `${Date.now()}-${Math.random()}`,
+        title: validatedTitle,
+        completed: false,
+        createdAt: new Date().toISOString(),
+        duration: validatedDuration,
+        timeRemaining: validatedDuration ? validatedDuration * 60 : undefined,
+        isTimerRunning: false,
+      };
+
+      currentTasks.push(newTask);
+      addedTasks.push(newTask);
+    }
+
+    saveTasks(currentTasks);
+    return addedTasks;
+  } catch (error) {
+    console.error('Error adding tasks batch:', error);
+    throw error;
+  }
 });
 
 ipcMain.handle('minimize', () => {

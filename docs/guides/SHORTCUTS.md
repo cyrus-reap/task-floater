@@ -22,6 +22,9 @@
 
 | Shortcut | Action |
 |----------|--------|
+| `Cmd+Shift+S` | Capture screenshot and extract tasks |
+| `Cmd+K` | Open Command Palette |
+| `Cmd+Shift+F` | Toggle Focus Mode |
 | `Cmd+D` | Mark selected task complete |
 | `Cmd+Backspace` | Delete selected task |
 | `Cmd+F` | Focus search box |

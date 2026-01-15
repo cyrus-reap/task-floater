@@ -10,6 +10,11 @@ interface Task {
   pinned?: boolean;
 }
 
+interface ParsedTask {
+  title: string;
+  duration?: number;
+}
+
 interface Settings {
   windowPosition?: { x: number; y: number };
   theme?: 'light' | 'dark';
@@ -38,6 +43,12 @@ interface ElectronAPI {
   close: () => Promise<void>;
   resizeWindow: (height: number) => Promise<void>;
   showConfirmDialog: (title: string, message: string) => Promise<boolean>;
+
+  // Screenshot-based task capture
+  captureNativeScreenshot: () => Promise<string | null>;
+  processScreenshotFile: (imagePath: string) => Promise<ParsedTask[]>;
+  addTasksBatch: (tasks: ParsedTask[]) => Promise<Task[]>;
+  onScreenshotTrigger: (callback: () => void) => void;
 }
 
 declare global {

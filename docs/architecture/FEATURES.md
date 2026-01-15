@@ -4,7 +4,24 @@
 
 ### ✅ High Priority Features (Completed)
 
-1. **Keyboard Shortcuts** ⌨️
+1. **Screenshot-Based Task Capture** 📸
+   - Native macOS screenshot integration
+   - Local OCR with Tesseract.js (no cloud, fully private)
+   - Smart text parsing handles multiple formats:
+     - Plain text (each line = task)
+     - Bullet points (-, •, *, ‣)
+     - Numbered lists (1., 2., etc.)
+     - Checkboxes ([ ], [x], ☐, ☑)
+     - Duration extraction (30min, 1h, 45m)
+   - Task preview modal with editing
+   - Bulk import workflow
+   - Keyboard shortcut: `Cmd+Shift+S`
+   - Uses macOS `screencapture` command for familiar UX
+
+2. **Keyboard Shortcuts** ⌨️
+   - `Cmd+Shift+S` - Capture screenshot and extract tasks
+   - `Cmd+K` - Open Command Palette
+   - `Cmd+Shift+F` - Toggle Focus Mode
    - `↑/↓` - Navigate tasks
    - `Space` - Toggle complete
    - `Enter` - Add task / Save edit
@@ -16,19 +33,19 @@
    - `Cmd+I` - Import
    - `Cmd+T` - Toggle theme
 
-2. **Native System Notifications** 🔔
+3. **Native System Notifications** 🔔
    - Timer completion notifications
    - Export/import confirmations
    - Clear completed confirmations
    - No blocking dialogs
    - Native macOS notification center integration
 
-3. **Window Position Memory** 📍
+4. **Window Position Memory** 📍
    - Automatically saves window position when moved
    - Restores position on app launch
    - Stored in settings.json
 
-4. **Better Error Handling** 🛡️
+5. **Better Error Handling** 🛡️
    - Input validation with `validation.ts`
    - Try-catch blocks throughout
    - Graceful error messages
@@ -38,7 +55,7 @@
      - Task IDs (non-empty strings)
      - Time remaining (non-negative)
 
-5. **Clean Code** 🧹
+6. **Clean Code** 🧹
    - Removed console.log statements (production ready)
    - Extracted constants to `constants.ts`
    - Proper TypeScript types in `types.d.ts`
@@ -46,29 +63,29 @@
 
 ### ✅ Medium Priority Features (Completed)
 
-6. **Task Editing** ✏️
+7. **Task Editing** ✏️
    - Double-click any task title to edit
    - Inline editing with instant save
    - Press Enter to save, Esc to cancel
    - Keyboard navigation with Enter on selected task
 
-7. **Drag & Drop Reordering** 🔄
+8. **Drag & Drop Reordering** 🔄
    - Drag tasks to reorder
    - Visual feedback (opacity, border)
    - Saves order automatically
    - Smooth animations
 
-8. **Quick Stats** 📊
+9. **Quick Stats** 📊
    - Live count: "X active • Y done"
    - Updates in real-time
    - Displayed in stats bar
 
-9. **Clear Completed** 🗑️
+10. **Clear Completed** 🗑️
    - One-click button to remove all completed tasks
    - Shows notification with count
    - Located in stats bar
 
-10. **Search & Filter** 🔍
+11. **Search & Filter** 🔍
     - Real-time search as you type
     - Filters by task title
     - 300ms debounce for performance

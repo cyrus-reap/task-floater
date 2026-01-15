@@ -1898,6 +1898,211 @@
       .segment-btn {
         display: none !important;
       }
+
+      /* ==========================================================================
+         SCREENSHOT MODAL
+         ========================================================================== */
+      .modal-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        backdrop-filter: blur(8px);
+        z-index: 9999;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .modal-overlay.active {
+        display: flex;
+      }
+
+      .modal {
+        background: var(--surface-elevated);
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--border-default);
+        box-shadow: var(--shadow-xl);
+        width: 340px;
+        max-height: 500px;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .modal-header {
+        padding: var(--space-4);
+        border-bottom: 1px solid var(--border-subtle);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .modal-title {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--text-primary);
+      }
+
+      .modal-close-btn {
+        width: 28px;
+        height: 28px;
+        padding: 0;
+        background: transparent;
+        border: none;
+        border-radius: var(--radius-sm);
+        color: var(--text-muted);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all var(--transition-fast);
+      }
+
+      .modal-close-btn:hover {
+        background: var(--surface-hover);
+        color: var(--text-secondary);
+      }
+
+      .modal-body {
+        padding: var(--space-4);
+        overflow-y: auto;
+        flex: 1;
+      }
+
+      .modal-loading {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: var(--space-8);
+        gap: var(--space-4);
+      }
+
+      .modal-loading-spinner {
+        width: 32px;
+        height: 32px;
+        border: 3px solid var(--border-default);
+        border-top-color: var(--accent);
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      .modal-loading-text {
+        font-size: 13px;
+        color: var(--text-secondary);
+      }
+
+      .preview-task-list {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-2);
+      }
+
+      .preview-task-item {
+        display: flex;
+        align-items: flex-start;
+        gap: var(--space-2);
+        padding: var(--space-2);
+        background: var(--surface-base);
+        border-radius: var(--radius-sm);
+        border: 1px solid var(--border-subtle);
+      }
+
+      .preview-task-remove {
+        flex-shrink: 0;
+        width: 20px;
+        height: 20px;
+        padding: 0;
+        background: transparent;
+        border: none;
+        border-radius: var(--radius-xs);
+        color: var(--text-muted);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all var(--transition-fast);
+      }
+
+      .preview-task-remove:hover {
+        background: var(--danger-muted);
+        color: var(--danger);
+      }
+
+      .preview-task-content {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-1);
+      }
+
+      .preview-task-title {
+        font-size: 13px;
+        color: var(--text-primary);
+      }
+
+      .preview-task-duration {
+        font-size: 11px;
+        color: var(--text-secondary);
+      }
+
+      .modal-footer {
+        padding: var(--space-4);
+        border-top: 1px solid var(--border-subtle);
+        display: flex;
+        gap: var(--space-2);
+      }
+
+      .modal-btn {
+        flex: 1;
+        padding: var(--space-2) var(--space-4);
+        border: none;
+        border-radius: var(--radius-sm);
+        font-size: 13px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all var(--transition-fast);
+      }
+
+      .modal-btn-cancel {
+        background: var(--surface-base);
+        color: var(--text-secondary);
+        border: 1px solid var(--border-default);
+      }
+
+      .modal-btn-cancel:hover {
+        background: var(--surface-hover);
+        color: var(--text-primary);
+      }
+
+      .modal-btn-primary {
+        background: var(--accent);
+        color: white;
+      }
+
+      .modal-btn-primary:hover {
+        background: var(--accent-hover);
+      }
+
+      .modal-btn-primary:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      .modal-empty-state {
+        text-align: center;
+        padding: var(--space-8);
+        color: var(--text-secondary);
+        font-size: 13px;
+      }
     </style>
   </head>
   <body>
@@ -1992,6 +2197,26 @@
       <div class="tasks-toolbar" id="tasksToolbar">
         <span class="tasks-count" id="statsText">0 tasks</span>
         <div class="tasks-actions">
+          <button
+            class="action-btn"
+            id="screenshotBtn"
+            title="Capture region and extract tasks (Cmd+Shift+S)"
+          >
+            <svg
+              class="icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path
+                d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"
+              ></path>
+              <circle cx="12" cy="13" r="4"></circle>
+            </svg>
+          </button>
           <button class="action-btn" id="clearCompletedBtn" title="Clear completed">
             <svg class="icon" viewBox="0 0 24 24">
               <polyline points="3 6 5 6 21 6" />
@@ -2070,6 +2295,47 @@
           </div>
         </div>
       </main>
+    </div>
+
+    <!-- Screenshot Task Preview Modal -->
+    <div class="modal-overlay" id="screenshotModal">
+      <div class="modal">
+        <div class="modal-header">
+          <div class="modal-title">Add Tasks from Screenshot</div>
+          <button class="modal-close-btn" id="modalCloseBtn">
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+        <div class="modal-body" id="modalBody">
+          <!-- Loading state (shown during OCR) -->
+          <div class="modal-loading" id="modalLoading">
+            <div class="modal-loading-spinner"></div>
+            <div class="modal-loading-text">Processing screenshot...</div>
+          </div>
+          <!-- Task preview list (shown after OCR) -->
+          <div class="preview-task-list" id="previewTaskList" style="display: none"></div>
+          <!-- Empty state (shown if no tasks found) -->
+          <div class="modal-empty-state" id="modalEmptyState" style="display: none">
+            No tasks detected in the screenshot. Try again with a clearer image.
+          </div>
+        </div>
+        <div class="modal-footer" id="modalFooter" style="display: none">
+          <button class="modal-btn modal-btn-cancel" id="modalCancelBtn">Cancel</button>
+          <button class="modal-btn modal-btn-primary" id="modalAddBtn">
+            Add <span id="modalAddCount">0</span> Tasks
+          </button>
+        </div>
+      </div>
     </div>
 
     <script src="../dist/renderer.js"></script>

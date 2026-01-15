@@ -106,6 +106,38 @@ Tasks can have optional timers (Pomodoro-style):
 - **Notification**: Audio beep and confirm dialog when timer completes
 - **Display**: Live countdown in MM:SS format with visual pulsing effect
 
+### Screenshot-Based Task Capture
+
+**NEW**: Bulk task creation via screenshot OCR
+
+**Service**: `src/ocrService.ts`
+- Uses Tesseract.js for local OCR (no cloud, fully private)
+- Smart text parsing handles multiple formats:
+  - Plain text (each line = task)
+  - Bullet points (-, •, *, ‣)
+  - Numbered lists (1., 2., etc.)
+  - Checkboxes ([ ], [x], ☐, ☑)
+  - Duration extraction (30min, 1h, 45m)
+- Filters out noise (short lines, all-caps headers)
+
+**Workflow**:
+1. Click camera icon in toolbar OR press `Cmd+Shift+S`
+2. Native macOS screenshot tool launches (like Cmd+Shift+4)
+3. User selects region by dragging (or presses Esc to cancel)
+4. OCR processes captured region (loading spinner shown)
+5. Preview extracted tasks in modal
+6. Remove unwanted tasks with X button
+7. Click "Add X Tasks" to bulk-add to task list
+
+**IPC Handlers** (`src/main.ts`):
+- `capture-native-screenshot`: Triggers `screencapture -i -c` (captures to clipboard)
+- `process-clipboard-screenshot`: Reads clipboard, runs OCR, parses tasks
+- `add-tasks-batch`: Bulk-adds validated tasks
+
+**Native Integration**: Uses macOS `screencapture` command for familiar UX
+
+**Global Shortcut**: `Cmd+Shift+S` registered in main process
+
 ### Security Model
 
 - **Context Isolation**: Enabled (`contextIsolation: true`)
@@ -120,7 +152,9 @@ src/
 ├── main.ts          # Main process - window creation, IPC handlers, file I/O
 ├── preload.ts       # Security bridge - exposes safe APIs to renderer
 ├── renderer.ts      # Renderer logic - UI interactions, task management
+├── ocrService.ts    # Screenshot OCR and task parsing (Tesseract.js)
 ├── linearService.ts # Linear API integration (in progress)
+├── validation.ts    # Input validation and security
 ├── types.d.ts       # TypeScript declarations for ElectronAPI
 └── index.html       # UI markup and embedded styles
 ```
