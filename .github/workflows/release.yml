@@ -1,0 +1,147 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+permissions:
+  contents: write
+
+jobs:
+  validate:
+    name: Validate Release
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run full validation
+        run: npm run validate
+
+      - name: Run tests
+        run: npm run test:run
+
+  build-and-release:
+    name: Build & Release
+    runs-on: macos-latest
+    needs: validate
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Import Code Signing Certificate
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+        env:
+          CSC_LINK: ${{ secrets.CSC_LINK }}
+          CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
+        run: |
+          # Create keychain
+          security create-keychain -p "${{ secrets.KEYCHAIN_PASSWORD }}" build.keychain
+          security default-keychain -s build.keychain
+          security unlock-keychain -p "${{ secrets.KEYCHAIN_PASSWORD }}" build.keychain
+
+          # Import certificate
+          echo "$CSC_LINK" | base64 --decode > certificate.p12
+          security import certificate.p12 -k build.keychain -P "$CSC_KEY_PASSWORD" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "${{ secrets.KEYCHAIN_PASSWORD }}" build.keychain
+
+          # Clean up
+          rm certificate.p12
+
+      - name: Build, Sign & Notarize
+        env:
+          # Notarization credentials (must match scripts/notarize.js)
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          # Code signing credentials
+          CSC_LINK: ${{ secrets.CSC_LINK }}
+          CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
+        run: npm run dist:mac
+
+      - name: Extract version from tag
+        id: version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          name: Task Floater v${{ steps.version.outputs.VERSION }}
+          body: |
+            ## Changes in v${{ steps.version.outputs.VERSION }}
+
+            See [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/main/CHANGELOG.md) for full details.
+
+            ### Downloads
+
+            **macOS:**
+            - **Apple Silicon (M1/M2/M3)**: `Task.Floater-${{ steps.version.outputs.VERSION }}-arm64.dmg`
+            - **Intel**: `Task.Floater-${{ steps.version.outputs.VERSION }}.dmg`
+
+            ### Installation
+
+            1. Download the appropriate DMG for your Mac
+            2. Open the DMG file
+            3. Drag Task Floater to Applications
+            4. Launch from Applications
+
+            **Note**: This release is code-signed and notarized by Apple. No Gatekeeper warnings!
+
+            ### Auto-Update
+
+            If you're upgrading from a previous version, the app will notify you automatically.
+          files: |
+            release/*.dmg
+            release/*.zip
+            release/latest-mac.yml
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload artifacts for debugging
+        uses: actions/upload-artifact@v3
+        with:
+          name: release-${{ steps.version.outputs.VERSION }}
+          path: |
+            release/*.dmg
+            release/*.zip
+            release/latest-mac.yml
+          retention-days: 30
+
+  notify:
+    name: Post-Release Notification
+    runs-on: ubuntu-latest
+    needs: build-and-release
+    if: success()
+
+    steps:
+      - name: Extract version
+        id: version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+      - name: Post to GitHub Discussions (optional)
+        run: |
+          echo "✅ Release v${{ steps.version.outputs.VERSION }} published successfully!"
+          echo "Users will receive auto-update notifications."

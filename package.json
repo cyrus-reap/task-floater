@@ -24,6 +24,10 @@
     "format": "prettier --write \"src/**/*.{ts,html}\"",
     "format:check": "prettier --check \"src/**/*.{ts,html}\"",
     "validate": "npm run typecheck && npm run lint && npm run format:check",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest run --coverage",
     "precommit": "lint-staged",
     "prepare": "husky",
     "icons": "node scripts/generate-icons.js",
@@ -31,7 +35,8 @@
     "dist": "npm run build && electron-builder",
     "dist:mac": "npm run build && electron-builder --mac",
     "dist:all": "npm run build && electron-builder -mwl",
-    "release": "npm run validate && npm run icons && npm run dist:mac"
+    "release": "./scripts/release.sh",
+    "release:quick": "npm run validate && npm run test:run && npm run icons && npm run dist:mac"
   },
   "lint-staged": {
     "src/**/*.ts": [
@@ -61,6 +66,7 @@
   },
   "license": "MIT",
   "devDependencies": {
+    "@mistweaverco/electron-notarize-async": "0.0.4",
     "@types/node": "^20.10.0",
     "@typescript-eslint/eslint-plugin": "^8.53.0",
     "@typescript-eslint/parser": "^8.53.0",
@@ -88,14 +94,19 @@
     "copyright": "Copyright © 2026 Cyrus David Pastelero",
     "publish": {
       "provider": "github",
-      "owner": "cyrus-reap",
+      "owner": "Cyvid7-Darus10",
       "repo": "task-floater"
     },
     "directories": {
       "output": "release",
       "buildResources": "build"
     },
-    "asar": false,
+    "afterSign": "scripts/notarize.js",
+    "asar": true,
+    "asarUnpack": [
+      "**/node_modules/tesseract.js/**/*",
+      "**/node_modules/tesseract.js-core/**/*"
+    ],
     "compression": "maximum",
     "files": [
       "dist/**/*",
@@ -105,6 +116,8 @@
       "package.json"
     ],
     "mac": {
+      "identity": "Cyrus David Pastelero (SM3PR8224Z)",
+      "notarize": false,
       "category": "public.app-category.productivity",
       "target": [
         {

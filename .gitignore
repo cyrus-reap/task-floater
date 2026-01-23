@@ -10,6 +10,8 @@ dist/
 
 # But keep config files in root if needed
 !*.config.js
+# Keep scripts directory JS files (build/notarize scripts)
+!scripts/*.js
 
 # IDE
 .vscode/
@@ -28,6 +30,12 @@ npm-debug.log*
 
 # Config (contains API keys)
 config.json
+
+# Code signing credentials
+.env.signing
+.env.local
+*.p12
+*.provisionprofile
 
 # User data
 tasks.json

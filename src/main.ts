@@ -53,7 +53,9 @@ function getSettings(): Settings {
 
 function saveSettings(settings: Settings): void {
   try {
-    fs.writeFileSync(SETTINGS_PATH, JSON.stringify(settings, null, 2));
+    fs.writeFileSync(SETTINGS_PATH, JSON.stringify(settings, null, 2), {
+      mode: 0o600, // Restrict to user-only read/write for security
+    });
   } catch (error) {
     console.error('Error saving settings:', error);
   }
