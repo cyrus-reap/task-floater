@@ -7,6 +7,11 @@ const { notarize } = require('@mistweaverco/electron-notarize-async');
 const path = require('path');
 
 exports.default = async function notarizing(context) {
+  // Temporarily skip notarization due to Apple service congestion
+  // Re-enable by removing this early return
+  console.log('⏭️  Skipping notarization (temporarily disabled)');
+  return;
+
   const { electronPlatformName, appOutDir } = context;
 
   // Only notarize macOS builds
