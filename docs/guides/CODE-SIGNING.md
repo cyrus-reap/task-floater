@@ -1,437 +1,483 @@
-# Making Task Floater an Official App
+# Code Signing & Notarization Guide
 
-Guide to code signing, notarization, and distribution options.
+Complete guide for signing and notarizing Task Floater for macOS distribution.
 
-## 🎯 Your Options
+## Overview
 
-### Option 1: Apple Developer Code Signing ⭐ Recommended
-- **Cost**: $99/year
-- **Result**: No Gatekeeper warnings, looks professional
-- **Distribution**: Direct download, GitHub Releases
-- **Users**: Click to install, no warnings
+```mermaid
+flowchart LR
+    subgraph Prerequisites
+        A[Apple Developer Account] --> B[Developer ID Certificate]
+        B --> C[App-Specific Password]
+    end
 
-### Option 2: Mac App Store
-- **Cost**: $99/year (same Developer Account)
-- **Result**: Listed in App Store
-- **Distribution**: Apple handles it
-- **Users**: Install from App Store
-- **Limitation**: More restrictions, review process
+    subgraph Build Process
+        D[npm run dist] --> E[Code Signing]
+        E --> F[Notarization]
+        F --> G[Stapling]
+        G --> H[DMG Creation]
+    end
 
-### Option 3: Stay Unsigned (Current)
-- **Cost**: Free
-- **Result**: Gatekeeper warnings
-- **Distribution**: GitHub Releases
-- **Users**: Must right-click → Open first time
-- **Good for**: Personal use, small audience
+    subgraph Distribution
+        H --> I[GitHub Release]
+        I --> J[User Downloads]
+        J --> K[No Gatekeeper Warnings]
+    end
+
+    Prerequisites --> Build Process
+```
+
+## Quick Start
+
+Already have everything set up? Here's the quick version:
+
+```bash
+# Load credentials
+source .env.signing
+
+# Build signed + notarized
+npm run dist
+
+# Create release
+gh release create v1.X.X release/*.dmg release/*.zip --generate-notes
+```
 
 ---
 
-## 🍎 Option 1: Code Signing & Notarization
+## Prerequisites
 
-### Step 1: Join Apple Developer Program
+| Requirement | Description | Where to Get |
+|-------------|-------------|--------------|
+| Apple Developer Account | $99/year membership | [developer.apple.com](https://developer.apple.com/programs/) |
+| Developer ID Certificate | Code signing certificate | Apple Developer Portal |
+| App-Specific Password | For notarization API | [appleid.apple.com](https://appleid.apple.com) |
+| Xcode Command Line Tools | Build tools | `xcode-select --install` |
 
-1. Go to: https://developer.apple.com/programs/
-2. Click "Enroll"
-3. Pay $99/year
-4. Wait 1-2 days for approval
+---
 
-### Step 2: Get Developer ID Certificate
+## Step 1: Get Developer ID Certificate
 
-**After enrollment approved:**
+### Create Certificate Signing Request (CSR)
 
-1. Go to: https://developer.apple.com/account/resources/certificates
-2. Click the "+" button
-3. Select: **"Developer ID Application"**
-4. Follow instructions to create Certificate Signing Request (CSR)
-5. Download the certificate
-6. Double-click to install in Keychain Access
+1. Open **Keychain Access**
+2. Menu: **Keychain Access → Certificate Assistant → Request a Certificate From a Certificate Authority**
+3. Enter your email and name
+4. Select **"Saved to disk"**
+5. Save the `.certSigningRequest` file
 
-**Verify installation:**
+### Download Certificate from Apple
+
+1. Go to [Apple Developer Portal → Certificates](https://developer.apple.com/account/resources/certificates/list)
+2. Click **"+"** to create new certificate
+3. Select **"Developer ID Application"**
+4. Upload your CSR file
+5. Download the `.cer` certificate
+6. Double-click to install in Keychain
+
+### Verify Installation
+
 ```bash
 security find-identity -v -p codesigning
 ```
 
-You should see:
+Expected output:
 ```
-1) ABCD1234... "Developer ID Application: Your Name (TEAM_ID)"
-```
-
-### Step 3: Configure package.json
-
-Add your identity to the mac section:
-
-```json
-"mac": {
-  "identity": "Developer ID Application: Cyrus David Pastelero (YOUR_TEAM_ID)",
-  // ... rest stays the same
-}
+1) XXXXXXXXXX "Developer ID Application: Your Name (TEAM_ID)"
+   1 valid identities found
 ```
 
-Find YOUR_TEAM_ID:
-```bash
-security find-identity -v -p codesigning | grep "Developer ID"
-```
-
-### Step 4: Set Up Notarization
-
-**Get app-specific password:**
-1. Go to: https://appleid.apple.com/account/manage
-2. Sign in
-3. Generate app-specific password
-4. Save it securely
-
-**Set environment variables:**
-```bash
-export APPLEID="your-apple-id@email.com"
-export APPLEIDPASS="xxxx-xxxx-xxxx-xxxx"  # App-specific password
-export TEAM_ID="YOUR_TEAM_ID"
-```
-
-**Add to ~/.zshrc or ~/.bash_profile** to persist:
-```bash
-# Add to your shell config
-echo 'export APPLEID="your@email.com"' >> ~/.zshrc
-echo 'export APPLEIDPASS="xxxx-xxxx-xxxx-xxxx"' >> ~/.zshrc
-echo 'export TEAM_ID="YOUR_TEAM_ID"' >> ~/.zshrc
-```
-
-### Step 5: Update package.json for Notarization
-
-Add notarization config:
-
-```json
-"mac": {
-  "identity": "Developer ID Application: Cyrus David Pastelero (YOUR_TEAM_ID)",
-  "notarize": {
-    "teamId": "YOUR_TEAM_ID"
-  },
-  // ... rest of config
-}
-```
-
-### Step 6: Build Signed & Notarized
-
-```bash
-npm run dist:mac
-```
-
-electron-builder will:
-1. ✅ Sign the app with your certificate
-2. ✅ Upload to Apple for notarization
-3. ✅ Wait for approval (~5-10 minutes)
-4. ✅ Staple the notarization ticket
-5. ✅ Create signed DMG
-
-### Step 7: Verify Signing
-
-```bash
-codesign -dv --verbose=4 "release/mac-arm64/Task Floater.app"
-```
-
-Should show:
-```
-Authority=Developer ID Application: Your Name (TEAM_ID)
-```
-
-### Step 8: Release
-
-Same as before:
-```bash
-gh release create v1.X.X release/*.dmg release/*.zip release/latest-mac.yml
-```
-
-**Now users can:**
-- Double-click DMG → No warnings!
-- Install normally
-- macOS trusts your app
+Your **Team ID** is the 10-character code in parentheses (e.g., `SM3PR8224Z`).
 
 ---
 
-## 🏪 Option 2: Mac App Store
+## Step 2: Get App-Specific Password
 
-### Requirements
-- Apple Developer Account ($99/year)
-- Mac App Store distribution certificate
-- App Store Connect setup
+Apple requires an app-specific password for notarization (not your regular Apple ID password).
 
-### Process
+1. Go to [appleid.apple.com](https://appleid.apple.com/account/manage)
+2. Sign in with your Apple ID
+3. Navigate to **Sign-In and Security → App-Specific Passwords**
+4. Click **"+"** to generate a new password
+5. Label it "Task Floater Notarization"
+6. Copy the password (format: `xxxx-xxxx-xxxx-xxxx`)
 
-**1. Additional Configuration**
+---
 
-Add to package.json:
+## Step 3: Configure Local Environment
+
+Create `.env.signing` in the project root:
+
+```bash
+export APPLE_ID="your-apple-id@email.com"
+export APPLE_APP_SPECIFIC_PASSWORD="xxxx-xxxx-xxxx-xxxx"
+export APPLE_TEAM_ID="YOUR_TEAM_ID"
+```
+
+Set proper permissions:
+```bash
+chmod 600 .env.signing
+```
+
+> **Security Note:** `.env.signing` is in `.gitignore` and will never be committed.
+
+---
+
+## Step 4: Build Signed & Notarized App
+
+```bash
+# Load environment variables
+source .env.signing
+
+# Build (signing + notarization happens automatically)
+npm run dist
+```
+
+### What Happens During Build
+
+```mermaid
+sequenceDiagram
+    participant Dev as Developer
+    participant EB as electron-builder
+    participant Apple as Apple Notary
+
+    Dev->>EB: npm run dist
+    EB->>EB: Compile TypeScript
+    EB->>EB: Package app bundle
+    EB->>EB: Sign with Developer ID
+    EB->>Apple: Submit for notarization
+    Apple->>Apple: Scan for malware
+    Apple-->>EB: Return ticket
+    EB->>EB: Staple ticket to app
+    EB->>EB: Create DMG
+    EB-->>Dev: Build complete!
+```
+
+**Build Output:**
+```
+release/
+├── Task Floater-1.6.0.dmg           # Intel (x64)
+├── Task Floater-1.6.0-arm64.dmg     # Apple Silicon
+├── Task Floater-1.6.0-mac.zip       # Intel portable
+├── Task Floater-1.6.0-arm64-mac.zip # Apple Silicon portable
+└── latest-mac.yml                   # Auto-update manifest
+```
+
+---
+
+## Step 5: Verify Signing
+
+```bash
+# Check code signature
+codesign -dv --verbose=2 "release/mac/Task Floater.app"
+```
+
+Expected output includes:
+```
+Authority=Developer ID Application: Your Name (TEAM_ID)
+Authority=Developer ID Certification Authority
+Authority=Apple Root CA
+```
+
+```bash
+# Check notarization
+spctl -a -t open --context context:primary-signature -v "release/Task Floater-1.6.0.dmg"
+```
+
+Expected output:
+```
+release/Task Floater-1.6.0.dmg: accepted
+source=Notarized Developer ID
+```
+
+---
+
+## Manual Notarization
+
+If automatic notarization fails or you need to notarize existing builds:
+
+### Submit for Notarization
+
+```bash
+xcrun notarytool submit "release/Task Floater-1.6.0.dmg" \
+  --apple-id "$APPLE_ID" \
+  --password "$APPLE_APP_SPECIFIC_PASSWORD" \
+  --team-id "$APPLE_TEAM_ID" \
+  --wait
+```
+
+### Staple the Ticket
+
+```bash
+xcrun stapler staple "release/Task Floater-1.6.0.dmg"
+```
+
+### Check Status
+
+```bash
+# View all submissions
+xcrun notarytool history \
+  --apple-id "$APPLE_ID" \
+  --password "$APPLE_APP_SPECIFIC_PASSWORD" \
+  --team-id "$APPLE_TEAM_ID"
+
+# Check specific submission
+xcrun notarytool info <submission-id> \
+  --apple-id "$APPLE_ID" \
+  --password "$APPLE_APP_SPECIFIC_PASSWORD" \
+  --team-id "$APPLE_TEAM_ID"
+
+# Get log if failed
+xcrun notarytool log <submission-id> \
+  --apple-id "$APPLE_ID" \
+  --password "$APPLE_APP_SPECIFIC_PASSWORD" \
+  --team-id "$APPLE_TEAM_ID"
+```
+
+---
+
+## GitHub Actions CI/CD
+
+### Export Certificate for CI
+
+Your certificate must be exported as a base64-encoded `.p12` file for GitHub Actions.
+
+```mermaid
+flowchart LR
+    A[Keychain] -->|Export| B[certificate.p12]
+    B -->|base64| C[CSC_LINK Secret]
+    C --> D[GitHub Actions]
+    D -->|Decode| E[Temporary Keychain]
+    E --> F[Sign App]
+```
+
+**Steps:**
+
+1. **Export from Keychain:**
+```bash
+security export -k ~/Library/Keychains/login.keychain-db \
+  -t identities -f pkcs12 \
+  -P "YOUR_SECURE_PASSWORD" \
+  -o ~/Desktop/certificate.p12
+```
+
+2. **Convert to base64:**
+```bash
+base64 -i ~/Desktop/certificate.p12 | pbcopy
+# Base64 string is now in your clipboard
+```
+
+3. **Delete the .p12 file:**
+```bash
+rm ~/Desktop/certificate.p12
+```
+
+### Configure GitHub Secrets
+
+Go to: `https://github.com/YOUR_USERNAME/task-floater/settings/secrets/actions`
+
+Add these secrets:
+
+| Secret Name | Value |
+|-------------|-------|
+| `APPLE_ID` | Your Apple ID email |
+| `APPLE_APP_SPECIFIC_PASSWORD` | App-specific password |
+| `APPLE_TEAM_ID` | Your 10-character Team ID |
+| `CSC_LINK` | Base64-encoded certificate (from clipboard) |
+| `CSC_KEY_PASSWORD` | Password used when exporting .p12 |
+| `KEYCHAIN_PASSWORD` | Any secure password (for CI keychain) |
+
+### Workflow Configuration
+
+The release workflow (`.github/workflows/release.yml`) handles everything automatically:
+
+```yaml
+- name: Build and Sign
+  env:
+    CSC_LINK: ${{ secrets.CSC_LINK }}
+    CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
+    APPLE_ID: ${{ secrets.APPLE_ID }}
+    APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+    APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+  run: npm run dist
+```
+
+### Trigger a Release
+
+```bash
+# Create and push a tag
+git tag v1.6.1
+git push origin v1.6.1
+
+# GitHub Actions will automatically:
+# 1. Run tests
+# 2. Build the app
+# 3. Sign with your certificate
+# 4. Notarize with Apple
+# 5. Create GitHub Release with DMG files
+```
+
+---
+
+## Troubleshooting
+
+### "No valid signing identity found"
+
+```bash
+# List available identities
+security find-identity -v -p codesigning
+
+# If empty, reinstall certificate from Apple Developer Portal
+```
+
+### Certificate and private key in different keychains
+
+The `.p12` export requires both certificate AND private key. If they're separated:
+
+```bash
+# Export cert from System keychain
+security export -k /Library/Keychains/System.keychain \
+  -t certs -f pemseq -o ~/Desktop/cert.pem
+
+# Import to login keychain (where private key is)
+security import ~/Desktop/cert.pem -k ~/Library/Keychains/login.keychain-db
+
+# Now export as .p12
+security export -k ~/Library/Keychains/login.keychain-db \
+  -t identities -f pkcs12 -P "PASSWORD" -o ~/Desktop/certificate.p12
+```
+
+### "Notarization failed"
+
+1. **Check credentials:**
+   ```bash
+   echo "APPLE_ID: $APPLE_ID"
+   echo "TEAM_ID: $APPLE_TEAM_ID"
+   ```
+
+2. **Get the error log:**
+   ```bash
+   xcrun notarytool log <submission-id> \
+     --apple-id "$APPLE_ID" \
+     --password "$APPLE_APP_SPECIFIC_PASSWORD" \
+     --team-id "$APPLE_TEAM_ID"
+   ```
+
+3. **Common issues:**
+   - Using regular password instead of app-specific password
+   - Team ID doesn't match certificate
+   - Hardened runtime not enabled
+   - Missing entitlements
+
+### Notarization stuck "In Progress"
+
+Apple's service can be slow during peak times. Options:
+- Wait longer (can take 30+ minutes)
+- Check [Apple System Status](https://developer.apple.com/system-status/)
+- Cancel and retry later
+
+### "App is damaged" error for users
+
+The app wasn't properly signed or notarized. For users with this issue:
+
+```bash
+# Remove quarantine attribute
+xattr -cr /Applications/Task\ Floater.app
+```
+
+Or: Right-click → Open → Click "Open" in dialog
+
+### CI/CD not signing
+
+1. Verify all GitHub secrets are configured
+2. Check CSC_LINK is valid base64:
+   ```bash
+   echo "$CSC_LINK" | base64 -d > /tmp/test.p12
+   # Should create a valid .p12 file
+   ```
+3. Ensure CSC_KEY_PASSWORD matches the export password
+
+---
+
+## Configuration Reference
+
+### package.json Build Section
+
 ```json
-"mac": {
-  "type": "distribution",
-  "target": ["mas"],
-  "category": "public.app-category.productivity",
-  "provisioningProfile": "embedded.provisionprofile",
-  "entitlements": "build/entitlements.mas.plist",
-  "entitlementsInherit": "build/entitlements.mas.inherit.plist"
+{
+  "build": {
+    "appId": "com.reap.task-floater",
+    "productName": "Task Floater",
+    "mac": {
+      "category": "public.app-category.productivity",
+      "target": [
+        { "target": "dmg", "arch": ["x64", "arm64"] },
+        { "target": "zip", "arch": ["x64", "arm64"] }
+      ],
+      "identity": "Your Name (TEAM_ID)",
+      "hardenedRuntime": true,
+      "gatekeeperAssess": false,
+      "entitlements": "build/entitlements.mac.plist",
+      "entitlementsInherit": "build/entitlements.mac.plist",
+      "notarize": false
+    },
+    "afterSign": "scripts/notarize.js"
+  }
 }
 ```
 
-**2. Create App Store Entitlements**
+### Entitlements (build/entitlements.mac.plist)
 
-`build/entitlements.mas.plist`:
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "...">
 <plist version="1.0">
 <dict>
-  <key>com.apple.security.app-sandbox</key>
-  <true/>
-  <key>com.apple.security.files.user-selected.read-write</key>
-  <true/>
+    <key>com.apple.security.cs.allow-jit</key>
+    <true/>
+    <key>com.apple.security.cs.allow-unsigned-executable-memory</key>
+    <true/>
+    <key>com.apple.security.cs.allow-dyld-environment-variables</key>
+    <true/>
 </dict>
 </plist>
 ```
 
-**3. Build for App Store**
-```bash
-npm run build
-electron-builder --mac mas
-```
+### Environment Variables
 
-**4. Upload to App Store Connect**
-```bash
-xcrun altool --upload-app -f release/Task\ Floater.pkg -u your@email.com
-```
-
-**5. Submit for Review**
-- Go to App Store Connect
-- Fill out app information
-- Submit for review
-- Wait 1-7 days for approval
-
-### App Store Considerations
-
-**Pros:**
-- ✅ Maximum trust (it's in the App Store!)
-- ✅ Automatic distribution
-- ✅ Built-in payment if you want to charge
-- ✅ Discoverability
-
-**Cons:**
-- ❌ Review process (1-7 days per update)
-- ❌ Sandboxing restrictions (more strict)
-- ❌ Can't use some Electron features
-- ❌ Apple takes 30% if you charge for app
-- ❌ More complex setup
+| Variable | Description | Example |
+|----------|-------------|---------|
+| `APPLE_ID` | Apple ID email | `you@example.com` |
+| `APPLE_APP_SPECIFIC_PASSWORD` | App-specific password | `xxxx-xxxx-xxxx-xxxx` |
+| `APPLE_TEAM_ID` | 10-character Team ID | `SM3PR8224Z` |
+| `CSC_LINK` | Base64 certificate (CI only) | `MIIKkQIB...` |
+| `CSC_KEY_PASSWORD` | Certificate password (CI only) | `your-password` |
 
 ---
 
-## 🆓 Option 3: Stay Unsigned (Current State)
+## Security Checklist
 
-### For Free Distribution
-
-**What you currently have:**
-- ✅ Works perfectly
-- ✅ Free to distribute
-- ✅ No yearly costs
-- ✅ No review process
-- ⚠️ Users see Gatekeeper warning first time
-
-### Make It Easier for Users
-
-**1. Update README with clear instructions:**
-
-```markdown
-## Installation
-
-1. Download Task Floater-X.X.X-arm64.dmg
-2. Double-click the DMG
-3. **First time only:**
-   - macOS will show a security warning
-   - Click "Cancel"
-   - Right-click the app → Select "Open"
-   - Click "Open" in the dialog
-4. Drag to Applications folder
-5. Future launches work normally!
-```
-
-**2. Create a video tutorial** showing the right-click → Open process
-
-**3. Add to release notes:**
-```
-⚠️ This app is unsigned. On first launch:
-1. Right-click Task Floater.app
-2. Click "Open"
-3. Click "Open" again
-```
-
-### Alternative: Simple Bypass Command
-
-Provide users with a one-liner:
-```bash
-xattr -cr /Applications/Task\ Floater.app && open /Applications/Task\ Floater.app
-```
+- [ ] `.env.signing` is in `.gitignore`
+- [ ] `*.p12` is in `.gitignore`
+- [ ] App-specific password used (not main password)
+- [ ] GitHub Secrets configured (not committed)
+- [ ] Local `.p12` file deleted after exporting
+- [ ] Hardened runtime enabled
+- [ ] Entitlements properly configured
 
 ---
 
-## 🎯 Recommended Path
+## Quick Reference
 
-### For You (Cyrus)
-
-**If building for personal/team use (< 50 users):**
-→ **Stay unsigned** (Option 3)
-- Free
-- Works fine with clear instructions
-- No overhead
-
-**If distributing publicly (want professional feel):**
-→ **Get Developer Account + Code Signing** (Option 1)
-- $99/year
-- No user warnings
-- Professional credibility
-- Still distribute via GitHub (no App Store hassle)
-
-**If building a commercial app:**
-→ **Mac App Store** (Option 2)
-- $99/year
-- Maximum reach
-- Built-in payments
-- Review process overhead
+| Task | Command |
+|------|---------|
+| Check certificate | `security find-identity -v -p codesigning` |
+| Build signed app | `source .env.signing && npm run dist` |
+| Verify signature | `codesign -dv "release/mac/Task Floater.app"` |
+| Verify notarization | `spctl -a -v "release/Task Floater-1.6.0.dmg"` |
+| Manual notarize | `xcrun notarytool submit ... --wait` |
+| Staple ticket | `xcrun stapler staple "file.dmg"` |
+| Check status | `xcrun notarytool history ...` |
 
 ---
 
-## 📝 Quick Setup: Code Signing
-
-Here's what to add to make your app signed once you have the certificate:
-
-### 1. Update package.json
-
-```json
-"mac": {
-  "identity": "Developer ID Application: Cyrus David Pastelero (TEAM_ID)",
-  "notarize": {
-    "teamId": "TEAM_ID"
-  },
-  // ... rest of existing config
-}
-```
-
-### 2. Set Environment Variables
-
-```bash
-# Add to ~/.zshrc
-export APPLEID="cyrus@reap.hk"
-export APPLEIDPASS="xxxx-xxxx-xxxx-xxxx"
-export TEAM_ID="YOUR_TEAM_ID"
-```
-
-### 3. Build Signed
-
-```bash
-npm run dist:mac
-```
-
-**First build will:**
-- Upload to Apple (notarization)
-- Wait ~5-10 minutes
-- Staple notarization ticket
-
-**Future builds:**
-- Much faster (caching)
-- Still notarized
-
-### 4. Release
-
-Same workflow:
-```bash
-gh release create v1.X.X release/*.dmg release/*.zip release/latest-mac.yml
-```
-
-**Users see:**
-- ✅ No warnings
-- ✅ Double-click to install
-- ✅ macOS trusts the app
-
----
-
-## 💰 Cost Comparison
-
-| Method | Yearly Cost | User Experience | Distribution |
-|--------|-------------|-----------------|--------------|
-| Unsigned | **$0** | Right-click to open | GitHub, direct |
-| Code Signed | **$99** | Click to install | GitHub, direct |
-| App Store | **$99** | App Store install | App Store only |
-
----
-
-## 🚀 My Recommendation
-
-### For Now (Testing/Personal Use)
-**Stay unsigned** - Just document the right-click → Open process clearly
-
-### When Ready to Go Public
-**Get Developer Account** - $99/year is worth it for:
-- Professional appearance
-- Better user experience
-- No support questions about warnings
-- Code signing = credibility
-
-### Eventually (If Popular)
-**Consider App Store** - But only if:
-- You want maximum reach
-- Don't mind review process
-- Want built-in payment system
-
----
-
-## 📄 Setting Up Code Signing (Step-by-Step)
-
-I can help you set it up! Once you have the Developer Account:
-
-1. **Get your certificate** (from Apple Developer portal)
-2. **Find your Team ID**:
-   ```bash
-   security find-identity -v -p codesigning
-   ```
-3. **I'll update package.json** with your identity
-4. **Set environment variables**
-5. **Build signed version**
-6. **Test it** - No warnings!
-7. **Release to GitHub**
-
----
-
-## ❓ FAQ
-
-### "Do I need code signing?"
-**No**, but it's professional. Unsigned apps work fine with clear instructions.
-
-### "Can I sign later?"
-**Yes!** You can always add signing to future releases.
-
-### "What about Windows/Linux?"
-Windows has similar code signing. Linux doesn't require it.
-
-### "Is notarization required?"
-**Recommended** but not strictly required. Without it, users see scarier warnings on macOS 10.15+.
-
-### "Can I test signing without paying?"
-**No** - need active Developer Account for certificates.
-
----
-
-## ✅ Next Steps
-
-**Decide which path:**
-
-1. **Stay unsigned** (free, current state)
-   - I can improve the installation instructions
-   - Add video/GIF showing right-click process
-   - Most users are OK with this for free apps
-
-2. **Get Developer Account** ($99/year)
-   - Let me know when you get it
-   - I'll configure everything for signing
-   - Professional, no-warning installations
-
-3. **App Store** ($99/year + review process)
-   - More complex setup
-   - I can help if you want this path
-
-**For now, your app is fully functional and distributable!** The unsigned status is fine for open-source projects - many successful apps start this way.
-
-Want me to improve the installation instructions for unsigned distribution, or are you planning to get the Developer Account?
+*Last updated: January 2026*

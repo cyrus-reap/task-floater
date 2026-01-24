@@ -2,6 +2,50 @@
 
 This document outlines the security measures implemented in Task Floater.
 
+## Security Architecture
+
+```mermaid
+graph TB
+    subgraph "Renderer Process (Sandboxed)"
+        R[renderer.ts<br/>UI Logic]
+        V[Validation<br/>HTML Escape]
+    end
+
+    subgraph "Preload (Bridge)"
+        P[preload.ts<br/>contextBridge]
+    end
+
+    subgraph "Main Process (Privileged)"
+        M[main.ts<br/>IPC Handlers]
+        VAL[validation.ts<br/>Input Validation]
+        FS[File System<br/>Sandboxed]
+    end
+
+    subgraph "Security Layers"
+        CSP[Content Security Policy]
+        CI[Context Isolation]
+        SB[Chromium Sandbox]
+    end
+
+    R -->|"Exposed APIs Only"| P
+    P -->|"IPC Messages"| M
+    M --> VAL
+    M --> FS
+
+    CSP -.->|Protects| R
+    CI -.->|Isolates| P
+    SB -.->|Sandboxes| R
+
+    style R fill:#4aff4a
+    style P fill:#ffa64a
+    style M fill:#4a9eff
+    style CSP fill:#ff4a4a
+    style CI fill:#ff4a4a
+    style SB fill:#ff4a4a
+```
+
+---
+
 ## Electron Security Configuration
 
 ### Context Isolation ✅

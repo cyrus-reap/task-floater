@@ -2,96 +2,145 @@
 
 Complete documentation for Task Floater - a modern floating task manager for macOS.
 
-## 📚 Documentation Index
+## Architecture Overview
 
-### Getting Started
-- [Main README](../README.md) - Overview, features, and quick start
-- [Contributing Guidelines](../CONTRIBUTING.md) - How to contribute
-- [Changelog](../CHANGELOG.md) - Version history
-- [Code of Conduct](../CODE_OF_CONDUCT.md) - Community guidelines
+```mermaid
+graph TB
+    subgraph Electron App
+        M[Main Process<br/>src/main.ts]
+        P[Preload Script<br/>src/preload.ts]
+        R[Renderer Process<br/>src/renderer.ts]
+    end
 
-### 📖 User Guides
-- [Building from Source](guides/BUILD.md) - Development setup and building
-- [Releasing Updates](guides/RELEASING.md) - Complete release workflow
-- [Focus Mode](guides/FOCUS-MODE.md) - Distraction-free productivity feature
+    subgraph Data Layer
+        S[(tasks.json)]
+        C[(settings.json)]
+    end
+
+    subgraph External
+        A[Apple Notary Service]
+        G[GitHub Releases]
+    end
+
+    M <-->|IPC| P
+    P <-->|contextBridge| R
+    M --> S
+    M --> C
+    M -.->|notarization| A
+    M -.->|auto-update| G
+
+    style M fill:#4a9eff
+    style P fill:#ffa64a
+    style R fill:#4aff4a
+```
+
+---
+
+## Quick Links
+
+### For Users
+- [Main README](../README.md) - Overview, installation, features
 - [Keyboard Shortcuts](guides/SHORTCUTS.md) - All keyboard commands
-- [Documentation Structure](guides/STRUCTURE.md) - How docs are organized
+- [Focus Mode](guides/FOCUS-MODE.md) - Distraction-free productivity
 
-### 🏗️ Architecture & Design
-- [Security Implementation](architecture/SECURITY.md) - Security features and best practices
-- [Best Practices](architecture/BEST_PRACTICES.md) - Code quality standards
-- [Features Overview](architecture/FEATURES.md) - Technical feature documentation
+### For Developers
+- [Building from Source](guides/BUILD.md) - Development setup
+- [Code Signing](guides/CODE-SIGNING.md) - Sign & notarize for distribution
+- [Releasing Updates](guides/RELEASING.md) - Release workflow
 
-### 📊 Project Reports
-- [Code Quality Report](reports/CODE_QUALITY_REPORT.md) - Code quality analysis
-- [Improvements Summary](reports/IMPROVEMENTS_SUMMARY.md) - Enhancement history
-- [UX Enhancements](reports/UX_ENHANCEMENTS.md) - UI/UX improvements
+### Architecture & Design
+- [Security](architecture/SECURITY.md) - Security implementation
+- [Features](architecture/FEATURES.md) - Technical feature docs
+- [Best Practices](architecture/BEST_PRACTICES.md) - Code standards
 
-### 🤖 For Claude Code
-- [CLAUDE.md](../CLAUDE.md) - Developer guidance for AI assistants
+---
 
-## 🎯 Quick Links by Task
-
-### I want to...
-
-#### ...build the app for development
-→ [Build Guide - Development](guides/BUILD.md#development)
-
-#### ...release a new version
-→ [Releasing Guide](guides/RELEASING.md)
-
-#### ...understand the security model
-→ [Security Documentation](architecture/SECURITY.md)
-
-#### ...use keyboard shortcuts
-→ [Shortcuts Guide](guides/SHORTCUTS.md)
-
-#### ...enable focus mode
-→ [Focus Mode Guide](guides/FOCUS-MODE.md)
-
-#### ...contribute code
-→ [Contributing Guidelines](../CONTRIBUTING.md)
-
-## 📁 Documentation Structure
+## Documentation Structure
 
 ```
 docs/
-├── README.md                    # This file - documentation index
-├── guides/                      # How-to guides
-│   ├── BUILD.md                 # Building and development
-│   ├── RELEASING.md             # Release workflow
-│   ├── FOCUS-MODE.md            # Focus mode feature
-│   └── SHORTCUTS.md             # Keyboard shortcuts
-├── architecture/                # Technical architecture
-│   ├── SECURITY.md              # Security implementation
-│   ├── BEST_PRACTICES.md        # Code quality standards
-│   └── FEATURES.md              # Feature documentation
-└── reports/                     # Project reports & analysis
-    ├── CODE_QUALITY_REPORT.md
-    ├── IMPROVEMENTS_SUMMARY.md
-    └── UX_ENHANCEMENTS.md
+├── README.md                 # This file - documentation index
+├── guides/                   # How-to guides
+│   ├── BUILD.md              # Building and development
+│   ├── CODE-SIGNING.md       # Code signing & notarization
+│   ├── RELEASING.md          # Release workflow
+│   ├── FOCUS-MODE.md         # Focus mode feature
+│   └── SHORTCUTS.md          # Keyboard shortcuts
+├── architecture/             # Technical documentation
+│   ├── SECURITY.md           # Security implementation
+│   ├── FEATURES.md           # Feature documentation
+│   └── BEST_PRACTICES.md     # Code quality standards
+└── reports/                  # Historical reports
+    └── ...                   # Code quality & improvement reports
 ```
 
-## 🔗 External Resources
+**Root-level docs:**
+```
+/
+├── README.md            # Project overview
+├── CHANGELOG.md         # Version history
+├── CONTRIBUTING.md      # Contribution guidelines
+├── CODE_OF_CONDUCT.md   # Community guidelines
+└── CLAUDE.md            # AI assistant context
+```
 
-- **GitHub Repository**: https://github.com/cyrus-reap/task-floater
-- **Releases**: https://github.com/cyrus-reap/task-floater/releases
-- **Issues**: https://github.com/cyrus-reap/task-floater/issues
-- **Electron Docs**: https://www.electronjs.org/docs
-- **TypeScript Docs**: https://www.typescriptlang.org/docs
+---
 
-## 🆘 Need Help?
+## Development Workflow
+
+```mermaid
+flowchart LR
+    subgraph Development
+        A[Clone Repo] --> B[npm install]
+        B --> C[npm start]
+        C --> D[Make Changes]
+        D --> E[npm run validate]
+    end
+
+    subgraph Release
+        E --> F[npm run dist]
+        F --> G[Test DMG]
+        G --> H[git tag vX.X.X]
+        H --> I[git push --tags]
+        I --> J[GitHub Actions]
+        J --> K[Release Created]
+    end
+```
+
+---
+
+## Common Tasks
+
+### I want to...
+
+| Task | Documentation |
+|------|---------------|
+| Install the app | [README.md](../README.md#installation) |
+| Learn keyboard shortcuts | [SHORTCUTS.md](guides/SHORTCUTS.md) |
+| Build from source | [BUILD.md](guides/BUILD.md) |
+| Sign & notarize the app | [CODE-SIGNING.md](guides/CODE-SIGNING.md) |
+| Create a release | [RELEASING.md](guides/RELEASING.md) |
+| Understand security model | [SECURITY.md](architecture/SECURITY.md) |
+| Contribute code | [CONTRIBUTING.md](../CONTRIBUTING.md) |
+| Use focus mode | [FOCUS-MODE.md](guides/FOCUS-MODE.md) |
+
+---
+
+## External Resources
+
+- **Repository**: [github.com/Cyvid7-Darus10/task-floater](https://github.com/Cyvid7-Darus10/task-floater)
+- **Releases**: [Latest Release](https://github.com/Cyvid7-Darus10/task-floater/releases/latest)
+- **Issues**: [Report a Bug](https://github.com/Cyvid7-Darus10/task-floater/issues)
+- **Electron Docs**: [electronjs.org/docs](https://www.electronjs.org/docs)
+
+---
+
+## Need Help?
 
 1. Check the relevant guide above
-2. Search [existing issues](https://github.com/cyrus-reap/task-floater/issues)
+2. Search [existing issues](https://github.com/Cyvid7-Darus10/task-floater/issues)
 3. Create a new issue if needed
 
-## 📝 Maintaining Documentation
+---
 
-When adding new documentation:
-- **Guides** → `docs/guides/` (how-to, tutorials)
-- **Architecture** → `docs/architecture/` (design, security, patterns)
-- **Reports** → `docs/reports/` (analysis, summaries)
-- **Keep at root** → README, CHANGELOG, CONTRIBUTING, CODE_OF_CONDUCT
-
-Update this index when adding new docs!
+*Last updated: January 2026*

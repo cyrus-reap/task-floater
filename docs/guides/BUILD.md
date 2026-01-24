@@ -1,380 +1,300 @@
-# Building Task Floater for Production
+# Building Task Floater
 
-This guide covers building Task Floater for distribution on macOS, Windows, and Linux.
+Guide for building Task Floater from source for development and distribution.
+
+## Build Pipeline
+
+```mermaid
+flowchart LR
+    subgraph Development
+        A[TypeScript<br/>src/*.ts] --> B[tsc]
+        B --> C[JavaScript<br/>dist/*.js]
+    end
+
+    subgraph Packaging
+        C --> D[electron-builder]
+        D --> E[.app Bundle]
+    end
+
+    subgraph Distribution
+        E --> F[Code Signing]
+        F --> G[Notarization]
+        G --> H[DMG/ZIP]
+    end
+
+    style A fill:#3178c6
+    style C fill:#f7df1e
+    style E fill:#47848f
+    style H fill:#4aff4a
+```
+
+---
 
 ## Prerequisites
 
-1. **Node.js** (v16 or higher)
-2. **npm** (v8 or higher)
-3. **Dependencies installed**: `npm install`
+- **Node.js** v18 or higher
+- **npm** v9 or higher
+- **macOS** (for macOS builds)
+
+```bash
+# Verify versions
+node --version  # v18+
+npm --version   # v9+
+```
+
+---
 
 ## Quick Start
 
-### Development Build
 ```bash
-npm run build    # Compile TypeScript
-npm start        # Run the app
+# Clone and install
+git clone https://github.com/Cyvid7-Darus10/task-floater.git
+cd task-floater
+npm install
+
+# Development
+npm start
+
+# Production build
+npm run dist
 ```
 
-### Production Build (macOS)
-```bash
-npm run dist:mac
-```
-
-Output: `release/Task Floater-1.0.0-arm64.dmg` and `.zip`
+---
 
 ## Build Commands
 
-### Local Testing (No Installer)
+| Command | Description | Output |
+|---------|-------------|--------|
+| `npm run build` | Compile TypeScript | `dist/*.js` |
+| `npm start` | Run in development | Opens app |
+| `npm run pack` | Package without installer | `release/mac/*.app` |
+| `npm run dist` | Full distribution build | `release/*.dmg` |
+
+---
+
+## Development Build
+
+### Run the App
+
 ```bash
-npm run pack
+npm start
 ```
-- Creates unpacked app in `release/mac/Task Floater.app`
-- Fastest way to test production build
-- **Use this to verify before creating installers**
 
-### macOS Production Build
+This compiles TypeScript and launches Electron in development mode.
+
+### Watch Mode
+
 ```bash
-npm run dist:mac
+npm run dev
 ```
-Creates:
-- `Task Floater-1.0.0-arm64.dmg` (Apple Silicon installer)
-- `Task Floater-1.0.0-x64.dmg` (Intel installer)
-- `Task Floater-1.0.0-arm64-mac.zip` (Portable)
-- `Task Floater-1.0.0-x64-mac.zip` (Portable)
 
-### All Platforms
+Watches for file changes and reloads automatically.
+
+### Type Checking
+
 ```bash
-npm run dist:all
+npm run typecheck    # Check types
+npm run lint         # Lint code
+npm run format:check # Check formatting
+npm run validate     # All of the above
 ```
-Builds for macOS, Windows, and Linux (requires platform-specific tools)
 
-## Before Building
+---
 
-### 1. Run Pre-build Checklist
+## Production Build
+
+### Step 1: Validate Code
+
 ```bash
-# Type check
-npm run typecheck
-
-# Lint
-npm run lint
-
-# Format check
-npm run format:check
-
-# Or run all at once
 npm run validate
 ```
 
-### 2. Create App Icons
+Runs type checking, linting, and format verification.
 
-**You need to create icons before building!**
+### Step 2: Build DMG
 
-Place icons in the `build/` directory:
-- `build/icon.icns` (macOS)
-- `build/icon.ico` (Windows)
-- `build/icon.png` (Linux, 512x512+)
-
-See `build/README.md` for icon creation instructions.
-
-### 3. Test the Build
 ```bash
-# First do a pack (faster)
-npm run pack
+npm run dist
+```
 
-# Then run the unpacked app
+Creates:
+```
+release/
+├── Task Floater-X.X.X.dmg           # Intel (x64)
+├── Task Floater-X.X.X-arm64.dmg     # Apple Silicon
+├── Task Floater-X.X.X-mac.zip       # Intel portable
+├── Task Floater-X.X.X-arm64-mac.zip # Apple Silicon portable
+└── latest-mac.yml                   # Auto-update manifest
+```
+
+### Step 3: Test the Build
+
+```bash
+# Open the DMG
+open release/Task\ Floater-*.dmg
+
+# Or run the app directly
 open release/mac/Task\ Floater.app
 ```
 
-## Distribution
+---
 
-### For macOS Users
+## Code Signing & Notarization
 
-#### DMG Installer (Recommended)
-```bash
-npm run dist:mac
-```
+For professional distribution without Gatekeeper warnings, you need to sign and notarize your app.
 
-**Share**: `release/Task Floater-1.0.0-arm64.dmg`
+**See: [Code Signing Guide](CODE-SIGNING.md)**
 
-Users:
-1. Download the .dmg file
-2. Double-click to mount
-3. Drag "Task Floater" to Applications folder
-4. Eject the DMG
-5. Open from Applications
+Quick summary:
+1. Get Apple Developer Account ($99/year)
+2. Create Developer ID certificate
+3. Configure `.env.signing`
+4. Run `source .env.signing && npm run dist`
 
-#### ZIP Archive (Portable)
-```bash
-npm run dist:mac
-```
-
-**Share**: `release/Task Floater-1.0.0-arm64-mac.zip`
-
-Users:
-1. Download and extract
-2. Move `Task Floater.app` to Applications
-3. Right-click → Open (first time only, due to Gatekeeper)
-
-### For Windows Users
-```bash
-npm run dist    # On Windows or with wine
-```
-
-Creates:
-- `Task Floater Setup 1.0.0.exe` (Installer)
-- `Task Floater-1.0.0-win.zip` (Portable)
-
-### For Linux Users
-```bash
-npm run dist    # On Linux
-```
-
-Creates:
-- `Task Floater-1.0.0.AppImage` (Universal)
-- `task-floater_1.0.0_amd64.deb` (Debian/Ubuntu)
-
-## Code Signing (Optional but Recommended)
-
-### macOS Code Signing
-
-**Why?** Prevents "App from unidentified developer" warnings
-
-**Requirements:**
-1. Apple Developer Account ($99/year)
-2. Developer ID Application certificate
-
-**Setup:**
-```bash
-# Set environment variables
-export APPLEID="your-apple-id@email.com"
-export APPLEIDPASS="app-specific-password"
-
-# Build with signing
-npm run dist:mac
-```
-
-Add to `package.json` build config:
-```json
-"mac": {
-  "identity": "Developer ID Application: Your Name (TEAM_ID)",
-  "electronUpdaterCompatibility": ">=2.16",
-}
-```
-
-### macOS Notarization
-
-For Gatekeeper approval, add:
-```json
-"afterSign": "scripts/notarize.js",
-"notarize": {
-  "teamId": "YOUR_TEAM_ID"
-}
-```
-
-**Note**: Not required for personal use, only for public distribution.
+---
 
 ## Build Configuration
 
-### Customization
-
-Edit `package.json` → `build` section:
+### package.json Build Section
 
 ```json
 {
-  "appId": "com.reap.task-floater",         // Unique app identifier
-  "productName": "Task Floater",            // Display name
-  "copyright": "Copyright © 2026 ...",      // Copyright text
-  "category": "public.app-category.productivity"  // macOS category
+  "build": {
+    "appId": "com.reap.task-floater",
+    "productName": "Task Floater",
+    "mac": {
+      "category": "public.app-category.productivity",
+      "target": [
+        { "target": "dmg", "arch": ["x64", "arm64"] },
+        { "target": "zip", "arch": ["x64", "arm64"] }
+      ]
+    },
+    "files": [
+      "dist/**/*",
+      "src/index.html",
+      "package.json"
+    ]
+  }
 }
 ```
 
-### Files Included in Build
+### Files Included
 
-From `package.json`:
-```json
-"files": [
-  "dist/**/*",        // Compiled JavaScript
-  "src/index.html",   // UI markup
-  "package.json"      // App metadata
-]
+| Included | Not Included |
+|----------|--------------|
+| `dist/**/*` (compiled JS) | `src/*.ts` (source) |
+| `src/index.html` | `node_modules/` (dev deps) |
+| `package.json` | `test/` |
+| Production dependencies | Documentation |
+
+---
+
+## App Icons
+
+Icons must be placed in `build/` directory before building:
+
+```
+build/
+├── icon.icns    # macOS (required)
+├── icon.ico     # Windows
+└── icon.png     # Linux (512x512+)
 ```
 
-**Not included:**
-- Source TypeScript files (`src/*.ts`)
-- Development dependencies
-- Test files
-- Documentation (unless added)
+**Generate icons:**
+```bash
+npm run icons
+```
+
+See `build/README.md` for manual icon creation.
+
+---
 
 ## Troubleshooting
 
-### "Icon not found"
-**Solution**: Create icons in `build/` directory (see `build/README.md`)
+### "Cannot find module"
 
-### Build fails with "Cannot find module"
-**Solution**:
 ```bash
 npm run clean
 npm install
 npm run build
-npm run dist:mac
 ```
 
 ### "App is damaged" on macOS
-**Cause**: Gatekeeper blocking unsigned app
 
-**Solution**:
+For unsigned builds:
 ```bash
-# Remove quarantine attribute
 xattr -cr /Applications/Task\ Floater.app
-
-# Or right-click → Open
 ```
+
+Or: Right-click → Open → Click "Open"
+
+For signed builds: See [Code Signing Guide](CODE-SIGNING.md)
 
 ### Build is too large
-**Check**:
+
+Expected sizes:
+- DMG: ~90-100 MB
+- Unpacked app: ~150-200 MB
+
+If larger, check that `files` array in package.json is correct.
+
+### TypeScript errors
+
 ```bash
-ls -lh release/*.dmg
+npm run typecheck
 ```
 
-**Optimize**:
-- Ensure `node_modules` not included (should be automatic)
-- Use `npm prune --production` before building
-- Check `files` array in package.json
+Fix all type errors before building.
 
-## Testing the Build
+---
 
-### Pre-Release Checklist
-
-- [ ] Run `npm run validate` (typecheck + lint + format)
-- [ ] Test development build (`npm start`)
-- [ ] Create test pack (`npm run pack`)
-- [ ] Test unpacked app from `release/mac/`
-- [ ] Verify all features work
-- [ ] Test timer functionality
-- [ ] Test data persistence
-- [ ] Check window positioning
-- [ ] Create final DMG (`npm run dist:mac`)
-- [ ] Test DMG installation
-- [ ] Verify app launches from Applications
-- [ ] Test on clean machine if possible
-
-## Release Workflow
-
-### 1. Version Bump
-```bash
-# Update version in package.json
-npm version patch   # 1.0.0 → 1.0.1
-# or
-npm version minor   # 1.0.0 → 1.1.0
-# or
-npm version major   # 1.0.0 → 2.0.0
-```
-
-### 2. Build
-```bash
-npm run validate    # Pre-build checks
-npm run dist:mac    # Create installer
-```
-
-### 3. Test
-```bash
-# Install from DMG
-open release/Task\ Floater-1.0.0-arm64.dmg
-
-# Test all features
-# - Create tasks
-# - Start timers
-# - Check persistence
-```
-
-### 4. Distribute
-```bash
-# Upload to GitHub Releases, website, etc.
-```
-
-## Build Outputs
-
-### macOS (after `npm run dist:mac`)
-```
-release/
-├── Task Floater-1.0.0-arm64.dmg        # Apple Silicon installer
-├── Task Floater-1.0.0-x64.dmg          # Intel installer
-├── Task Floater-1.0.0-arm64-mac.zip    # Apple Silicon portable
-├── Task Floater-1.0.0-x64-mac.zip      # Intel portable
-├── mac/
-│   └── Task Floater.app                # Unpacked app (from npm run pack)
-└── builder-effective-config.yaml       # Build configuration used
-```
-
-### File Sizes (Approximate)
-- DMG: ~80-120 MB (includes Electron runtime)
-- ZIP: ~80-120 MB
-- Unpacked: ~150-200 MB
-
-## Continuous Integration
-
-### GitHub Actions Example
-```yaml
-name: Build
-
-on: [push, pull_request]
-
-jobs:
-  build:
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
-        with:
-          node-version: '20'
-      - run: npm install
-      - run: npm run validate
-      - run: npm run dist:mac
-      - uses: actions/upload-artifact@v3
-        with:
-          name: macos-build
-          path: release/*.dmg
-```
-
-## Environment Variables
-
-### For Code Signing
-```bash
-export APPLEID="your-apple-id@email.com"
-export APPLEIDPASS="app-specific-password"
-export TEAM_ID="YOUR_TEAM_ID"
-```
-
-### For CI/CD
-Add to GitHub Secrets:
-- `APPLEID`
-- `APPLEIDPASS`
-- `CSC_LINK` (base64 encoded certificate)
-- `CSC_KEY_PASS` (certificate password)
-
-## Platform-Specific Notes
+## Platform Notes
 
 ### macOS
-- **Apple Silicon**: Builds for arm64 architecture
-- **Intel**: Builds for x64 architecture
-- **Universal**: Can build universal binary (both architectures)
-- **Gatekeeper**: Unsigned apps require right-click → Open
-- **Sandbox**: App runs in macOS sandbox
 
-### Windows
-- Requires wine on macOS/Linux for cross-compilation
-- NSIS installer created by default
-- May trigger SmartScreen without code signing
+- **Apple Silicon (M1/M2/M3)**: Builds `arm64` architecture
+- **Intel**: Builds `x64` architecture
+- **Universal**: Build both with `arch: ["x64", "arm64"]`
 
-### Linux
-- AppImage is universal (works on most distros)
-- .deb for Debian/Ubuntu
-- Doesn't require wine
+### Windows (Cross-compile)
 
-## Additional Resources
+```bash
+# Requires wine on macOS
+npm run dist -- --win
+```
 
-- [electron-builder docs](https://www.electron.build/)
-- [macOS Code Signing](https://www.electron.build/code-signing)
-- [macOS Notarization](https://kilianvalkhof.com/2019/electron/notarizing-your-electron-application/)
-- [Windows Code Signing](https://www.electron.build/code-signing#windows)
+### Linux (Cross-compile)
+
+```bash
+npm run dist -- --linux
+```
+
+---
+
+## CI/CD Build
+
+GitHub Actions automatically builds on:
+- Push to `main` branch
+- Pull requests
+- Tags (creates release)
+
+See `.github/workflows/ci.yml` and `.github/workflows/release.yml`
+
+---
+
+## Quick Reference
+
+| Task | Command |
+|------|---------|
+| Install dependencies | `npm install` |
+| Run development | `npm start` |
+| Type check | `npm run typecheck` |
+| Lint | `npm run lint` |
+| Format | `npm run format` |
+| Validate all | `npm run validate` |
+| Build production | `npm run dist` |
+| Clean build | `npm run clean` |
+
+---
+
+*See also: [Code Signing](CODE-SIGNING.md) | [Releasing](RELEASING.md)*
