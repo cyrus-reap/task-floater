@@ -45,8 +45,11 @@ interface ElectronAPI {
   resizeWindow: (height: number) => Promise<void>;
   showConfirmDialog: (title: string, message: string) => Promise<boolean>;
 
-  // Screenshot-based task capture
-  captureNativeScreenshot: () => Promise<string | null>;
+  // Screenshot-based task capture (using desktopCapturer API)
+  getDesktopSources: () => Promise<
+    Array<{ id: string; name: string; thumbnailDataURL: string; type: 'screen' | 'window' }>
+  >;
+  captureDesktopSource: (sourceId: string) => Promise<string>;
   processScreenshotFile: (imagePath: string) => Promise<ParsedTask[]>;
   addTasksBatch: (tasks: ParsedTask[]) => Promise<Task[]>;
   onScreenshotTrigger: (callback: () => void) => void;

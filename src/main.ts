@@ -6,15 +6,12 @@ import {
   Notification,
   dialog,
   globalShortcut,
+  desktopCapturer,
 } from 'electron';
 import * as path from 'path';
 import * as fs from 'fs';
-import { execFile } from 'child_process';
-import { promisify } from 'util';
 import { Validators, ValidationError } from './validation';
 import { parseTasksFromText, ParsedTask } from './ocrService';
-
-const execFileAsync = promisify(execFile);
 
 const STORE_PATH = path.join(app.getPath('userData'), 'tasks.json');
 const SETTINGS_PATH = path.join(app.getPath('userData'), 'settings.json');
@@ -451,53 +448,72 @@ ipcMain.handle('update-settings', async (_event, settings: Partial<Settings>): P
   saveSettings(updated);
 });
 
-// Screenshot-based task capture
+// Screenshot-based task capture using Electron's desktopCapturer API
+// This approach is Mac App Store compatible (no external commands)
+
 /**
- * Triggers native macOS screenshot tool (like Cmd+Shift+4)
- * Returns path to captured image file, or null if canceled
+ * Get available desktop sources (screens and windows) for capture
+ * Returns list of sources with id, name, and thumbnail preview
  */
-ipcMain.handle('capture-native-screenshot', async (): Promise<string | null> => {
+ipcMain.handle(
+  'get-desktop-sources',
+  async (): Promise<
+    Array<{ id: string; name: string; thumbnailDataURL: string; type: 'screen' | 'window' }>
+  > => {
+    try {
+      const sources = await desktopCapturer.getSources({
+        types: ['screen', 'window'],
+        thumbnailSize: { width: 300, height: 200 },
+      });
+
+      return sources.map(source => ({
+        id: source.id,
+        name: source.name,
+        thumbnailDataURL: source.thumbnail.toDataURL(),
+        type: source.id.startsWith('screen') ? 'screen' : 'window',
+      }));
+    } catch (error) {
+      console.error('Error getting desktop sources:', error);
+      throw error;
+    }
+  }
+);
+
+/**
+ * Capture screenshot from a specific desktop source (screen or window)
+ * Returns temp file path with captured image
+ */
+ipcMain.handle('capture-desktop-source', async (_event, sourceId: string): Promise<string> => {
   try {
-    // Check if we're on macOS
-    if (process.platform !== 'darwin') {
-      throw new Error('Native screenshot capture is only supported on macOS');
+    // Validate sourceId
+    if (!sourceId || typeof sourceId !== 'string') {
+      throw new ValidationError('Invalid source ID');
     }
 
-    // Create temp file path for screenshot
+    // Get the source again at full resolution
+    const sources = await desktopCapturer.getSources({
+      types: ['screen', 'window'],
+      thumbnailSize: screen.getPrimaryDisplay().size,
+    });
+
+    const source = sources.find(s => s.id === sourceId);
+    if (!source) {
+      throw new Error('Source not found');
+    }
+
+    // Get the image data
+    const image = source.thumbnail;
+    const pngBuffer = image.toPNG();
+
+    // Save to temp file
     const tempDir = app.getPath('temp');
     const tempFile = path.join(tempDir, `task-floater-screenshot-${Date.now()}.png`);
+    fs.writeFileSync(tempFile, pngBuffer);
 
-    // Use screencapture command: -i = interactive, save to file
-    // This approach doesn't require Screen Recording permission
-    // Using execFile instead of exec to prevent command injection vulnerabilities
-    try {
-      await execFileAsync('screencapture', ['-i', tempFile]);
-    } catch {
-      // screencapture returns exit code 1 when user cancels
-      return null;
-    }
-
-    // Check if file was created (user didn't cancel)
-    if (fs.existsSync(tempFile)) {
-      const stats = fs.statSync(tempFile);
-      if (stats.size > 0) {
-        return tempFile;
-      } else {
-        // Empty file means user canceled
-        try {
-          fs.unlinkSync(tempFile);
-        } catch {
-          // Ignore cleanup error
-        }
-        return null;
-      }
-    } else {
-      return null;
-    }
+    return tempFile;
   } catch (error) {
-    // Unexpected error
-    console.error('Unexpected error during screenshot capture:', error);
-    return null;
+    console.error('Error capturing desktop source:', error);
+    throw error;
   }
 });
 

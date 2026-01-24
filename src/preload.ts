@@ -52,9 +52,12 @@ contextBridge.exposeInMainWorld('electronAPI', {
   showConfirmDialog: (title: string, message: string): Promise<boolean> =>
     ipcRenderer.invoke('show-confirm-dialog', title, message),
 
-  // Screenshot-based task capture
-  captureNativeScreenshot: (): Promise<string | null> =>
-    ipcRenderer.invoke('capture-native-screenshot'),
+  // Screenshot-based task capture (using desktopCapturer API)
+  getDesktopSources: (): Promise<
+    Array<{ id: string; name: string; thumbnailDataURL: string; type: 'screen' | 'window' }>
+  > => ipcRenderer.invoke('get-desktop-sources'),
+  captureDesktopSource: (sourceId: string): Promise<string> =>
+    ipcRenderer.invoke('capture-desktop-source', sourceId),
   processScreenshotFile: (imagePath: string): Promise<ParsedTask[]> =>
     ipcRenderer.invoke('process-screenshot-file', imagePath),
   addTasksBatch: (tasks: ParsedTask[]): Promise<Task[]> =>

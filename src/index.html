@@ -2196,6 +2196,75 @@
         color: var(--text-secondary);
       }
 
+      .modal-source-selector {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-4);
+        padding: var(--space-4);
+      }
+
+      .source-selector-header {
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--text-primary);
+      }
+
+      .source-selector-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--space-3);
+        max-height: 400px;
+        overflow-y: auto;
+      }
+
+      .source-item {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        background: var(--surface-base);
+        border: 2px solid var(--border-subtle);
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        transition: all var(--transition-fast);
+        overflow: hidden;
+      }
+
+      .source-item:hover {
+        border-color: var(--accent);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      }
+
+      .source-thumbnail {
+        width: 100%;
+        height: 120px;
+        object-fit: cover;
+        background: var(--surface-muted);
+      }
+
+      .source-info {
+        padding: var(--space-2);
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-1);
+      }
+
+      .source-name {
+        font-size: 12px;
+        font-weight: 500;
+        color: var(--text-primary);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .source-type {
+        font-size: 10px;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
       .preview-task-list {
         display: flex;
         flex-direction: column;
@@ -2737,6 +2806,11 @@
           </button>
         </div>
         <div class="modal-body" id="modalBody">
+          <!-- Source selector (shown first - pick screen or window) -->
+          <div class="modal-source-selector" id="modalSourceSelector" style="display: none">
+            <div class="source-selector-header">Select a screen or window to capture:</div>
+            <div class="source-selector-grid" id="sourceGrid"></div>
+          </div>
           <!-- Loading state (shown during OCR) -->
           <div class="modal-loading" id="modalLoading">
             <div class="modal-loading-spinner"></div>

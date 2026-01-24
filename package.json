@@ -35,6 +35,7 @@
     "pack": "npm run build && electron-builder --dir",
     "dist": "npm run build && electron-builder",
     "dist:mac": "npm run build && electron-builder --mac",
+    "dist:mas": "npm run build && electron-builder --mac mas",
     "dist:all": "npm run build && electron-builder -mwl",
     "release": "./scripts/release.sh",
     "release:quick": "npm run validate && npm run test:run && npm run icons && npm run dist:mac"
@@ -145,6 +146,18 @@
       "gatekeeperAssess": false,
       "entitlements": "build/entitlements.mac.plist",
       "entitlementsInherit": "build/entitlements.mac.plist",
+      "electronLanguages": [
+        "en"
+      ]
+    },
+    "mas": {
+      "type": "distribution",
+      "category": "public.app-category.productivity",
+      "entitlements": "build/entitlements.mas.plist",
+      "entitlementsInherit": "build/entitlements.mas.inherit.plist",
+      "hardenedRuntime": false,
+      "gatekeeperAssess": false,
+      "icon": "build/icon.icns",
       "electronLanguages": [
         "en"
       ]

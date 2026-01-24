@@ -2676,6 +2676,8 @@ function setupScreenshotCapture(): void {
   const modalFooter = document.getElementById('modalFooter');
   const modalEmptyState = document.getElementById('modalEmptyState');
   const modalAddCount = document.getElementById('modalAddCount');
+  const modalSourceSelector = document.getElementById('modalSourceSelector');
+  const sourceGrid = document.getElementById('sourceGrid');
 
   if (!screenshotBtn || !modal) {
     console.warn('Screenshot elements not found');
@@ -2736,17 +2738,73 @@ function setupScreenshotCapture(): void {
 
   async function handleScreenshotCapture(): Promise<void> {
     try {
-      // Trigger native macOS screenshot tool (like Cmd+Shift+4)
-      const imagePath = await window.electronAPI.captureNativeScreenshot();
+      // Show modal with source selector
+      openModal();
+      showSourceSelector();
 
-      if (!imagePath) {
-        // User canceled (pressed Esc) or no screenshot taken
+      // Get available desktop sources (screens and windows)
+      const sources = await window.electronAPI.getDesktopSources();
+
+      if (sources.length === 0) {
+        closeModal();
+        showToast('No screens or windows available to capture', 'error');
         return;
       }
 
-      // Show modal in loading state while processing
-      openModal();
+      // Render sources in grid
+      renderSources(sources);
+    } catch (error) {
+      console.error('Screenshot capture error:', error);
+      closeModal();
+      showToast('Failed to get desktop sources', 'error');
+    }
+  }
+
+  function renderSources(
+    sources: Array<{
+      id: string;
+      name: string;
+      thumbnailDataURL: string;
+      type: 'screen' | 'window';
+    }>
+  ): void {
+    if (!sourceGrid) {
+      return;
+    }
+
+    sourceGrid.innerHTML = sources
+      .map(
+        source => `
+        <div class="source-item" data-source-id="${source.id}">
+          <img class="source-thumbnail" src="${source.thumbnailDataURL}" alt="${escapeHtml(source.name)}" />
+          <div class="source-info">
+            <div class="source-name" title="${escapeHtml(source.name)}">${escapeHtml(source.name)}</div>
+            <div class="source-type">${source.type}</div>
+          </div>
+        </div>
+      `
+      )
+      .join('');
+
+    // Add click handlers to source items
+    const sourceItems = sourceGrid.querySelectorAll('.source-item');
+    sourceItems.forEach(item => {
+      item.addEventListener('click', async () => {
+        const sourceId = (item as HTMLElement).dataset.sourceId;
+        if (sourceId) {
+          await captureSelectedSource(sourceId);
+        }
+      });
+    });
+  }
+
+  async function captureSelectedSource(sourceId: string): Promise<void> {
+    try {
+      // Show loading state while capturing and processing
       showLoadingState();
+
+      // Capture the selected source
+      const imagePath = await window.electronAPI.captureDesktopSource(sourceId);
 
       // Process screenshot file with OCR
       const tasks = await window.electronAPI.processScreenshotFile(imagePath);
@@ -2758,9 +2816,9 @@ function setupScreenshotCapture(): void {
         showPreviewTasks(tasks);
       }
     } catch (error) {
-      console.error('Screenshot capture error:', error);
+      console.error('Error capturing source:', error);
       closeModal();
-      showToast('Failed to process screenshot', 'error');
+      showToast('Failed to capture and process screenshot', 'error');
     }
   }
 
@@ -2773,7 +2831,28 @@ function setupScreenshotCapture(): void {
     previewTasks = [];
   }
 
+  function showSourceSelector(): void {
+    if (modalSourceSelector) {
+      modalSourceSelector.style.display = 'flex';
+    }
+    if (modalLoading) {
+      modalLoading.style.display = 'none';
+    }
+    if (previewTaskList) {
+      previewTaskList.style.display = 'none';
+    }
+    if (modalFooter) {
+      modalFooter.style.display = 'none';
+    }
+    if (modalEmptyState) {
+      modalEmptyState.style.display = 'none';
+    }
+  }
+
   function showLoadingState(): void {
+    if (modalSourceSelector) {
+      modalSourceSelector.style.display = 'none';
+    }
     if (modalLoading) {
       modalLoading.style.display = 'flex';
     }
@@ -2789,6 +2868,9 @@ function setupScreenshotCapture(): void {
   }
 
   function showEmptyState(): void {
+    if (modalSourceSelector) {
+      modalSourceSelector.style.display = 'none';
+    }
     if (modalLoading) {
       modalLoading.style.display = 'none';
     }
@@ -2804,6 +2886,9 @@ function setupScreenshotCapture(): void {
   }
 
   function showPreviewTasks(tasks: ParsedTask[]): void {
+    if (modalSourceSelector) {
+      modalSourceSelector.style.display = 'none';
+    }
     if (modalLoading) {
       modalLoading.style.display = 'none';
     }
