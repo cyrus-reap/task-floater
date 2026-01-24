@@ -9,12 +9,12 @@ import {
 } from 'electron';
 import * as path from 'path';
 import * as fs from 'fs';
-import { exec } from 'child_process';
+import { execFile } from 'child_process';
 import { promisify } from 'util';
 import { Validators, ValidationError } from './validation';
 import { parseTasksFromText, ParsedTask } from './ocrService';
 
-const execAsync = promisify(exec);
+const execFileAsync = promisify(execFile);
 
 const STORE_PATH = path.join(app.getPath('userData'), 'tasks.json');
 const SETTINGS_PATH = path.join(app.getPath('userData'), 'settings.json');
@@ -455,8 +455,9 @@ ipcMain.handle('capture-native-screenshot', async (): Promise<string | null> => 
 
     // Use screencapture command: -i = interactive, save to file
     // This approach doesn't require Screen Recording permission
+    // Using execFile instead of exec to prevent command injection vulnerabilities
     try {
-      await execAsync(`screencapture -i "${tempFile}"`);
+      await execFileAsync('screencapture', ['-i', tempFile]);
     } catch {
       // screencapture returns exit code 1 when user cancels
       return null;

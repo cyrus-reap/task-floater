@@ -2103,6 +2103,58 @@
         color: var(--text-secondary);
         font-size: 13px;
       }
+
+      /* ==========================================================================
+         LOADING OVERLAY
+         ========================================================================== */
+      .loading-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(4px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10000;
+        opacity: 0;
+        transition: opacity 0.2s ease;
+      }
+
+      .loading-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: var(--space-4);
+        background: var(--surface-elevated);
+        padding: var(--space-8);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-xl);
+        border: 1px solid var(--border-default);
+      }
+
+      .loading-spinner {
+        width: 40px;
+        height: 40px;
+        border: 3px solid var(--border-default);
+        border-top-color: var(--accent);
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      .loading-message {
+        color: var(--text-primary);
+        font-size: 14px;
+        font-weight: 500;
+      }
     </style>
   </head>
   <body>
@@ -2111,22 +2163,40 @@
       <header class="header">
         <div class="header-left">
           <!-- Mode selector -->
-          <div class="mode-selector">
-            <button class="mode-btn active" id="fullModeBtn" title="Full Mode (⌘1)">
-              <svg class="icon" viewBox="0 0 24 24">
+          <div class="mode-selector" role="group" aria-label="View mode selector">
+            <button
+              class="mode-btn active"
+              id="fullModeBtn"
+              title="Full Mode (⌘1)"
+              aria-label="Full Mode"
+              aria-pressed="true"
+            >
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
                 <rect x="3" y="3" width="18" height="18" rx="2" />
                 <line x1="3" y1="9" x2="21" y2="9" />
               </svg>
             </button>
-            <button class="mode-btn" id="compactModeBtn" title="Compact Mode (⌘2)">
-              <svg class="icon" viewBox="0 0 24 24">
+            <button
+              class="mode-btn"
+              id="compactModeBtn"
+              title="Compact Mode (⌘2)"
+              aria-label="Compact Mode"
+              aria-pressed="false"
+            >
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
                 <line x1="4" y1="6" x2="20" y2="6" />
                 <line x1="4" y1="12" x2="20" y2="12" />
                 <line x1="4" y1="18" x2="14" y2="18" />
               </svg>
             </button>
-            <button class="mode-btn" id="focusModeBtn" title="Focus Mode (⌘3)">
-              <svg class="icon" viewBox="0 0 24 24">
+            <button
+              class="mode-btn"
+              id="focusModeBtn"
+              title="Focus Mode (⌘3)"
+              aria-label="Focus Mode"
+              aria-pressed="false"
+            >
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
                 <circle cx="12" cy="12" r="3" />
                 <circle cx="12" cy="12" r="10" />
               </svg>
@@ -2149,8 +2219,13 @@
         </div>
 
         <div class="header-right">
-          <button class="toolbar-btn" id="themeToggle" title="Toggle Theme (⌘T)">
-            <svg class="icon" viewBox="0 0 24 24">
+          <button
+            class="toolbar-btn"
+            id="themeToggle"
+            title="Toggle Theme (⌘T)"
+            aria-label="Toggle between light and dark theme"
+          >
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
               <circle cx="12" cy="12" r="5" />
               <line x1="12" y1="1" x2="12" y2="3" />
               <line x1="12" y1="21" x2="12" y2="23" />
@@ -2162,45 +2237,117 @@
               <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
             </svg>
           </button>
-          <div class="window-controls">
-            <button class="window-btn minimize-btn" id="minimizeBtn" title="Minimize"></button>
-            <button class="window-btn close-btn" id="closeBtn" title="Close"></button>
+          <div class="window-controls" role="group" aria-label="Window controls">
+            <button
+              class="window-btn minimize-btn"
+              id="minimizeBtn"
+              title="Minimize"
+              aria-label="Minimize window"
+            ></button>
+            <button
+              class="window-btn close-btn"
+              id="closeBtn"
+              title="Close"
+              aria-label="Close window"
+            ></button>
           </div>
         </div>
       </header>
 
       <!-- Hero Input Section -->
-      <section class="input-section" id="inputSection">
+      <section class="input-section" id="inputSection" aria-label="Add new task">
         <div class="input-row">
           <div class="task-input-wrapper">
-            <input type="text" id="taskInput" placeholder="What needs to be done?" autofocus />
-            <span class="input-hint">Press Enter</span>
+            <input
+              type="text"
+              id="taskInput"
+              placeholder="What needs to be done?"
+              aria-label="Task description"
+              autofocus
+            />
+            <span class="input-hint" aria-hidden="true">Press Enter</span>
           </div>
-          <button class="add-btn" id="addBtn">Add</button>
+          <button class="add-btn" id="addBtn" aria-label="Add task">Add</button>
         </div>
         <div class="duration-row">
-          <span class="duration-label">Timer</span>
-          <div class="duration-picker" id="durationPicker">
-            <button class="duration-option selected" data-minutes="0">None</button>
-            <button class="duration-option" data-minutes="15">15m</button>
-            <button class="duration-option" data-minutes="25">25m</button>
-            <button class="duration-option" data-minutes="45">45m</button>
-            <button class="duration-option" data-minutes="60">1h</button>
-            <button class="duration-option" data-minutes="90">90m</button>
+          <span class="duration-label" id="durationLabel">Timer</span>
+          <div
+            class="duration-picker"
+            id="durationPicker"
+            role="radiogroup"
+            aria-labelledby="durationLabel"
+          >
+            <button
+              class="duration-option selected"
+              data-minutes="0"
+              role="radio"
+              aria-checked="true"
+              aria-label="No timer"
+            >
+              None
+            </button>
+            <button
+              class="duration-option"
+              data-minutes="15"
+              role="radio"
+              aria-checked="false"
+              aria-label="15 minute timer"
+            >
+              15m
+            </button>
+            <button
+              class="duration-option"
+              data-minutes="25"
+              role="radio"
+              aria-checked="false"
+              aria-label="25 minute timer"
+            >
+              25m
+            </button>
+            <button
+              class="duration-option"
+              data-minutes="45"
+              role="radio"
+              aria-checked="false"
+              aria-label="45 minute timer"
+            >
+              45m
+            </button>
+            <button
+              class="duration-option"
+              data-minutes="60"
+              role="radio"
+              aria-checked="false"
+              aria-label="1 hour timer"
+            >
+              1h
+            </button>
+            <button
+              class="duration-option"
+              data-minutes="90"
+              role="radio"
+              aria-checked="false"
+              aria-label="90 minute timer"
+            >
+              90m
+            </button>
           </div>
         </div>
         <!-- Legacy elements -->
-        <input type="number" id="durationInput" style="display: none" />
+        <input type="number" id="durationInput" style="display: none" aria-hidden="true" />
       </section>
 
       <!-- Tasks Toolbar -->
       <div class="tasks-toolbar" id="tasksToolbar">
-        <span class="tasks-count" id="statsText">0 tasks</span>
-        <div class="tasks-actions">
+        <span class="tasks-count" id="statsText" aria-live="polite" aria-atomic="true">
+          0 tasks
+        </span>
+        <div class="tasks-actions" role="group" aria-label="Task actions">
           <button
             class="action-btn"
             id="screenshotBtn"
             title="Capture region and extract tasks (Cmd+Shift+S)"
+            aria-label="Capture screenshot and extract tasks"
           >
             <svg
               class="icon"
@@ -2210,6 +2357,7 @@
               stroke-width="2"
               stroke-linecap="round"
               stroke-linejoin="round"
+              aria-hidden="true"
             >
               <path
                 d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"
@@ -2217,16 +2365,28 @@
               <circle cx="12" cy="13" r="4"></circle>
             </svg>
           </button>
-          <button class="action-btn" id="clearCompletedBtn" title="Clear completed">
-            <svg class="icon" viewBox="0 0 24 24">
+          <button
+            class="action-btn"
+            id="clearCompletedBtn"
+            title="Clear completed"
+            aria-label="Clear completed tasks"
+          >
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
               <polyline points="3 6 5 6 21 6" />
               <path
                 d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
               />
             </svg>
           </button>
-          <button class="overflow-menu-btn" id="overflowMenuBtn" title="More actions">
-            <svg class="icon" viewBox="0 0 24 24">
+          <button
+            class="overflow-menu-btn"
+            id="overflowMenuBtn"
+            title="More actions"
+            aria-label="More actions menu"
+            aria-haspopup="true"
+            aria-expanded="false"
+          >
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
               <circle cx="12" cy="12" r="1" />
               <circle cx="12" cy="5" r="1" />
               <circle cx="12" cy="19" r="1" />
@@ -2236,20 +2396,27 @@
       </div>
 
       <!-- Search -->
-      <section class="search-section" id="searchSection">
-        <div class="search-wrapper">
+      <section class="search-section" id="searchSection" aria-label="Search tasks">
+        <div class="search-wrapper" role="search">
           <svg
             class="search-icon"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
             stroke-width="2"
+            aria-hidden="true"
           >
             <circle cx="11" cy="11" r="8" />
             <path d="m21 21-4.35-4.35" />
           </svg>
-          <input type="text" id="searchInput" placeholder="Search tasks..." />
-          <span class="search-shortcut">
+          <input
+            type="text"
+            id="searchInput"
+            placeholder="Search tasks..."
+            aria-label="Search tasks"
+            role="searchbox"
+          />
+          <span class="search-shortcut" aria-hidden="true">
             <span class="kbd">⌘</span><span class="kbd">F</span>
           </span>
         </div>

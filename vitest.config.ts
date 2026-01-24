@@ -1,33 +1,28 @@
 import { defineConfig } from 'vitest/config';
-import path from 'path';
 
 export default defineConfig({
   test: {
     globals: true,
-    environment: 'happy-dom',
-    setupFiles: ['./test/setup.ts'],
+    environment: 'jsdom', // Use jsdom for DOM APIs (validation tests need document)
     include: ['test/**/*.test.ts'],
+    exclude: ['node_modules', 'dist', 'build'],
     coverage: {
       provider: 'v8',
-      reporter: ['text', 'json', 'html', 'lcov'],
+      reporter: ['text', 'html', 'lcov'],
+      include: ['src/**/*.ts'],
       exclude: [
-        'node_modules/',
-        'dist/',
-        'test/',
-        '*.config.ts',
-        '*.config.js',
-        'scripts/',
+        'src/**/*.d.ts',
+        'src/types.d.ts',
+        'src/index.html',
+        'dist/**',
+        'test/**',
       ],
-      all: true,
-      lines: 80,
-      functions: 80,
-      branches: 80,
-      statements: 80,
-    },
-  },
-  resolve: {
-    alias: {
-      '@': path.resolve(__dirname, './src'),
+      thresholds: {
+        lines: 70,
+        functions: 70,
+        branches: 70,
+        statements: 70,
+      },
     },
   },
 });

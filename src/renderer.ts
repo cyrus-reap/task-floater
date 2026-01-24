@@ -25,154 +25,78 @@ interface ParsedTask {
 }
 
 // =============================================================================
-// CONSTANTS
+// IMPORTS - CONSTANTS
+// =============================================================================
+
+import {
+  TIMER_CONSTANTS,
+  UI_TIMING,
+  DURATION_PRESETS,
+  ELEMENT_IDS,
+  SELECTORS,
+  CSS_CLASSES,
+  APP_MODES,
+  type AppMode,
+  DATA_ATTRIBUTES,
+  TIMER_ACTIONS,
+  KEYBOARD_KEYS,
+  AUDIO_SETTINGS,
+  SCROLL_BEHAVIOR,
+  THEMES,
+  MESSAGES,
+} from './constants';
+
+// =============================================================================
+// LOCAL CONSTANTS (derived from imports for convenience)
 // =============================================================================
 
 // Timer constants
-const TIMER_SAVE_INTERVAL_SECONDS = 10;
-const SECONDS_PER_MINUTE = 60;
-const AUTO_ADVANCE_DELAY_MS = 2000;
-const SEARCH_DEBOUNCE_MS = 300;
-const TIMER_TICK_INTERVAL_MS = 1000;
-const TIMER_WARNING_THRESHOLD_SECONDS = 300; // 5 minutes
-const TOAST_DURATION_MS = 3000;
-const SUCCESS_ANIMATION_DURATION_MS = 400;
-const CONFETTI_COUNT = 50;
+const TIMER_SAVE_INTERVAL_SECONDS = TIMER_CONSTANTS.SAVE_INTERVAL_SECONDS;
+const SECONDS_PER_MINUTE = TIMER_CONSTANTS.SECONDS_PER_MINUTE;
+const AUTO_ADVANCE_DELAY_MS = TIMER_CONSTANTS.AUTO_ADVANCE_DELAY_MS;
+const TIMER_TICK_INTERVAL_MS = TIMER_CONSTANTS.TICK_INTERVAL_MS;
+const TIMER_WARNING_THRESHOLD_SECONDS = TIMER_CONSTANTS.WARNING_THRESHOLD_SECONDS;
 
-// Duration presets (in minutes) - 3×2 grid for symmetry
-const DURATION_PRESETS = [
-  { label: '15 min', minutes: 15 },
-  { label: '25 min', minutes: 25 },
-  { label: '30 min', minutes: 30 },
-  { label: '45 min', minutes: 45 },
-  { label: '1 hour', minutes: 60 },
-  { label: '90 min', minutes: 90 },
-];
+// UI timing
+const SEARCH_DEBOUNCE_MS = UI_TIMING.SEARCH_DEBOUNCE_MS;
+const TOAST_DURATION_MS = UI_TIMING.TOAST_DURATION_MS;
+const SUCCESS_ANIMATION_DURATION_MS = UI_TIMING.SUCCESS_ANIMATION_DURATION_MS;
+const CONFETTI_COUNT = UI_TIMING.CONFETTI_COUNT;
 
-// DOM Element IDs
-const ELEMENT_IDS = {
-  TASK_INPUT: 'taskInput',
-  DURATION_INPUT: 'durationInput',
-  ADD_BTN: 'addBtn',
-  TASKS_SECTION: 'tasksSection',
-  MINIMIZE_BTN: 'minimizeBtn',
-  CLOSE_BTN: 'closeBtn',
-  SEARCH_INPUT: 'searchInput',
-  STATS_TEXT: 'statsText',
-  STATS_BAR: 'statsBar',
-  CLEAR_COMPLETED_BTN: 'clearCompletedBtn',
-  EXPORT_BTN: 'exportBtn',
-  IMPORT_BTN: 'importBtn',
-  THEME_TOGGLE: 'themeToggle',
-  FOCUS_BTN: 'focusBtn',
-  SEARCH_TOGGLE: 'searchToggle',
-  INPUT_TOGGLE: 'inputToggle',
-  SEARCH_BAR: 'searchBar',
-  INPUT_SECTION: 'inputSection',
-  // New premium UI elements
-  APP_CONTAINER: 'appContainer',
-  FULL_MODE_BTN: 'fullModeBtn',
-  COMPACT_MODE_BTN: 'compactModeBtn',
-  FOCUS_MODE_BTN: 'focusModeBtn',
-  DURATION_PICKER: 'durationPicker',
-  OVERFLOW_MENU_BTN: 'overflowMenuBtn',
-} as const;
+// Data attributes
+const ATTR_ID = DATA_ATTRIBUTES.ID;
+const ATTR_MINUTES = DATA_ATTRIBUTES.MINUTES;
 
-// CSS Selectors
-const SELECTORS = {
-  PRESET_BTN: '.preset-btn',
-  SEGMENT_BTN: '.segment-btn',
-  SEGMENTED_CONTROL: '.segmented-control',
-  TASK_CHECKBOX: '.task-checkbox',
-  DELETE_BTN: '.delete-btn',
-  TIMER_BTN: '.timer-btn',
-  TIMER_DISPLAY: '.timer-display',
-  TIMER_PROGRESS_BAR: '.timer-progress-bar',
-  TIMER_PROGRESS_FILL: '.timer-progress-fill',
-  TASK_ITEM: '.task-item',
-  TASK_TITLE: '.task-title',
-  TASK_ITEM_NOT_COMPLETED: '.task-item:not(.completed)',
-  DURATION_PRESETS: '.duration-presets',
-  // New premium UI selectors
-  DURATION_OPTION: '.duration-option',
-  MODE_BTN: '.mode-btn',
-  TIMER_TIME: '.timer-time',
-  TIMER_PROGRESS: '.timer-progress',
-  CONTEXT_MENU: '.context-menu',
-  OVERFLOW_MENU: '.overflow-menu',
-} as const;
+// Timer actions
+const TIMER_ACTION_PLAY = TIMER_ACTIONS.PLAY;
+const TIMER_ACTION_PAUSE = TIMER_ACTIONS.PAUSE;
+const TIMER_ACTION_RESET = TIMER_ACTIONS.RESET;
 
-// CSS Classes
-const CSS_CLASSES = {
-  TIMER_RUNNING: 'timer-running',
-  TIMER_WARNING: 'timer-warning',
-  COMPLETED: 'completed',
-  SELECTED: 'selected',
-  RUNNING: 'running',
-  PAUSED: 'paused',
-  WARNING: 'warning',
-  EDITING: 'editing',
-  ACTIVE: 'active',
-  LIGHT_THEME: 'light-theme',
-  TASK_EDIT_INPUT: 'task-edit-input',
-  EMPTY_STATE: 'empty-state',
-  EMPTY_STATE_ICON: 'empty-state-icon',
-  EMPTY_STATE_TITLE: 'empty-state-title',
-  EMPTY_STATE_TEXT: 'empty-state-text',
-  COLLAPSED: 'collapsed',
-  FOCUS_MODE: 'focus-mode',
-  COMPACT_MODE: 'compact-mode',
-  HAS_TIMER: 'has-timer',
-  PINNED: 'pinned',
-  COMPLETING: 'completing',
-  TASK_GROUP: 'task-group',
-  TASK_GROUP_HEADER: 'task-group-header',
-  TASK_GROUP_ITEMS: 'task-group-items',
-} as const;
-
-// App modes
-const APP_MODES = {
-  FULL: 'full',
-  COMPACT: 'compact',
-  FOCUS: 'focus',
-} as const;
-
-type AppMode = (typeof APP_MODES)[keyof typeof APP_MODES];
-
-// Data Attributes
-const ATTR_ID = 'data-id';
-const ATTR_MINUTES = 'data-minutes';
-
-// Timer Actions
-const TIMER_ACTION_PLAY = 'play';
-const TIMER_ACTION_PAUSE = 'pause';
-const TIMER_ACTION_RESET = 'reset';
-
-// Keyboard Keys
-const KEY_ESCAPE = 'Escape';
-const KEY_ENTER = 'Enter';
-const KEY_ARROW_UP = 'ArrowUp';
-const KEY_ARROW_DOWN = 'ArrowDown';
-const KEY_SPACE = ' ';
+// Keyboard keys
+const KEY_ESCAPE = KEYBOARD_KEYS.ESCAPE;
+const KEY_ENTER = KEYBOARD_KEYS.ENTER;
+const KEY_ARROW_UP = KEYBOARD_KEYS.ARROW_UP;
+const KEY_ARROW_DOWN = KEYBOARD_KEYS.ARROW_DOWN;
+const KEY_SPACE = KEYBOARD_KEYS.SPACE;
 
 // Audio settings
-const AUDIO_FREQUENCY = 800;
-const AUDIO_GAIN = 0.3;
-const AUDIO_DURATION = 0.5;
-const AUDIO_TYPE_SINE = 'sine';
+const AUDIO_FREQUENCY = AUDIO_SETTINGS.FREQUENCY;
+const AUDIO_GAIN = AUDIO_SETTINGS.GAIN;
+const AUDIO_DURATION = AUDIO_SETTINGS.DURATION;
+const AUDIO_TYPE_SINE = AUDIO_SETTINGS.TYPE;
 
 // Scroll behavior
-const SCROLL_BEHAVIOR_SMOOTH = 'smooth';
-const SCROLL_BLOCK_NEAREST = 'nearest';
+const SCROLL_BEHAVIOR_SMOOTH = SCROLL_BEHAVIOR.SMOOTH;
+const SCROLL_BLOCK_NEAREST = SCROLL_BEHAVIOR.BLOCK_NEAREST;
 
 // Theme values
-const THEME_LIGHT = 'light';
-const THEME_DARK = 'dark';
+const THEME_LIGHT = THEMES.LIGHT;
+const THEME_DARK = THEMES.DARK;
 
 // Messages
-const MSG_TIMER_COMPLETE_TITLE = '⏰ Timer Complete';
-const MSG_ALL_DONE_TITLE = '🎉 All Done!';
-const MSG_ALL_DONE_BODY = 'No more tasks with timers. Great work!';
+const MSG_TIMER_COMPLETE_TITLE = MESSAGES.TIMER_COMPLETE_TITLE;
+const MSG_ALL_DONE_TITLE = MESSAGES.ALL_DONE_TITLE;
+const MSG_ALL_DONE_BODY = MESSAGES.ALL_DONE_BODY;
 
 // =============================================================================
 // STATE
@@ -184,6 +108,7 @@ let selectedDuration: number | undefined = undefined;
 let selectedTaskIndex = -1;
 let currentMode: AppMode = APP_MODES.FULL;
 let contextMenuTarget: string | null = null;
+let draggedTaskId: string | null = null; // For drag-and-drop reordering
 let isDoneSectionCollapsed = true;
 let isCommandPaletteOpen = false;
 let commandPaletteSelectedIndex = 0;
@@ -377,6 +302,69 @@ function showToast(message: string, type: 'success' | 'error' | 'info' = 'info')
 }
 
 /**
+ * Debounce utility function
+ * Returns a debounced version of the provided function
+ */
+function debounce<T extends (...args: any[]) => any>(
+  func: T,
+  wait: number
+): (...args: Parameters<T>) => void {
+  let timeout: number | undefined;
+
+  return function executedFunction(...args: Parameters<T>): void {
+    const later = () => {
+      clearTimeout(timeout);
+      func(...args);
+    };
+
+    clearTimeout(timeout);
+    timeout = window.setTimeout(later, wait);
+  };
+}
+
+/**
+ * Show loading overlay with spinner
+ * Returns a unique ID for hiding the specific overlay later
+ */
+function showLoadingOverlay(message: string): string {
+  const loadingId = `loading-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
+  const overlay = document.createElement('div');
+  overlay.className = 'loading-overlay';
+  overlay.id = loadingId;
+  overlay.setAttribute('role', 'alert');
+  overlay.setAttribute('aria-live', 'polite');
+  overlay.setAttribute('aria-busy', 'true');
+
+  overlay.innerHTML = `
+    <div class="loading-content">
+      <div class="loading-spinner"></div>
+      <div class="loading-message">${message}</div>
+    </div>
+  `;
+
+  document.body.appendChild(overlay);
+
+  // Trigger animation
+  requestAnimationFrame(() => {
+    overlay.style.opacity = '1';
+  });
+
+  return loadingId;
+}
+
+/**
+ * Hide loading overlay by ID
+ */
+function hideLoadingOverlay(loadingId: string): void {
+  const overlay = document.getElementById(loadingId);
+  if (overlay) {
+    overlay.style.opacity = '0';
+    setTimeout(() => overlay.remove(), 200);
+  }
+}
+
+/**
  * Trigger confetti celebration
  */
 function triggerConfetti(): void {
@@ -428,10 +416,15 @@ function updateTimerWarning(taskId: string, timeRemaining: number): void {
 // =============================================================================
 
 async function loadTasks(): Promise<void> {
-  tasks = await window.electronAPI.getTasks();
-  renderTasks();
-  updateStats();
-  restartRunningTimers();
+  try {
+    tasks = await window.electronAPI.getTasks();
+    renderTasks();
+    updateStats();
+    restartRunningTimers();
+  } catch (error) {
+    console.error('Failed to load tasks:', error);
+    showToast('Failed to load tasks. Please restart the app.', 'error');
+  }
 }
 
 function updateStats(): void {
@@ -454,19 +447,24 @@ async function addTask(): Promise<void> {
     return;
   }
 
-  await window.electronAPI.addTask(title, selectedDuration);
+  try {
+    await window.electronAPI.addTask(title, selectedDuration);
 
-  // Success feedback
-  showSuccessAnimation(DOM.addBtn);
-  showToast('Task added!', 'success');
+    // Success feedback
+    showSuccessAnimation(DOM.addBtn);
+    showToast('Task added!', 'success');
 
-  DOM.taskInput.value = '';
-  selectNoneOption();
+    DOM.taskInput.value = '';
+    selectNoneOption();
 
-  await loadTasks();
+    await loadTasks();
 
-  // Auto-focus for quick entry
-  setTimeout(() => DOM.taskInput.focus(), 100);
+    // Auto-focus for quick entry
+    setTimeout(() => DOM.taskInput.focus(), 100);
+  } catch (error) {
+    console.error('Failed to add task:', error);
+    showToast('Failed to add task. Please try again.', 'error');
+  }
 }
 
 async function toggleTask(taskId: string): Promise<void> {
@@ -483,14 +481,21 @@ async function toggleTask(taskId: string): Promise<void> {
     }
   }
 
-  await window.electronAPI.toggleTask(taskId);
-  await loadTasks();
+  try {
+    await window.electronAPI.toggleTask(taskId);
+    await loadTasks();
 
-  // Check if all tasks are complete
-  const allComplete = tasks.length > 0 && tasks.every(t => t.completed);
-  if (allComplete) {
-    triggerConfetti();
-    showToast('🎉 All tasks complete! Great work!', 'success');
+    // Check if all tasks are complete
+    const allComplete = tasks.length > 0 && tasks.every(t => t.completed);
+    if (allComplete) {
+      triggerConfetti();
+      showToast('🎉 All tasks complete! Great work!', 'success');
+    }
+  } catch (error) {
+    console.error('Failed to toggle task:', error);
+    showToast('Failed to update task. Please try again.', 'error');
+    // Reload tasks to ensure UI is in sync
+    await loadTasks();
   }
 }
 
@@ -504,14 +509,28 @@ async function deleteTask(taskId: string): Promise<void> {
     await new Promise(resolve => setTimeout(resolve, 300));
   }
 
-  await window.electronAPI.deleteTask(taskId);
-  showToast('Task deleted', 'info');
-  await loadTasks();
+  try {
+    await window.electronAPI.deleteTask(taskId);
+    showToast('Task deleted', 'info');
+    await loadTasks();
+  } catch (error) {
+    console.error('Failed to delete task:', error);
+    showToast('Failed to delete task. Please try again.', 'error');
+    // Reload tasks to ensure UI is in sync
+    await loadTasks();
+  }
 }
 
 async function updateTaskTitle(taskId: string, newTitle: string): Promise<void> {
-  await window.electronAPI.updateTask(taskId, { title: newTitle });
-  await loadTasks();
+  try {
+    await window.electronAPI.updateTask(taskId, { title: newTitle });
+    await loadTasks();
+  } catch (error) {
+    console.error('Failed to update task title:', error);
+    showToast('Failed to update task. Please try again.', 'error');
+    // Reload tasks to ensure UI is in sync
+    await loadTasks();
+  }
 }
 
 async function togglePin(taskId: string): Promise<void> {
@@ -748,7 +767,7 @@ function renderTasks(): void {
     const runningTask = filteredTasks.find(t => t.isTimerRunning);
     if (runningTask) {
       DOM.tasksSection.innerHTML = renderFocusTimerView(runningTask);
-      attachFocusTimerHandlers(runningTask.id);
+      // Event handlers now use delegation - no need to attach here
       resizeWindowToContent();
       return;
     } else {
@@ -820,18 +839,34 @@ function renderTaskSections(taskList: Task[]): string {
   return html;
 }
 
+// Event delegation handler - attached once during initialization
 function attachSectionHandlers(): void {
-  const doneHeader = document.querySelector('.task-group-done .task-group-header');
-  if (doneHeader) {
-    doneHeader.addEventListener('click', toggleDoneSection);
-    doneHeader.addEventListener('keydown', (e: Event) => {
+  // Note: This handler uses event delegation and is only attached once during initialization
+  // It is NOT re-attached on every render, preventing memory leaks
+}
+
+// One-time initialization of delegated section event listeners
+function initSectionEventDelegation(): void {
+  // Handle clicks and keyboard events on the "Done" section header
+  DOM.tasksSection.addEventListener('click', (e: Event) => {
+    const target = e.target as HTMLElement;
+    const doneHeader = target.closest('.task-group-done .task-group-header');
+    if (doneHeader) {
+      toggleDoneSection();
+    }
+  });
+
+  DOM.tasksSection.addEventListener('keydown', (e: Event) => {
+    const target = e.target as HTMLElement;
+    const doneHeader = target.closest('.task-group-done .task-group-header');
+    if (doneHeader) {
       const keyEvent = e as KeyboardEvent;
       if (keyEvent.key === KEY_ENTER || keyEvent.key === KEY_SPACE) {
         e.preventDefault();
         toggleDoneSection();
       }
-    });
-  }
+    }
+  });
 }
 
 function toggleDoneSection(): void {
@@ -1000,11 +1035,19 @@ function renderFocusTimerView(task: Task): string {
   `;
 }
 
-function attachFocusTimerHandlers(taskId: string): void {
-  document.querySelectorAll('.focus-timer-btn').forEach(btn => {
-    btn.addEventListener('click', async e => {
-      const target = e.currentTarget as HTMLElement;
-      const action = target.dataset.action;
+// One-time initialization of delegated focus timer event listeners
+function initFocusTimerEventDelegation(): void {
+  // Focus timer button clicks - delegate to tasksSection
+  DOM.tasksSection.addEventListener('click', async e => {
+    const target = e.target as HTMLElement;
+    const focusBtn = target.closest('.focus-timer-btn') as HTMLElement;
+    if (focusBtn) {
+      const taskId = focusBtn.dataset.id;
+      const action = focusBtn.dataset.action;
+
+      if (!taskId) {
+        return;
+      }
 
       switch (action) {
         case TIMER_ACTION_PLAY:
@@ -1021,7 +1064,7 @@ function attachFocusTimerHandlers(taskId: string): void {
           await toggleTask(taskId);
           break;
       }
-    });
+    }
   });
 }
 
@@ -1033,10 +1076,10 @@ function renderTaskHTML(task: Task): string {
   const pinnedClass = task.pinned ? CSS_CLASSES.PINNED : '';
 
   // SVG icons
-  const dragIcon = `<svg class="icon" viewBox="0 0 24 24"><circle cx="9" cy="6" r="1.5"/><circle cx="15" cy="6" r="1.5"/><circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/><circle cx="9" cy="18" r="1.5"/><circle cx="15" cy="18" r="1.5"/></svg>`;
-  const deleteIcon = `<svg class="icon" viewBox="0 0 24 24"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>`;
-  const moreIcon = `<svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>`;
-  const pinIcon = `<svg class="pin-indicator icon" viewBox="0 0 24 24"><path d="M12 2L12 8M12 8L16 4M12 8L8 4M12 8L12 22" stroke-width="2"/></svg>`;
+  const dragIcon = `<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="6" r="1.5"/><circle cx="15" cy="6" r="1.5"/><circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/><circle cx="9" cy="18" r="1.5"/><circle cx="15" cy="18" r="1.5"/></svg>`;
+  const deleteIcon = `<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>`;
+  const moreIcon = `<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>`;
+  const pinIcon = `<svg class="pin-indicator icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2L12 8M12 8L16 4M12 8L8 4M12 8L12 22" stroke-width="2"/></svg>`;
 
   return `
     <div class="task-item ${completedClass} ${timerRunningClass} ${hasTimerClass} ${pinnedClass}"
@@ -1044,7 +1087,7 @@ function renderTaskHTML(task: Task): string {
          data-id="${task.id}"
          role="listitem"
          aria-label="${escapeHtml(task.title)}${task.completed ? ' (completed)' : ''}${task.pinned ? ' (pinned)' : ''}">
-      <div class="drag-handle" title="Drag to reorder">
+      <div class="drag-handle" title="Drag to reorder" aria-label="Drag to reorder task">
         ${dragIcon}
       </div>
       <div class="task-checkbox ${completedClass}"
@@ -1052,16 +1095,16 @@ function renderTaskHTML(task: Task): string {
            role="checkbox"
            aria-checked="${task.completed}"
            tabindex="0"
-           aria-label="Mark as ${task.completed ? 'incomplete' : 'complete'}"></div>
+           aria-label="Mark task ${escapeHtml(task.title)} as ${task.completed ? 'incomplete' : 'complete'}"></div>
       <div class="task-content">
         <div class="task-main">
           ${task.pinned ? pinIcon : ''}
           <div class="task-title">${escapeHtml(task.title)}</div>
           <div class="task-actions">
-            <button class="task-action-btn more-btn" data-id="${task.id}" title="More actions">
+            <button class="task-action-btn more-btn" data-id="${task.id}" title="More actions" aria-label="More actions for ${escapeHtml(task.title)}" aria-haspopup="true">
               ${moreIcon}
             </button>
-            <button class="task-action-btn delete-btn delete" data-id="${task.id}" title="Delete">
+            <button class="task-action-btn delete-btn delete" data-id="${task.id}" title="Delete" aria-label="Delete task ${escapeHtml(task.title)}">
               ${deleteIcon}
             </button>
           </div>
@@ -1080,26 +1123,26 @@ function renderTimerHTML(task: Task): string {
   const progressPercent = ((task.timeRemaining || 0) / (task.duration * 60)) * 100;
 
   // SVG icons for timer controls - compact inline design
-  const playIcon = `<svg class="icon" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="6 4 18 12 6 20 6 4"></polygon></svg>`;
-  const pauseIcon = `<svg class="icon" viewBox="0 0 24 24" fill="currentColor" stroke="none"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>`;
-  const resetIcon = `<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>`;
+  const playIcon = `<svg class="icon" viewBox="0 0 24 24" fill="currentColor" stroke="none" aria-hidden="true"><polygon points="6 4 18 12 6 20 6 4"></polygon></svg>`;
+  const pauseIcon = `<svg class="icon" viewBox="0 0 24 24" fill="currentColor" stroke="none" aria-hidden="true"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>`;
+  const resetIcon = `<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>`;
 
   // New premium timer design
   return `
-    <div class="task-timer">
-      <span class="timer-time ${task.isTimerRunning ? CSS_CLASSES.RUNNING : ''}" data-id="${task.id}">
+    <div class="task-timer" role="group" aria-label="Timer for ${escapeHtml(task.title)}">
+      <span class="timer-time ${task.isTimerRunning ? CSS_CLASSES.RUNNING : ''}" data-id="${task.id}" aria-live="polite" aria-atomic="true">
         ${formatTime(task.timeRemaining || 0)}
       </span>
-      <div class="timer-progress" data-id="${task.id}">
+      <div class="timer-progress" data-id="${task.id}" role="progressbar" aria-valuenow="${progressPercent}" aria-valuemin="0" aria-valuemax="100">
         <div class="timer-progress-fill ${task.isTimerRunning ? '' : CSS_CLASSES.PAUSED}" style="width: ${progressPercent}%"></div>
       </div>
       <div class="timer-controls">
         ${
           task.isTimerRunning
-            ? `<button class="timer-btn pause" data-id="${task.id}" data-action="${TIMER_ACTION_PAUSE}" title="Pause (Space)">${pauseIcon}</button>`
-            : `<button class="timer-btn play" data-id="${task.id}" data-action="${TIMER_ACTION_PLAY}" title="Start (Space)">${playIcon}</button>`
+            ? `<button class="timer-btn pause" data-id="${task.id}" data-action="${TIMER_ACTION_PAUSE}" title="Pause (Space)" aria-label="Pause timer">${pauseIcon}</button>`
+            : `<button class="timer-btn play" data-id="${task.id}" data-action="${TIMER_ACTION_PLAY}" title="Start (Space)" aria-label="Start timer">${playIcon}</button>`
         }
-        <button class="timer-btn reset" data-id="${task.id}" data-action="${TIMER_ACTION_RESET}" title="Reset">${resetIcon}</button>
+        <button class="timer-btn reset" data-id="${task.id}" data-action="${TIMER_ACTION_RESET}" title="Reset" aria-label="Reset timer">${resetIcon}</button>
       </div>
     </div>
   `;
@@ -1109,42 +1152,64 @@ function renderTimerHTML(task: Task): string {
 // EVENT HANDLERS - TASKS
 // =============================================================================
 
+// Event delegation handlers - attached once to parent containers
+// This prevents memory leaks from attaching/re-attaching on every render
 function attachTaskEventHandlers(): void {
-  // Checkbox toggle
-  document.querySelectorAll(SELECTORS.TASK_CHECKBOX).forEach(checkbox => {
-    checkbox.addEventListener('click', async e => {
-      const taskId = (e.currentTarget as HTMLElement).dataset.id!;
-      await toggleTask(taskId);
-    });
+  // Note: These handlers use event delegation and are only attached once during initialization
+  // They are NOT re-attached on every render, preventing memory leaks
+}
+
+// One-time initialization of delegated task event listeners
+function initTaskEventDelegation(): void {
+  // Checkbox toggle - delegate to tasksSection
+  DOM.tasksSection.addEventListener('click', async e => {
+    const target = e.target as HTMLElement;
+    const checkbox = target.closest(SELECTORS.TASK_CHECKBOX) as HTMLElement;
+    if (checkbox) {
+      const taskId = checkbox.dataset.id;
+      if (taskId) {
+        await toggleTask(taskId);
+      }
+    }
   });
 
-  // Double-click to edit
-  document.querySelectorAll(SELECTORS.TASK_TITLE).forEach(title => {
-    title.addEventListener('dblclick', e => {
-      const taskItem = (e.target as HTMLElement).closest(SELECTORS.TASK_ITEM);
+  // Double-click to edit - delegate to tasksSection
+  DOM.tasksSection.addEventListener('dblclick', e => {
+    const target = e.target as HTMLElement;
+    const title = target.closest(SELECTORS.TASK_TITLE);
+    if (title) {
+      const taskItem = title.closest(SELECTORS.TASK_ITEM);
       const taskId = taskItem?.querySelector(`[${ATTR_ID}]`)?.getAttribute(ATTR_ID);
       if (taskId) {
         enterEditMode(taskId);
       }
-    });
+    }
   });
 
-  // Delete button
-  document.querySelectorAll(SELECTORS.DELETE_BTN).forEach(btn => {
-    btn.addEventListener('click', async e => {
-      const taskId = (e.currentTarget as HTMLElement).dataset.id!;
-      await deleteTask(taskId);
-    });
+  // Delete button - delegate to tasksSection
+  DOM.tasksSection.addEventListener('click', async e => {
+    const target = e.target as HTMLElement;
+    const deleteBtn = target.closest(SELECTORS.DELETE_BTN) as HTMLElement;
+    if (deleteBtn) {
+      const taskId = deleteBtn.dataset.id;
+      if (taskId) {
+        await deleteTask(taskId);
+      }
+    }
   });
 
-  // More button (overflow menu)
-  document.querySelectorAll('.more-btn').forEach(btn => {
-    btn.addEventListener('click', e => {
+  // More button (overflow menu) - delegate to tasksSection
+  DOM.tasksSection.addEventListener('click', e => {
+    const target = e.target as HTMLElement;
+    const moreBtn = target.closest('.more-btn') as HTMLElement;
+    if (moreBtn) {
       e.stopPropagation();
-      const taskId = (e.currentTarget as HTMLElement).dataset.id!;
-      const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-      showTaskContextMenu({ clientX: rect.right, clientY: rect.bottom } as MouseEvent, taskId);
-    });
+      const taskId = moreBtn.dataset.id;
+      if (taskId) {
+        const rect = moreBtn.getBoundingClientRect();
+        showTaskContextMenu({ clientX: rect.right, clientY: rect.bottom } as MouseEvent, taskId);
+      }
+    }
   });
 }
 
@@ -1152,12 +1217,25 @@ function attachTaskEventHandlers(): void {
 // EVENT HANDLERS - TIMERS
 // =============================================================================
 
+// Event delegation handlers - attached once to parent container
 function attachTimerEventHandlers(): void {
-  document.querySelectorAll(SELECTORS.TIMER_BTN).forEach(btn => {
-    btn.addEventListener('click', async e => {
-      const target = e.currentTarget as HTMLElement;
-      const taskId = target.dataset.id!;
-      const action = target.dataset.action!;
+  // Note: These handlers use event delegation and are only attached once during initialization
+  // They are NOT re-attached on every render, preventing memory leaks
+}
+
+// One-time initialization of delegated timer event listeners
+function initTimerEventDelegation(): void {
+  // Timer button clicks - delegate to tasksSection
+  DOM.tasksSection.addEventListener('click', async e => {
+    const target = e.target as HTMLElement;
+    const timerBtn = target.closest(SELECTORS.TIMER_BTN) as HTMLElement;
+    if (timerBtn) {
+      const taskId = timerBtn.dataset.id;
+      const action = timerBtn.dataset.action;
+
+      if (!taskId || !action) {
+        return;
+      }
 
       if (action === TIMER_ACTION_PLAY) {
         await startTimer(taskId);
@@ -1166,7 +1244,7 @@ function attachTimerEventHandlers(): void {
       } else if (action === TIMER_ACTION_RESET) {
         await resetTimer(taskId);
       }
-    });
+    }
   });
 }
 
@@ -1174,63 +1252,90 @@ function attachTimerEventHandlers(): void {
 // EVENT HANDLERS - DRAG & DROP
 // =============================================================================
 
+// Constants for drag and drop styling
+const DRAG_OPACITY_DRAGGING = '0.5';
+const DRAG_OPACITY_NORMAL = '1';
+const DRAG_CLASS = 'dragging';
+const DRAG_OVER_CLASS = 'drag-over';
+
+// Event delegation handlers - attached once to parent container
 function attachDragHandlers(): void {
-  let draggedTaskId: string | null = null;
+  // Note: These handlers use event delegation and are only attached once during initialization
+  // They are NOT re-attached on every render, preventing memory leaks
+}
 
-  const DRAG_OPACITY_DRAGGING = '0.5';
-  const DRAG_OPACITY_NORMAL = '1';
-  const DRAG_CLASS = 'dragging';
-  const DRAG_OVER_CLASS = 'drag-over';
-
-  document.querySelectorAll(SELECTORS.TASK_ITEM).forEach(item => {
-    const element = item as HTMLElement;
-
-    element.addEventListener('dragstart', (e: DragEvent) => {
-      draggedTaskId = element.getAttribute(ATTR_ID);
+// One-time initialization of delegated drag-and-drop event listeners
+function initDragEventDelegation(): void {
+  // Dragstart - delegate to tasksSection
+  DOM.tasksSection.addEventListener('dragstart', (e: DragEvent) => {
+    const target = e.target as HTMLElement;
+    const taskItem = target.closest(SELECTORS.TASK_ITEM) as HTMLElement;
+    if (taskItem) {
+      draggedTaskId = taskItem.getAttribute(ATTR_ID);
       if (e.dataTransfer && draggedTaskId) {
         e.dataTransfer.effectAllowed = 'move';
         e.dataTransfer.setData('text/plain', draggedTaskId);
       }
-      element.style.opacity = DRAG_OPACITY_DRAGGING;
-      element.classList.add(DRAG_CLASS);
-    });
+      taskItem.style.opacity = DRAG_OPACITY_DRAGGING;
+      taskItem.classList.add(DRAG_CLASS);
+    }
+  });
 
-    element.addEventListener('dragend', () => {
-      element.style.opacity = DRAG_OPACITY_NORMAL;
-      element.classList.remove(DRAG_CLASS);
+  // Dragend - delegate to tasksSection
+  DOM.tasksSection.addEventListener('dragend', (e: DragEvent) => {
+    const target = e.target as HTMLElement;
+    const taskItem = target.closest(SELECTORS.TASK_ITEM) as HTMLElement;
+    if (taskItem) {
+      taskItem.style.opacity = DRAG_OPACITY_NORMAL;
+      taskItem.classList.remove(DRAG_CLASS);
       draggedTaskId = null;
       // Clean up any drag-over classes
       document.querySelectorAll(`.${DRAG_OVER_CLASS}`).forEach(el => {
         el.classList.remove(DRAG_OVER_CLASS);
       });
-    });
+    }
+  });
 
-    element.addEventListener('dragover', (e: DragEvent) => {
+  // Dragover - delegate to tasksSection
+  DOM.tasksSection.addEventListener('dragover', (e: DragEvent) => {
+    const target = e.target as HTMLElement;
+    const taskItem = target.closest(SELECTORS.TASK_ITEM) as HTMLElement;
+    if (taskItem) {
       e.preventDefault();
       if (e.dataTransfer) {
         e.dataTransfer.dropEffect = 'move';
       }
-      const taskId = element.getAttribute(ATTR_ID);
+      const taskId = taskItem.getAttribute(ATTR_ID);
       if (draggedTaskId && taskId && draggedTaskId !== taskId) {
-        element.classList.add(DRAG_OVER_CLASS);
+        taskItem.classList.add(DRAG_OVER_CLASS);
       }
-    });
+    }
+  });
 
-    element.addEventListener('dragleave', () => {
-      element.classList.remove(DRAG_OVER_CLASS);
-    });
+  // Dragleave - delegate to tasksSection
+  DOM.tasksSection.addEventListener('dragleave', (e: DragEvent) => {
+    const target = e.target as HTMLElement;
+    const taskItem = target.closest(SELECTORS.TASK_ITEM) as HTMLElement;
+    if (taskItem) {
+      taskItem.classList.remove(DRAG_OVER_CLASS);
+    }
+  });
 
-    element.addEventListener('drop', async (e: DragEvent) => {
+  // Drop - delegate to tasksSection
+  DOM.tasksSection.addEventListener('drop', async (e: DragEvent) => {
+    const target = e.target as HTMLElement;
+    const taskItem = target.closest(SELECTORS.TASK_ITEM) as HTMLElement;
+    if (taskItem) {
       e.preventDefault();
-      element.classList.remove(DRAG_OVER_CLASS);
+      taskItem.classList.remove(DRAG_OVER_CLASS);
 
-      const targetTaskId = element.getAttribute(ATTR_ID);
+      const targetTaskId = taskItem.getAttribute(ATTR_ID);
       const droppedTaskId = e.dataTransfer?.getData('text/plain') || draggedTaskId;
 
       if (droppedTaskId && targetTaskId && droppedTaskId !== targetTaskId) {
         await reorderTasks(droppedTaskId, targetTaskId);
       }
-    });
+    }
   });
 }
 
@@ -1645,11 +1750,16 @@ function setupActionButtons(): void {
     });
 
     // Load saved theme
-    window.electronAPI.getSettings().then(settings => {
-      if (settings.theme === THEME_LIGHT) {
-        document.body.classList.add(CSS_CLASSES.LIGHT_THEME);
-      }
-    });
+    window.electronAPI
+      .getSettings()
+      .then(settings => {
+        if (settings.theme === THEME_LIGHT) {
+          document.body.classList.add(CSS_CLASSES.LIGHT_THEME);
+        }
+      })
+      .catch(error => {
+        console.error('Failed to load theme settings:', error);
+      });
   }
 
   // Focus mode toggle
@@ -1800,21 +1910,37 @@ function showOverflowMenu(): void {
 }
 
 async function handleExport(): Promise<void> {
-  showToast('Exporting tasks...', 'info');
-  const result = await window.electronAPI.exportTasks();
-  if (result) {
-    showToast('Tasks exported successfully!', 'success');
+  const loadingId = showLoadingOverlay('Exporting tasks...');
+  try {
+    const result = await window.electronAPI.exportTasks();
+    hideLoadingOverlay(loadingId);
+    if (result) {
+      showToast('Tasks exported successfully!', 'success');
+    } else {
+      showToast('Export canceled', 'info');
+    }
+  } catch (error) {
+    hideLoadingOverlay(loadingId);
+    console.error('Failed to export tasks:', error);
+    showToast('Failed to export tasks. Please try again.', 'error');
   }
 }
 
 async function handleImport(): Promise<void> {
-  showToast('Importing tasks...', 'info');
-  const count = await window.electronAPI.importTasks();
-  if (count > 0) {
-    showToast(`Imported ${count} task${count > 1 ? 's' : ''}!`, 'success');
-    await loadTasks();
-  } else {
-    showToast('No tasks imported', 'info');
+  const loadingId = showLoadingOverlay('Importing tasks...');
+  try {
+    const count = await window.electronAPI.importTasks();
+    hideLoadingOverlay(loadingId);
+    if (count > 0) {
+      showToast(`Imported ${count} task${count > 1 ? 's' : ''}!`, 'success');
+      await loadTasks();
+    } else {
+      showToast('No tasks imported', 'info');
+    }
+  } catch (error) {
+    hideLoadingOverlay(loadingId);
+    console.error('Failed to import tasks:', error);
+    showToast('Failed to import tasks. Please try again.', 'error');
   }
 }
 
@@ -2011,20 +2137,25 @@ function setupAccordionToggles(): void {
   }
 
   // Load saved states
-  window.electronAPI.getSettings().then(settings => {
-    if (settings.searchCollapsed && DOM.searchBar && DOM.searchToggle) {
-      DOM.searchBar.classList.add(CSS_CLASSES.COLLAPSED);
-      DOM.searchToggle.classList.add(CSS_CLASSES.COLLAPSED);
-    }
-    if (settings.inputCollapsed && DOM.inputSection && DOM.inputToggle) {
-      DOM.inputSection.classList.add(CSS_CLASSES.COLLAPSED);
-      DOM.inputToggle.classList.add(CSS_CLASSES.COLLAPSED);
-    }
-    // Load done section collapsed state
-    if (settings.doneSectionCollapsed !== undefined) {
-      isDoneSectionCollapsed = settings.doneSectionCollapsed;
-    }
-  });
+  window.electronAPI
+    .getSettings()
+    .then(settings => {
+      if (settings.searchCollapsed && DOM.searchBar && DOM.searchToggle) {
+        DOM.searchBar.classList.add(CSS_CLASSES.COLLAPSED);
+        DOM.searchToggle.classList.add(CSS_CLASSES.COLLAPSED);
+      }
+      if (settings.inputCollapsed && DOM.inputSection && DOM.inputToggle) {
+        DOM.inputSection.classList.add(CSS_CLASSES.COLLAPSED);
+        DOM.inputToggle.classList.add(CSS_CLASSES.COLLAPSED);
+      }
+      // Load done section collapsed state
+      if (settings.doneSectionCollapsed !== undefined) {
+        isDoneSectionCollapsed = settings.doneSectionCollapsed;
+      }
+    })
+    .catch(error => {
+      console.error('Failed to load accordion settings:', error);
+    });
 }
 
 // =============================================================================
@@ -2104,15 +2235,17 @@ function openCommandPalette(): void {
   // Focus input
   setTimeout(() => input?.focus(), 50);
 
-  // Handle input filtering
-  input?.addEventListener('input', () => {
+  // Handle input filtering with debounce to improve performance
+  const debouncedFilter = debounce(() => {
     const query = input.value.toLowerCase();
     const filtered = filterCommands(query);
     list.innerHTML = renderCommandList(filtered);
     commandPaletteSelectedIndex = 0;
     updateCommandPaletteSelection(list);
     attachCommandClickHandlers(list, overlay);
-  });
+  }, SEARCH_DEBOUNCE_MS);
+
+  input?.addEventListener('input', debouncedFilter);
 
   // Handle keyboard navigation
   input?.addEventListener('keydown', e => {
@@ -2498,6 +2631,14 @@ function initialize(): void {
   setupContextMenu();
   setupCommandPalette();
   setupScreenshotCapture();
+
+  // Initialize event delegation for tasks, timers, drag-and-drop, and sections
+  // These are attached ONCE to parent containers to prevent memory leaks
+  initTaskEventDelegation();
+  initTimerEventDelegation();
+  initDragEventDelegation();
+  initSectionEventDelegation();
+  initFocusTimerEventDelegation();
 
   // Load initial data
   loadTasks();
