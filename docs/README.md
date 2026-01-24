@@ -47,6 +47,7 @@ graph TB
 - [Building from Source](guides/BUILD.md) - Development setup
 - [Code Signing](guides/CODE-SIGNING.md) - Sign & notarize for distribution
 - [Releasing Updates](guides/RELEASING.md) - Release workflow
+- [Mac App Store](guides/MAC_APP_STORE.md) - App Store distribution guide
 
 ### Architecture & Design
 - [Security](architecture/SECURITY.md) - Security implementation
@@ -64,6 +65,7 @@ docs/
 │   ├── BUILD.md              # Building and development
 │   ├── CODE-SIGNING.md       # Code signing & notarization
 │   ├── RELEASING.md          # Release workflow
+│   ├── MAC_APP_STORE.md      # Mac App Store distribution
 │   ├── FOCUS-MODE.md         # Focus mode feature
 │   └── SHORTCUTS.md          # Keyboard shortcuts
 ├── architecture/             # Technical documentation
@@ -120,6 +122,7 @@ flowchart LR
 | Build from source | [BUILD.md](guides/BUILD.md) |
 | Sign & notarize the app | [CODE-SIGNING.md](guides/CODE-SIGNING.md) |
 | Create a release | [RELEASING.md](guides/RELEASING.md) |
+| Distribute via Mac App Store | [MAC_APP_STORE.md](guides/MAC_APP_STORE.md) |
 | Understand security model | [SECURITY.md](architecture/SECURITY.md) |
 | Contribute code | [CONTRIBUTING.md](../CONTRIBUTING.md) |
 | Use focus mode | [FOCUS-MODE.md](guides/FOCUS-MODE.md) |
