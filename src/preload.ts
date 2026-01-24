@@ -10,6 +10,7 @@ interface Task {
   isTimerRunning?: boolean;
   tags?: string[];
   pinned?: boolean;
+  priority?: 'high' | 'medium' | 'low';
 }
 
 interface ParsedTask {
@@ -26,8 +27,11 @@ interface Settings {
 contextBridge.exposeInMainWorld('electronAPI', {
   getTasks: (): Promise<Task[]> => ipcRenderer.invoke('get-tasks'),
   saveTasks: (tasks: Task[]): Promise<void> => ipcRenderer.invoke('save-tasks', tasks),
-  addTask: (title: string, duration?: number): Promise<Task> =>
-    ipcRenderer.invoke('add-task', title, duration),
+  addTask: (
+    title: string,
+    duration?: number,
+    priority?: 'high' | 'medium' | 'low'
+  ): Promise<Task> => ipcRenderer.invoke('add-task', title, duration, priority),
   toggleTask: (taskId: string): Promise<void> => ipcRenderer.invoke('toggle-task', taskId),
   deleteTask: (taskId: string): Promise<void> => ipcRenderer.invoke('delete-task', taskId),
   updateTask: (taskId: string, updates: Partial<Task>): Promise<void> =>

@@ -17,6 +17,7 @@ interface Task {
   isTimerRunning?: boolean;
   tags?: string[];
   pinned?: boolean;
+  priority?: 'high' | 'medium' | 'low';
 }
 
 interface ParsedTask {
@@ -44,6 +45,8 @@ import {
   SCROLL_BEHAVIOR,
   THEMES,
   MESSAGES,
+  PRIORITY_LEVELS,
+  type Priority,
 } from './constants';
 
 // =============================================================================
@@ -97,6 +100,11 @@ const THEME_DARK = THEMES.DARK;
 const MSG_TIMER_COMPLETE_TITLE = MESSAGES.TIMER_COMPLETE_TITLE;
 const MSG_ALL_DONE_TITLE = MESSAGES.ALL_DONE_TITLE;
 const MSG_ALL_DONE_BODY = MESSAGES.ALL_DONE_BODY;
+const MSG_TASK_DELETED = MESSAGES.TASK_DELETED;
+const MSG_TASK_RESTORED = MESSAGES.TASK_RESTORED;
+
+// Undo timing
+const UNDO_WINDOW_MS = UI_TIMING.UNDO_WINDOW_MS;
 
 // =============================================================================
 // STATE
@@ -105,6 +113,7 @@ const MSG_ALL_DONE_BODY = MESSAGES.ALL_DONE_BODY;
 let tasks: Task[] = [];
 const timerIntervals: Map<string, number> = new Map();
 let selectedDuration: number | undefined = undefined;
+let selectedPriority: Priority = PRIORITY_LEVELS.NONE;
 let selectedTaskIndex = -1;
 let currentMode: AppMode = APP_MODES.FULL;
 let contextMenuTarget: string | null = null;
@@ -112,6 +121,10 @@ let draggedTaskId: string | null = null; // For drag-and-drop reordering
 let isDoneSectionCollapsed = true;
 let isCommandPaletteOpen = false;
 let commandPaletteSelectedIndex = 0;
+
+// Undo delete state
+let lastDeletedTask: Task | null = null;
+let undoTimeout: number | null = null;
 
 // =============================================================================
 // COMMAND PALETTE DEFINITIONS
@@ -222,6 +235,10 @@ const DOM = {
   compactModeBtn: document.getElementById(ELEMENT_IDS.COMPACT_MODE_BTN) as HTMLButtonElement | null,
   focusModeBtn: document.getElementById(ELEMENT_IDS.FOCUS_MODE_BTN) as HTMLButtonElement | null,
   durationPicker: document.getElementById(ELEMENT_IDS.DURATION_PICKER) as HTMLDivElement | null,
+  customDurationInput: document.getElementById(
+    ELEMENT_IDS.CUSTOM_DURATION_INPUT
+  ) as HTMLInputElement | null,
+  priorityPicker: document.getElementById(ELEMENT_IDS.PRIORITY_PICKER) as HTMLDivElement | null,
   overflowMenuBtn: document.getElementById(
     ELEMENT_IDS.OVERFLOW_MENU_BTN
   ) as HTMLButtonElement | null,
@@ -299,6 +316,45 @@ function showToast(message: string, type: 'success' | 'error' | 'info' = 'info')
     toast.style.animation = 'slideOut 0.3s ease-out forwards';
     setTimeout(() => toast.remove(), 300);
   }, TOAST_DURATION_MS);
+}
+
+/**
+ * Show toast notification with undo action button
+ */
+function showToastWithUndo(message: string, type: 'success' | 'error' | 'info' = 'info'): void {
+  let toastContainer = document.querySelector('.toast-container') as HTMLDivElement;
+  if (!toastContainer) {
+    toastContainer = document.createElement('div');
+    toastContainer.className = 'toast-container';
+    document.body.appendChild(toastContainer);
+  }
+
+  // Remove any existing toasts with undo buttons
+  toastContainer.querySelectorAll('.toast').forEach(t => t.remove());
+
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+
+  const icons = { success: '✓', error: '✕', info: 'ℹ' };
+  toast.innerHTML = `
+    <span style="font-size: 16px;">${icons[type]}</span>
+    <span class="toast-message">${message}</span>
+    <button class="toast-action" id="undoBtn">Undo</button>
+  `;
+
+  toastContainer.appendChild(toast);
+
+  // Attach undo handler
+  const undoBtn = toast.querySelector('#undoBtn');
+  undoBtn?.addEventListener('click', () => {
+    toast.remove();
+    undoDelete();
+  });
+
+  setTimeout(() => {
+    toast.style.animation = 'slideOut 0.3s ease-out forwards';
+    setTimeout(() => toast.remove(), 300);
+  }, UNDO_WINDOW_MS);
 }
 
 /**
@@ -448,7 +504,13 @@ async function addTask(): Promise<void> {
   }
 
   try {
-    await window.electronAPI.addTask(title, selectedDuration);
+    // Convert priority 'none' to undefined for API
+    const priorityValue =
+      selectedPriority === PRIORITY_LEVELS.NONE
+        ? undefined
+        : (selectedPriority as 'high' | 'medium' | 'low');
+
+    await window.electronAPI.addTask(title, selectedDuration, priorityValue);
 
     // Success feedback
     showSuccessAnimation(DOM.addBtn);
@@ -456,6 +518,7 @@ async function addTask(): Promise<void> {
 
     DOM.taskInput.value = '';
     selectNoneOption();
+    selectNonePriority();
 
     await loadTasks();
 
@@ -500,6 +563,9 @@ async function toggleTask(taskId: string): Promise<void> {
 }
 
 async function deleteTask(taskId: string): Promise<void> {
+  // Store task for potential undo
+  const taskToDelete = tasks.find(t => t.id === taskId);
+
   stopTimer(taskId);
 
   // Smooth removal animation
@@ -511,13 +577,68 @@ async function deleteTask(taskId: string): Promise<void> {
 
   try {
     await window.electronAPI.deleteTask(taskId);
-    showToast('Task deleted', 'info');
+
+    // Store for undo and clear any previous timeout
+    if (taskToDelete) {
+      if (undoTimeout !== null) {
+        clearTimeout(undoTimeout);
+      }
+      lastDeletedTask = { ...taskToDelete };
+
+      // Show toast with undo action
+      showToastWithUndo(MSG_TASK_DELETED, 'info');
+
+      // Clear undo state after window expires
+      undoTimeout = window.setTimeout(() => {
+        lastDeletedTask = null;
+        undoTimeout = null;
+      }, UNDO_WINDOW_MS);
+    }
+
     await loadTasks();
   } catch (error) {
     console.error('Failed to delete task:', error);
     showToast('Failed to delete task. Please try again.', 'error');
     // Reload tasks to ensure UI is in sync
     await loadTasks();
+  }
+}
+
+async function undoDelete(): Promise<void> {
+  if (!lastDeletedTask) {
+    return;
+  }
+
+  try {
+    // Clear the undo timeout
+    if (undoTimeout !== null) {
+      clearTimeout(undoTimeout);
+      undoTimeout = null;
+    }
+
+    // Re-add the task with all its properties
+    const restoredTask = lastDeletedTask;
+    lastDeletedTask = null;
+
+    // Get current tasks and add the restored task back
+    const currentTasks = await window.electronAPI.getTasks();
+    currentTasks.push(restoredTask);
+    await window.electronAPI.saveTasks(currentTasks);
+
+    showToast(MSG_TASK_RESTORED, 'success');
+    await loadTasks();
+
+    // Restart timer if it was running
+    if (
+      restoredTask.isTimerRunning &&
+      restoredTask.timeRemaining &&
+      restoredTask.timeRemaining > 0
+    ) {
+      startTimer(restoredTask.id);
+    }
+  } catch (error) {
+    console.error('Failed to undo delete:', error);
+    showToast('Failed to restore task', 'error');
   }
 }
 
@@ -904,13 +1025,31 @@ function filterTasks(query: string): Task[] {
 }
 
 function sortTasks(taskList: Task[]): Task[] {
-  // Sort priority: pinned → running timer → active → completed
+  // Sort priority: pinned → running timer → high priority → medium priority → low priority → none → completed
   // Preserve manual order within each priority group
   const pinned = taskList.filter(t => !t.completed && t.pinned);
   const running = taskList.filter(t => !t.completed && !t.pinned && t.isTimerRunning);
+
+  // Active tasks (not pinned, not running timer, not completed)
   const active = taskList.filter(t => !t.completed && !t.pinned && !t.isTimerRunning);
+
+  // Sort active tasks by priority
+  const highPriority = active.filter(t => t.priority === PRIORITY_LEVELS.HIGH);
+  const mediumPriority = active.filter(t => t.priority === PRIORITY_LEVELS.MEDIUM);
+  const lowPriority = active.filter(t => t.priority === PRIORITY_LEVELS.LOW);
+  const noPriority = active.filter(t => !t.priority);
+
   const completed = taskList.filter(t => t.completed);
-  return [...pinned, ...running, ...active, ...completed];
+
+  return [
+    ...pinned,
+    ...running,
+    ...highPriority,
+    ...mediumPriority,
+    ...lowPriority,
+    ...noPriority,
+    ...completed,
+  ];
 }
 
 function getActiveTasks(taskList: Task[]): Task[] {
@@ -1075,6 +1214,22 @@ function renderTaskHTML(task: Task): string {
   const hasTimerClass = task.duration && task.duration > 0 ? CSS_CLASSES.HAS_TIMER : '';
   const pinnedClass = task.pinned ? CSS_CLASSES.PINNED : '';
 
+  // Priority class for left border
+  let priorityClass = '';
+  if (task.priority === PRIORITY_LEVELS.HIGH) {
+    priorityClass = CSS_CLASSES.PRIORITY_HIGH;
+  } else if (task.priority === PRIORITY_LEVELS.MEDIUM) {
+    priorityClass = CSS_CLASSES.PRIORITY_MEDIUM;
+  } else if (task.priority === PRIORITY_LEVELS.LOW) {
+    priorityClass = CSS_CLASSES.PRIORITY_LOW;
+  }
+
+  // Priority indicator dot
+  let priorityIndicator = '';
+  if (task.priority) {
+    priorityIndicator = `<span class="task-priority-indicator priority-${task.priority}"></span>`;
+  }
+
   // SVG icons
   const dragIcon = `<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="6" r="1.5"/><circle cx="15" cy="6" r="1.5"/><circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/><circle cx="9" cy="18" r="1.5"/><circle cx="15" cy="18" r="1.5"/></svg>`;
   const deleteIcon = `<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>`;
@@ -1082,11 +1237,11 @@ function renderTaskHTML(task: Task): string {
   const pinIcon = `<svg class="pin-indicator icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2L12 8M12 8L16 4M12 8L8 4M12 8L12 22" stroke-width="2"/></svg>`;
 
   return `
-    <div class="task-item ${completedClass} ${timerRunningClass} ${hasTimerClass} ${pinnedClass}"
+    <div class="task-item ${completedClass} ${timerRunningClass} ${hasTimerClass} ${pinnedClass} ${priorityClass}"
          draggable="true"
          data-id="${task.id}"
          role="listitem"
-         aria-label="${escapeHtml(task.title)}${task.completed ? ' (completed)' : ''}${task.pinned ? ' (pinned)' : ''}">
+         aria-label="${escapeHtml(task.title)}${task.completed ? ' (completed)' : ''}${task.pinned ? ' (pinned)' : ''}${task.priority ? ` (${task.priority} priority)` : ''}">
       <div class="drag-handle" title="Drag to reorder" aria-label="Drag to reorder task">
         ${dragIcon}
       </div>
@@ -1099,6 +1254,7 @@ function renderTaskHTML(task: Task): string {
       <div class="task-content">
         <div class="task-main">
           ${task.pinned ? pinIcon : ''}
+          ${priorityIndicator}
           <div class="task-title">${escapeHtml(task.title)}</div>
           <div class="task-actions">
             <button class="task-action-btn more-btn" data-id="${task.id}" title="More actions" aria-label="More actions for ${escapeHtml(task.title)}" aria-haspopup="true">
@@ -1608,7 +1764,68 @@ function attachDurationPickerHandlers(): void {
       const target = e.currentTarget as HTMLElement;
       const minutes = parseInt(target.getAttribute(ATTR_MINUTES) || '0');
       toggleDurationOption(target, minutes);
+
+      // Clear custom input when preset is selected
+      if (DOM.customDurationInput) {
+        DOM.customDurationInput.value = '';
+        DOM.customDurationInput.classList.remove(CSS_CLASSES.ACTIVE);
+      }
     });
+  });
+
+  // Custom duration input handler
+  attachCustomDurationHandler();
+}
+
+function attachCustomDurationHandler(): void {
+  const customInput = DOM.customDurationInput;
+  if (!customInput) {
+    return;
+  }
+
+  customInput.addEventListener('focus', () => {
+    // Clear preset selection when custom input is focused
+    clearPresetSelection();
+    customInput.classList.add(CSS_CLASSES.ACTIVE);
+  });
+
+  customInput.addEventListener('input', () => {
+    const value = parseInt(customInput.value);
+
+    if (!isNaN(value) && value > 0) {
+      // Clamp to valid range
+      const clampedValue = Math.min(Math.max(value, 1), 1440);
+      selectedDuration = clampedValue;
+
+      // Clear preset selection
+      clearPresetSelection();
+      customInput.classList.add(CSS_CLASSES.ACTIVE);
+    } else if (customInput.value === '') {
+      selectedDuration = undefined;
+      customInput.classList.remove(CSS_CLASSES.ACTIVE);
+    }
+  });
+
+  customInput.addEventListener('blur', () => {
+    const value = parseInt(customInput.value);
+
+    if (!isNaN(value) && value > 0) {
+      // Clamp value on blur and update display
+      const clampedValue = Math.min(Math.max(value, 1), 1440);
+      customInput.value = clampedValue.toString();
+      selectedDuration = clampedValue;
+    } else if (customInput.value === '') {
+      customInput.classList.remove(CSS_CLASSES.ACTIVE);
+      // If empty, select "None" option
+      selectNoneOption();
+    }
+  });
+
+  // Handle Enter key
+  customInput.addEventListener('keydown', e => {
+    if (e.key === KEY_ENTER) {
+      customInput.blur();
+    }
   });
 }
 
@@ -1689,6 +1906,58 @@ function selectNoneOption(): void {
     noneOption.classList.add(CSS_CLASSES.SELECTED);
   }
   selectedDuration = undefined;
+
+  // Clear custom input
+  if (DOM.customDurationInput) {
+    DOM.customDurationInput.value = '';
+    DOM.customDurationInput.classList.remove(CSS_CLASSES.ACTIVE);
+  }
+}
+
+// =============================================================================
+// PRIORITY PICKER
+// =============================================================================
+
+function initializePriorityPicker(): void {
+  if (!DOM.priorityPicker) {
+    return;
+  }
+
+  document.querySelectorAll(SELECTORS.PRIORITY_OPTION).forEach(btn => {
+    btn.addEventListener('click', e => {
+      const target = e.currentTarget as HTMLElement;
+      const priority = target.getAttribute('data-priority') as Priority;
+      togglePriorityOption(target, priority);
+    });
+  });
+}
+
+function togglePriorityOption(clickedBtn: HTMLElement, priority: Priority): void {
+  // Clear all priority selections
+  document.querySelectorAll(SELECTORS.PRIORITY_OPTION).forEach(btn => {
+    btn.classList.remove(CSS_CLASSES.SELECTED);
+    btn.setAttribute('aria-checked', 'false');
+  });
+
+  // Select the clicked button
+  clickedBtn.classList.add(CSS_CLASSES.SELECTED);
+  clickedBtn.setAttribute('aria-checked', 'true');
+
+  // Set priority
+  selectedPriority = priority;
+}
+
+function selectNonePriority(): void {
+  selectedPriority = PRIORITY_LEVELS.NONE;
+  document.querySelectorAll(SELECTORS.PRIORITY_OPTION).forEach(btn => {
+    btn.classList.remove(CSS_CLASSES.SELECTED);
+    btn.setAttribute('aria-checked', 'false');
+  });
+  const noneOption = document.querySelector(`${SELECTORS.PRIORITY_OPTION}[data-priority="none"]`);
+  if (noneOption) {
+    noneOption.classList.add(CSS_CLASSES.SELECTED);
+    noneOption.setAttribute('aria-checked', 'true');
+  }
 }
 
 // =============================================================================
@@ -2618,6 +2887,7 @@ function initialize(): void {
 
   // Setup all components
   initializePresetButtons();
+  initializePriorityPicker();
   setupTaskInput();
   setupWindowControls();
   setupActionButtons();

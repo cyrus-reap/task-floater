@@ -137,4 +137,25 @@ export const Validators = {
     div.textContent = html;
     return div.innerHTML;
   },
+
+  /**
+   * Validate priority level
+   * - Ensures valid priority value (high, medium, low, or undefined)
+   */
+  priority(priority: unknown): 'high' | 'medium' | 'low' | undefined {
+    if (priority === undefined || priority === null || priority === 'none') {
+      return undefined;
+    }
+
+    if (typeof priority !== 'string') {
+      throw new ValidationError('Priority must be a string');
+    }
+
+    const validPriorities = ['high', 'medium', 'low'];
+    if (!validPriorities.includes(priority)) {
+      throw new ValidationError(`Priority must be one of: ${validPriorities.join(', ')}`);
+    }
+
+    return priority as 'high' | 'medium' | 'low';
+  },
 };

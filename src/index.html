@@ -598,6 +598,180 @@
         box-shadow: var(--shadow-sm);
       }
 
+      /* Custom duration input */
+      .custom-duration-wrapper {
+        display: flex;
+        align-items: center;
+        min-width: 50px;
+      }
+
+      .custom-duration-input {
+        width: 50px;
+        padding: 6px 8px;
+        background: var(--surface-base);
+        border: 1px solid var(--border-default);
+        border-radius: var(--radius-xs);
+        color: var(--text-primary);
+        font-size: 11px;
+        font-weight: 500;
+        text-align: center;
+        outline: none;
+        transition: all var(--transition-fast);
+        -moz-appearance: textfield;
+      }
+
+      .custom-duration-input::-webkit-outer-spin-button,
+      .custom-duration-input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+      }
+
+      .custom-duration-input::placeholder {
+        color: var(--text-muted);
+      }
+
+      .custom-duration-input:focus {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 2px var(--accent-subtle);
+      }
+
+      .custom-duration-input.active {
+        background: var(--accent);
+        color: white;
+        border-color: var(--accent);
+      }
+
+      /* Priority picker */
+      .priority-row {
+        display: flex;
+        align-items: center;
+        gap: var(--space-3);
+        margin-top: var(--space-3);
+        padding-top: var(--space-3);
+        border-top: 1px solid var(--border-subtle);
+      }
+
+      .priority-label {
+        font-size: 10px;
+        font-weight: 500;
+        color: var(--text-tertiary);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        flex-shrink: 0;
+      }
+
+      .priority-picker {
+        display: flex;
+        flex: 1;
+        background: var(--surface-base);
+        border-radius: var(--radius-sm);
+        padding: 2px;
+        gap: 2px;
+      }
+
+      .priority-option {
+        flex: 1;
+        padding: 6px 0;
+        background: transparent;
+        border: none;
+        border-radius: var(--radius-xs);
+        color: var(--text-tertiary);
+        font-size: 11px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all var(--transition-fast);
+        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+      }
+
+      .priority-option:hover {
+        color: var(--text-secondary);
+        background: var(--surface-hover);
+      }
+
+      .priority-option.selected {
+        background: var(--surface-overlay);
+        color: var(--text-primary);
+        box-shadow: var(--shadow-sm);
+      }
+
+      .priority-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        flex-shrink: 0;
+      }
+
+      .priority-dot.priority-high {
+        background: #ef4444;
+      }
+
+      .priority-dot.priority-medium {
+        background: #f59e0b;
+      }
+
+      .priority-dot.priority-low {
+        background: #3b82f6;
+      }
+
+      /* Task priority indicator */
+      .task-priority-indicator {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        flex-shrink: 0;
+        margin-right: var(--space-1);
+      }
+
+      .task-priority-indicator.priority-high {
+        background: #ef4444;
+      }
+
+      .task-priority-indicator.priority-medium {
+        background: #f59e0b;
+      }
+
+      .task-priority-indicator.priority-low {
+        background: #3b82f6;
+      }
+
+      /* Task item priority border */
+      .task-item.priority-high::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: #ef4444;
+        opacity: 0.7;
+      }
+
+      .task-item.priority-medium::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: #f59e0b;
+        opacity: 0.7;
+      }
+
+      .task-item.priority-low::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: #3b82f6;
+        opacity: 0.7;
+      }
+
       /* Legacy elements */
       .segmented-control,
       .duration-presets,
@@ -1408,6 +1582,28 @@
         font-size: 12px;
         font-weight: 500;
         color: var(--text-primary);
+      }
+
+      .toast-action {
+        padding: 4px 10px;
+        background: var(--accent);
+        border: none;
+        border-radius: var(--radius-xs);
+        color: white;
+        font-size: 11px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all var(--transition-fast);
+        margin-left: var(--space-2);
+        flex-shrink: 0;
+      }
+
+      .toast-action:hover {
+        background: var(--accent-hover);
+      }
+
+      .toast-action:active {
+        transform: scale(0.95);
       }
 
       /* ==========================================================================
@@ -2330,6 +2526,63 @@
               aria-label="90 minute timer"
             >
               90m
+            </button>
+            <div class="custom-duration-wrapper">
+              <input
+                type="number"
+                id="customDurationInput"
+                class="custom-duration-input"
+                placeholder="min"
+                min="1"
+                max="1440"
+                aria-label="Custom duration in minutes"
+              />
+            </div>
+          </div>
+        </div>
+        <div class="priority-row">
+          <span class="priority-label" id="priorityLabel">Priority</span>
+          <div
+            class="priority-picker"
+            id="priorityPicker"
+            role="radiogroup"
+            aria-labelledby="priorityLabel"
+          >
+            <button
+              class="priority-option selected"
+              data-priority="none"
+              role="radio"
+              aria-checked="true"
+              aria-label="No priority"
+            >
+              None
+            </button>
+            <button
+              class="priority-option"
+              data-priority="low"
+              role="radio"
+              aria-checked="false"
+              aria-label="Low priority"
+            >
+              <span class="priority-dot priority-low"></span>Low
+            </button>
+            <button
+              class="priority-option"
+              data-priority="medium"
+              role="radio"
+              aria-checked="false"
+              aria-label="Medium priority"
+            >
+              <span class="priority-dot priority-medium"></span>Med
+            </button>
+            <button
+              class="priority-option"
+              data-priority="high"
+              role="radio"
+              aria-checked="false"
+              aria-label="High priority"
+            >
+              <span class="priority-dot priority-high"></span>High
             </button>
           </div>
         </div>

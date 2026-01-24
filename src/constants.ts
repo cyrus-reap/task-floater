@@ -24,6 +24,7 @@ export const UI_TIMING = {
   TOAST_DURATION_MS: 3000,
   SUCCESS_ANIMATION_DURATION_MS: 400,
   CONFETTI_COUNT: 50,
+  UNDO_WINDOW_MS: 3000,
 } as const;
 
 // =============================================================================
@@ -84,6 +85,10 @@ export const ELEMENT_IDS = {
 
   // Duration picker
   DURATION_PICKER: 'durationPicker',
+  CUSTOM_DURATION_INPUT: 'customDurationInput',
+
+  // Priority picker
+  PRIORITY_PICKER: 'priorityPicker',
 
   // Overflow menu
   OVERFLOW_MENU_BTN: 'overflowMenuBtn',
@@ -118,6 +123,10 @@ export const SELECTORS = {
   // Duration picker
   DURATION_PRESETS: '.duration-presets',
   DURATION_OPTION: '.duration-option',
+  CUSTOM_DURATION_INPUT: '.custom-duration-input',
+
+  // Priority picker
+  PRIORITY_OPTION: '.priority-option',
 
   // Menus
   CONTEXT_MENU: '.context-menu',
@@ -164,7 +173,25 @@ export const CSS_CLASSES = {
 
   // Edit mode
   TASK_EDIT_INPUT: 'task-edit-input',
+
+  // Priority
+  PRIORITY_HIGH: 'priority-high',
+  PRIORITY_MEDIUM: 'priority-medium',
+  PRIORITY_LOW: 'priority-low',
 } as const;
+
+// =============================================================================
+// PRIORITY LEVELS
+// =============================================================================
+
+export const PRIORITY_LEVELS = {
+  HIGH: 'high',
+  MEDIUM: 'medium',
+  LOW: 'low',
+  NONE: 'none',
+} as const;
+
+export type Priority = (typeof PRIORITY_LEVELS)[keyof typeof PRIORITY_LEVELS];
 
 // =============================================================================
 // APP MODES
@@ -254,6 +281,8 @@ export const MESSAGES = {
   NO_MORE_TASKS: 'No more tasks with timers! Great work! 🎉',
   EMPTY_STATE_TITLE: 'No tasks yet',
   EMPTY_STATE_TEXT: 'Type a task above and click a duration to get started',
+  TASK_DELETED: 'Task deleted',
+  TASK_RESTORED: 'Task restored',
 } as const;
 
 // =============================================================================

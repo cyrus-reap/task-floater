@@ -8,6 +8,7 @@ interface Task {
   isTimerRunning?: boolean;
   tags?: string[];
   pinned?: boolean;
+  priority?: 'high' | 'medium' | 'low';
 }
 
 interface ParsedTask {
@@ -28,7 +29,7 @@ interface Settings {
 interface ElectronAPI {
   getTasks: () => Promise<Task[]>;
   saveTasks: (tasks: Task[]) => Promise<void>;
-  addTask: (title: string, duration?: number) => Promise<Task>;
+  addTask: (title: string, duration?: number, priority?: 'high' | 'medium' | 'low') => Promise<Task>;
   toggleTask: (taskId: string) => Promise<void>;
   deleteTask: (taskId: string) => Promise<void>;
   updateTask: (taskId: string, updates: Partial<Task>) => Promise<void>;

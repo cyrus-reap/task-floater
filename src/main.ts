@@ -29,6 +29,7 @@ interface Task {
   isTimerRunning?: boolean;
   tags?: string[];
   pinned?: boolean;
+  priority?: 'high' | 'medium' | 'low';
 }
 
 interface Settings {
@@ -230,36 +231,46 @@ ipcMain.handle('save-tasks', async (_event, tasks: Task[]): Promise<void> => {
   }
 });
 
-ipcMain.handle('add-task', async (_event, title: string, duration?: number): Promise<Task> => {
-  try {
-    // Validate inputs
-    const validatedTitle = Validators.taskTitle(title);
-    const validatedDuration = Validators.duration(duration);
+ipcMain.handle(
+  'add-task',
+  async (
+    _event,
+    title: string,
+    duration?: number,
+    priority?: 'high' | 'medium' | 'low'
+  ): Promise<Task> => {
+    try {
+      // Validate inputs
+      const validatedTitle = Validators.taskTitle(title);
+      const validatedDuration = Validators.duration(duration);
+      const validatedPriority = Validators.priority(priority);
 
-    const tasks = getTasks();
+      const tasks = getTasks();
 
-    // Prevent DoS: Limit total number of tasks
-    if (tasks.length >= 1000) {
-      throw new ValidationError('Maximum number of tasks reached (1000)');
+      // Prevent DoS: Limit total number of tasks
+      if (tasks.length >= 1000) {
+        throw new ValidationError('Maximum number of tasks reached (1000)');
+      }
+
+      const newTask: Task = {
+        id: Date.now().toString(),
+        title: validatedTitle,
+        completed: false,
+        createdAt: new Date().toISOString(),
+        duration: validatedDuration,
+        timeRemaining: validatedDuration ? validatedDuration * 60 : undefined,
+        isTimerRunning: false,
+        priority: validatedPriority,
+      };
+      tasks.push(newTask);
+      saveTasks(tasks);
+      return newTask;
+    } catch (error) {
+      console.error('Error adding task:', error);
+      throw error;
     }
-
-    const newTask: Task = {
-      id: Date.now().toString(),
-      title: validatedTitle,
-      completed: false,
-      createdAt: new Date().toISOString(),
-      duration: validatedDuration,
-      timeRemaining: validatedDuration ? validatedDuration * 60 : undefined,
-      isTimerRunning: false,
-    };
-    tasks.push(newTask);
-    saveTasks(tasks);
-    return newTask;
-  } catch (error) {
-    console.error('Error adding task:', error);
-    throw error;
   }
-});
+);
 
 ipcMain.handle('toggle-task', async (_event, taskId: string): Promise<void> => {
   try {
@@ -357,6 +368,9 @@ ipcMain.handle(
           throw new ValidationError('pinned must be a boolean');
         }
         task.pinned = updates.pinned;
+      }
+      if (updates.priority !== undefined) {
+        task.priority = Validators.priority(updates.priority);
       }
 
       saveTasks(tasks);
