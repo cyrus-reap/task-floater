@@ -401,8 +401,9 @@ function showLoadingOverlay(message: string): string {
 
   document.body.appendChild(overlay);
 
-  // Trigger animation
+  // Trigger animation - add active class to show and enable pointer events
   requestAnimationFrame(() => {
+    overlay.classList.add('active');
     overlay.style.opacity = '1';
   });
 
@@ -416,6 +417,7 @@ function hideLoadingOverlay(loadingId: string): void {
   const overlay = document.getElementById(loadingId);
   if (overlay) {
     overlay.style.opacity = '0';
+    overlay.classList.remove('active');
     setTimeout(() => overlay.remove(), 200);
   }
 }
@@ -1008,11 +1010,15 @@ function resizeWindowToContent(): void {
   requestAnimationFrame(() => {
     const container = DOM.container;
     if (container) {
-      // Get the actual content height
+      // Get the actual content height with computed styles
+      const containerStyles = window.getComputedStyle(container);
+      const maxHeight = parseInt(containerStyles.maxHeight);
       const contentHeight = container.scrollHeight;
-      // Add some padding for visual comfort
-      const padding = 10;
-      window.electronAPI.resizeWindow(contentHeight + padding);
+
+      // Use the smaller of content height or max-height, with some buffer
+      const targetHeight = Math.min(contentHeight + 2, maxHeight || 600);
+
+      window.electronAPI.resizeWindow(targetHeight);
     }
   });
 }
@@ -2432,11 +2438,11 @@ function setupAccordionToggles(): void {
 // =============================================================================
 
 function setupWindowControls(): void {
-  DOM.minimizeBtn.addEventListener('click', () => {
+  DOM.minimizeBtn?.addEventListener('click', () => {
     window.electronAPI.minimize();
   });
 
-  DOM.closeBtn.addEventListener('click', () => {
+  DOM.closeBtn?.addEventListener('click', () => {
     window.electronAPI.close();
   });
 }
@@ -2446,9 +2452,11 @@ function setupWindowControls(): void {
 // =============================================================================
 
 function setupTaskInput(): void {
-  DOM.addBtn.addEventListener('click', addTask);
+  DOM.addBtn?.addEventListener('click', () => {
+    addTask();
+  });
 
-  DOM.taskInput.addEventListener('keypress', e => {
+  DOM.taskInput?.addEventListener('keypress', e => {
     if (e.key === 'Enter') {
       addTask();
     }

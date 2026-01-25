@@ -10,44 +10,94 @@
     <title>Task Floater</title>
     <style>
       /* ==========================================================================
-         CSS VARIABLES - Premium Design System
+         CSS VARIABLES - Refined Design System
          ========================================================================== */
       :root {
-        /* Surface hierarchy - 3 levels only */
-        --surface-base: rgba(22, 22, 26, 0.95);
-        --surface-elevated: rgba(32, 32, 38, 1);
-        --surface-overlay: rgba(44, 44, 52, 1);
-        --surface-hover: rgba(255, 255, 255, 0.03);
-        --surface-active: rgba(255, 255, 255, 0.05);
+        /* Surface Layers - Progressive depth (darkest to lightest) */
+        --layer-0-app-bg: #0a0a0c;
+        --layer-1-container: rgba(16, 16, 20, 0.95);
+        --layer-2-panel: rgba(28, 28, 34, 0.6);
+        --layer-3-card-rest: rgba(32, 32, 40, 0.4);
+        --layer-4-card-hover: rgba(38, 38, 46, 0.6);
+        --layer-5-card-active: rgba(42, 42, 50, 0.7);
 
-        /* Text hierarchy */
-        --text-primary: rgba(255, 255, 255, 0.92);
-        --text-secondary: rgba(255, 255, 255, 0.6);
-        --text-tertiary: rgba(255, 255, 255, 0.4);
-        --text-muted: rgba(255, 255, 255, 0.2);
-        --text-placeholder: rgba(255, 255, 255, 0.25);
+        /* Legacy aliases for backwards compatibility */
+        --surface-base: var(--layer-1-container);
+        --surface-elevated: rgba(28, 28, 34, 1);
+        --surface-overlay: var(--layer-4-card-hover);
+        --surface-card: var(--layer-3-card-rest);
+        --surface-hover: rgba(255, 255, 255, 0.04);
+        --surface-active: rgba(255, 255, 255, 0.07);
+        --surface-input: rgba(22, 22, 28, 1);
 
-        /* Single accent - Blue */
-        --accent: #3b82f6;
-        --accent-hover: #60a5fa;
-        --accent-muted: rgba(59, 130, 246, 0.12);
-        --accent-subtle: rgba(59, 130, 246, 0.06);
-        --accent-glow: rgba(59, 130, 246, 0.2);
-
-        /* Semantic - Muted */
-        --success: #10b981;
-        --success-muted: rgba(16, 185, 129, 0.1);
-        --warning: #f59e0b;
-        --warning-muted: rgba(245, 158, 11, 0.1);
-        --danger: #ef4444;
-        --danger-muted: rgba(239, 68, 68, 0.08);
-
-        /* Borders - Very subtle */
+        /* Border System - Progressive clarity */
         --border-subtle: rgba(255, 255, 255, 0.04);
-        --border-default: rgba(255, 255, 255, 0.06);
-        --border-strong: rgba(255, 255, 255, 0.1);
+        --border-default: rgba(255, 255, 255, 0.08);
+        --border-strong: rgba(255, 255, 255, 0.12);
+        --border-accent: rgba(59, 130, 246, 0.4);
+        --border-accent-strong: rgba(59, 130, 246, 0.6);
+        --border-focus: var(--border-accent-strong);
 
-        /* 8pt spacing grid */
+        /* Text Hierarchy - Five-level contrast */
+        --text-primary: rgba(255, 255, 255, 0.95);
+        --text-secondary: rgba(255, 255, 255, 0.72);
+        --text-tertiary: rgba(255, 255, 255, 0.5);
+        --text-muted: rgba(255, 255, 255, 0.35);
+        --text-placeholder: rgba(255, 255, 255, 0.28);
+
+        /* Accent Color - Primary blue with variants */
+        --accent: #3b82f6;
+        --accent-bright: #60a5fa;
+        --accent-hover: #60a5fa;
+        --accent-dim: rgba(59, 130, 246, 0.15);
+        --accent-muted: rgba(59, 130, 246, 0.15);
+        --accent-subtle: rgba(59, 130, 246, 0.08);
+        --accent-glow: rgba(59, 130, 246, 0.25);
+        --accent-glow-strong: rgba(59, 130, 246, 0.4);
+
+        /* Priority Colors - With full variants */
+        --priority-low: #3b82f6;
+        --priority-low-bright: #60a5fa;
+        --priority-low-bg: rgba(59, 130, 246, 0.18);
+        --priority-low-tint: rgba(59, 130, 246, 0.1);
+        --priority-low-border: rgba(59, 130, 246, 0.5);
+        --priority-low-glow: rgba(59, 130, 246, 0.25);
+
+        --priority-medium: #f59e0b;
+        --priority-medium-bright: #fbbf24;
+        --priority-medium-bg: rgba(245, 158, 11, 0.18);
+        --priority-medium-tint: rgba(245, 158, 11, 0.1);
+        --priority-medium-border: rgba(245, 158, 11, 0.5);
+        --priority-medium-glow: rgba(245, 158, 11, 0.25);
+
+        --priority-high: #ef4444;
+        --priority-high-bright: #f87171;
+        --priority-high-bg: rgba(239, 68, 68, 0.18);
+        --priority-high-tint: rgba(239, 68, 68, 0.1);
+        --priority-high-border: rgba(239, 68, 68, 0.5);
+        --priority-high-glow: rgba(239, 68, 68, 0.3);
+
+        /* Semantic Colors */
+        --success: #10b981;
+        --success-bg: rgba(16, 185, 129, 0.15);
+        --success-muted: rgba(16, 185, 129, 0.12);
+        --success-tint: rgba(16, 185, 129, 0.08);
+        --warning: #f59e0b;
+        --warning-bg: rgba(245, 158, 11, 0.15);
+        --warning-muted: rgba(245, 158, 11, 0.12);
+        --warning-tint: rgba(245, 158, 11, 0.08);
+        --danger: #ef4444;
+        --danger-bg: rgba(239, 68, 68, 0.15);
+        --danger-muted: rgba(239, 68, 68, 0.12);
+        --danger-tint: rgba(239, 68, 68, 0.08);
+
+        /* Interactive States */
+        --interactive-hover: rgba(255, 255, 255, 0.08);
+        --interactive-active: rgba(255, 255, 255, 0.12);
+        --focus-ring: 0 0 0 3px rgba(59, 130, 246, 0.12);
+        --focus-ring-strong: 0 0 0 3px rgba(59, 130, 246, 0.2);
+
+        /* Spacing Scale - 4px base grid */
         --space-0: 0;
         --space-1: 4px;
         --space-2: 8px;
@@ -57,30 +107,85 @@
         --space-6: 24px;
         --space-8: 32px;
         --space-10: 40px;
+        --space-12: 48px;
 
-        /* Radii - Soft */
+        /* Border Radius Scale */
         --radius-xs: 4px;
         --radius-sm: 6px;
-        --radius-md: 10px;
-        --radius-lg: 14px;
-        --radius-xl: 16px;
+        --radius-md: 8px;
+        --radius-lg: 10px;
+        --radius-xl: 12px;
+        --radius-2xl: 16px;
         --radius-full: 9999px;
 
         /* Typography */
         --font-sans:
           -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Inter', system-ui, sans-serif;
-        --font-mono: 'SF Mono', 'Menlo', 'Monaco', monospace;
+        --font-mono: 'SF Mono', 'Menlo', 'Monaco', 'Courier New', monospace;
 
-        /* Shadows */
-        --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.12);
-        --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.15);
-        --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.2);
-        --shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.25);
+        --text-xs: 11px;
+        --text-sm: 12px;
+        --text-base: 13px;
+        --text-md: 14px;
+        --text-lg: 16px;
+        --text-xl: 20px;
+        --text-2xl: 32px;
+        --text-3xl: 48px;
 
-        /* Transitions */
-        --transition-fast: 0.1s ease;
-        --transition-base: 0.15s ease;
-        --transition-smooth: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        --weight-normal: 400;
+        --weight-medium: 500;
+        --weight-semibold: 600;
+        --weight-bold: 700;
+
+        --leading-tight: 1.25;
+        --leading-snug: 1.375;
+        --leading-normal: 1.5;
+        --leading-relaxed: 1.625;
+
+        --tracking-tight: -0.01em;
+        --tracking-normal: 0;
+        --tracking-wide: 0.02em;
+        --tracking-wider: 0.08em;
+
+        /* Elevation System - Shadows and highlights */
+        --elevation-0: none;
+        --elevation-1: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.08);
+        --elevation-2: 0 4px 12px rgba(0, 0, 0, 0.15), 0 2px 4px rgba(0, 0, 0, 0.1);
+        --elevation-3: 0 8px 24px rgba(0, 0, 0, 0.2), 0 4px 8px rgba(0, 0, 0, 0.12);
+
+        --glow-accent: 0 0 12px rgba(59, 130, 246, 0.4);
+        --glow-accent-strong: 0 0 20px rgba(59, 130, 246, 0.5);
+        --glow-priority-high: 0 2px 8px rgba(239, 68, 68, 0.2);
+
+        --highlight-inset: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+        --shadow-inset: inset 0 1px 3px rgba(0, 0, 0, 0.15);
+
+        /* Legacy shadow aliases */
+        --shadow-sm: var(--elevation-1);
+        --shadow-md: var(--elevation-2);
+        --shadow-lg: var(--elevation-3);
+        --shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.35);
+        --shadow-glow: var(--glow-accent);
+
+        /* Motion System - Duration and easing */
+        --duration-instant: 80ms;
+        --duration-fast: 120ms;
+        --duration-base: 180ms;
+        --duration-smooth: 250ms;
+        --duration-slow: 350ms;
+        --duration-slower: 500ms;
+
+        --ease-out: cubic-bezier(0, 0, 0.2, 1);
+        --ease-in: cubic-bezier(0.4, 0, 1, 1);
+        --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+        --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+        --ease-smooth: cubic-bezier(0.45, 0, 0.15, 1);
+
+        /* Combined transition tokens */
+        --transition-fast: var(--duration-fast) var(--ease-out);
+        --transition-base: var(--duration-base) var(--ease-in-out);
+        --transition-smooth: var(--duration-smooth) var(--ease-in-out);
+        --transition-bounce: 300ms var(--ease-bounce);
       }
 
       /* ==========================================================================
@@ -94,6 +199,14 @@
         box-sizing: border-box;
       }
 
+      html,
+      body {
+        height: 100%;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+      }
+
       body {
         font-family: var(--font-sans);
         font-size: 13px;
@@ -105,10 +218,13 @@
         -moz-osx-font-smoothing: grayscale;
         -webkit-app-region: no-drag;
         user-select: none;
+        display: flex;
+        align-items: flex-start;
+        justify-content: center;
       }
 
       /* ==========================================================================
-         ANIMATIONS
+         ANIMATIONS - Premium Micro-interactions
          ========================================================================== */
       @keyframes fadeIn {
         from {
@@ -122,11 +238,11 @@
       @keyframes slideUp {
         from {
           opacity: 0;
-          transform: translateY(8px);
+          transform: translateY(10px) scale(0.98);
         }
         to {
           opacity: 1;
-          transform: translateY(0);
+          transform: translateY(0) scale(1);
         }
       }
 
@@ -258,6 +374,7 @@
       .container {
         width: 380px;
         height: auto;
+        min-height: 200px;
         max-height: 600px;
         background: var(--surface-base);
         backdrop-filter: blur(60px) saturate(180%);
@@ -276,11 +393,11 @@
 
       /* Mode variations */
       .container.compact-mode {
-        max-height: 400px;
+        max-height: 350px;
       }
 
       .container.focus-mode {
-        max-height: none;
+        max-height: 450px;
       }
 
       /* ==========================================================================
@@ -461,40 +578,52 @@
          HERO INPUT SECTION
          ========================================================================== */
       .input-section {
-        padding: var(--space-4) var(--space-4) var(--space-3);
+        padding: var(--space-4);
         background: var(--surface-elevated);
         border-bottom: 1px solid var(--border-subtle);
         flex-shrink: 0;
+        position: relative;
+        z-index: 3;
       }
 
       .input-row {
         display: flex;
-        gap: var(--space-2);
-        align-items: center;
+        gap: 0;
+        align-items: stretch;
+        background: var(--surface-input);
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--border-default);
+        transition: all var(--transition-base);
+        box-shadow: var(--shadow-inset);
+      }
+
+      .input-row:focus-within {
+        border-color: var(--border-focus);
+        box-shadow:
+          var(--shadow-inset),
+          0 0 0 3px var(--accent-subtle),
+          var(--shadow-glow);
       }
 
       .task-input-wrapper {
         flex: 1;
         position: relative;
+        display: flex;
+        align-items: center;
       }
 
       #taskInput {
         width: 100%;
         padding: var(--space-3) var(--space-4);
-        background: var(--surface-base);
-        border: 1px solid var(--border-default);
-        border-radius: var(--radius-md);
+        background: transparent;
+        border: none;
+        border-radius: var(--radius-lg) 0 0 var(--radius-lg);
         color: var(--text-primary);
         font-size: 14px;
         font-family: inherit;
         font-weight: 450;
         outline: none;
         transition: all var(--transition-base);
-      }
-
-      #taskInput:focus {
-        border-color: var(--accent);
-        box-shadow: 0 0 0 2px var(--accent-subtle);
       }
 
       #taskInput::placeholder {
@@ -522,30 +651,36 @@
         padding: var(--space-3) var(--space-5);
         background: var(--accent);
         border: none;
-        border-radius: var(--radius-md);
+        border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
         color: white;
         font-size: 13px;
         font-weight: 600;
         cursor: pointer;
-        transition: all var(--transition-fast);
+        transition: all var(--transition-base);
         white-space: nowrap;
         flex-shrink: 0;
+        min-width: 70px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: var(--space-1);
       }
 
       .add-btn:hover {
         background: var(--accent-hover);
-        transform: translateY(-1px);
+        box-shadow: var(--shadow-glow);
       }
 
       .add-btn:active {
-        transform: translateY(0) scale(0.98);
+        transform: scale(0.97);
+        transition: transform 0.08s ease;
       }
 
       .add-btn.success {
         animation: checkPop 0.3s ease;
       }
 
-      /* Duration picker - Compact dropdown style */
+      /* Duration picker - Interactive pill buttons */
       .duration-row {
         display: flex;
         align-items: center;
@@ -556,46 +691,55 @@
       }
 
       .duration-label {
-        font-size: 10px;
-        font-weight: 500;
-        color: var(--text-tertiary);
+        font-size: 9px;
+        font-weight: 600;
+        color: var(--text-muted);
         text-transform: uppercase;
-        letter-spacing: 0.05em;
+        letter-spacing: 0.08em;
         flex-shrink: 0;
+        min-width: 42px;
       }
 
       .duration-picker {
         display: flex;
         flex: 1;
-        background: var(--surface-base);
-        border-radius: var(--radius-sm);
-        padding: 2px;
-        gap: 2px;
+        background: var(--surface-input);
+        border-radius: var(--radius-md);
+        padding: 3px;
+        gap: 3px;
+        border: 1px solid var(--border-subtle);
       }
 
       .duration-option {
         flex: 1;
-        padding: 6px 0;
+        padding: 7px 2px;
         background: transparent;
         border: none;
-        border-radius: var(--radius-xs);
+        border-radius: var(--radius-sm);
         color: var(--text-tertiary);
         font-size: 11px;
         font-weight: 500;
         cursor: pointer;
-        transition: all var(--transition-fast);
+        transition: all var(--transition-base);
         text-align: center;
       }
 
       .duration-option:hover {
-        color: var(--text-secondary);
+        color: var(--text-primary);
         background: var(--surface-hover);
       }
 
       .duration-option.selected {
         background: var(--accent);
         color: white;
-        box-shadow: var(--shadow-sm);
+        box-shadow:
+          var(--shadow-sm),
+          0 0 12px var(--accent-glow);
+        font-weight: 600;
+      }
+
+      .duration-option:active {
+        transform: scale(0.95);
       }
 
       /* Custom duration input */
@@ -652,43 +796,45 @@
       }
 
       .priority-label {
-        font-size: 10px;
-        font-weight: 500;
-        color: var(--text-tertiary);
+        font-size: 9px;
+        font-weight: 600;
+        color: var(--text-muted);
         text-transform: uppercase;
-        letter-spacing: 0.05em;
+        letter-spacing: 0.08em;
         flex-shrink: 0;
+        min-width: 42px;
       }
 
       .priority-picker {
         display: flex;
         flex: 1;
-        background: var(--surface-base);
-        border-radius: var(--radius-sm);
-        padding: 2px;
-        gap: 2px;
+        background: var(--surface-input);
+        border-radius: var(--radius-md);
+        padding: 3px;
+        gap: 3px;
+        border: 1px solid var(--border-subtle);
       }
 
       .priority-option {
         flex: 1;
-        padding: 6px 0;
+        padding: 7px 2px;
         background: transparent;
         border: none;
-        border-radius: var(--radius-xs);
+        border-radius: var(--radius-sm);
         color: var(--text-tertiary);
         font-size: 11px;
         font-weight: 500;
         cursor: pointer;
-        transition: all var(--transition-fast);
+        transition: all var(--transition-base);
         text-align: center;
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: 4px;
+        gap: 5px;
       }
 
       .priority-option:hover {
-        color: var(--text-secondary);
+        color: var(--text-primary);
         background: var(--surface-hover);
       }
 
@@ -696,25 +842,55 @@
         background: var(--surface-overlay);
         color: var(--text-primary);
         box-shadow: var(--shadow-sm);
+        font-weight: 600;
+      }
+
+      .priority-option:active {
+        transform: scale(0.95);
+      }
+
+      /* Priority-specific selected states with tinted backgrounds */
+      .priority-option[data-priority='low'].selected {
+        background: var(--priority-low-tint);
+        color: var(--priority-low);
+        box-shadow:
+          var(--shadow-sm),
+          0 0 10px rgba(59, 130, 246, 0.15);
+      }
+
+      .priority-option[data-priority='medium'].selected {
+        background: var(--priority-medium-tint);
+        color: var(--priority-medium);
+        box-shadow:
+          var(--shadow-sm),
+          0 0 10px rgba(245, 158, 11, 0.15);
+      }
+
+      .priority-option[data-priority='high'].selected {
+        background: var(--priority-high-tint);
+        color: var(--priority-high);
+        box-shadow:
+          var(--shadow-sm),
+          0 0 10px rgba(239, 68, 68, 0.15);
       }
 
       .priority-dot {
-        width: 6px;
-        height: 6px;
+        width: 7px;
+        height: 7px;
         border-radius: 50%;
         flex-shrink: 0;
       }
 
       .priority-dot.priority-high {
-        background: #ef4444;
+        background: var(--priority-high);
       }
 
       .priority-dot.priority-medium {
-        background: #f59e0b;
+        background: var(--priority-medium);
       }
 
       .priority-dot.priority-low {
-        background: #3b82f6;
+        background: var(--priority-low);
       }
 
       /* Task priority indicator */
@@ -738,38 +914,20 @@
         background: #3b82f6;
       }
 
-      /* Task item priority border */
-      .task-item.priority-high::after {
-        content: '';
-        position: absolute;
-        left: 0;
-        top: 0;
-        bottom: 0;
-        width: 2px;
-        background: #ef4444;
-        opacity: 0.7;
+      /* Priority Border Indicators - Uses left-border from base */
+      .task-item.priority-low {
+        border-left-color: var(--priority-low);
       }
 
-      .task-item.priority-medium::after {
-        content: '';
-        position: absolute;
-        left: 0;
-        top: 0;
-        bottom: 0;
-        width: 2px;
-        background: #f59e0b;
-        opacity: 0.7;
+      .task-item.priority-medium {
+        border-left-color: var(--priority-medium);
       }
 
-      .task-item.priority-low::after {
-        content: '';
-        position: absolute;
-        left: 0;
-        top: 0;
-        bottom: 0;
-        width: 2px;
-        background: #3b82f6;
-        opacity: 0.7;
+      .task-item.priority-high {
+        border-left-color: var(--priority-high);
+        box-shadow:
+          var(--elevation-1),
+          -2px 0 8px var(--priority-high-glow);
       }
 
       /* Legacy elements */
@@ -788,6 +946,10 @@
         justify-content: space-between;
         padding: var(--space-2) var(--space-4);
         flex-shrink: 0;
+        background: var(--surface-elevated);
+        border-bottom: 1px solid var(--border-subtle);
+        position: relative;
+        z-index: 2;
       }
 
       .tasks-count {
@@ -927,10 +1089,22 @@
          TASKS LIST
          ========================================================================== */
       .tasks-section {
-        flex: 0 1 auto;
+        flex: 1 1 auto;
         overflow-y: auto;
         overflow-x: hidden;
+        min-height: 100px;
         max-height: 400px;
+        background: var(--surface-base);
+        position: relative;
+        z-index: 1;
+      }
+
+      .container.compact-mode .tasks-section {
+        max-height: 200px;
+      }
+
+      .container.focus-mode .tasks-section {
+        max-height: 300px;
       }
 
       .tasks-section::-webkit-scrollbar {
@@ -952,7 +1126,7 @@
 
       /* Task group headers */
       .task-group {
-        margin-bottom: var(--space-2);
+        margin-bottom: var(--space-1);
       }
 
       .task-group-header {
@@ -960,14 +1134,16 @@
         align-items: center;
         gap: var(--space-2);
         padding: var(--space-2) var(--space-4);
+        margin: 0 var(--space-2);
         cursor: default;
         user-select: none;
+        border-radius: var(--radius-sm);
       }
 
       /* Only Done section header is clickable */
       .task-group-done .task-group-header {
         cursor: pointer;
-        transition: background var(--transition-fast);
+        transition: all var(--transition-base);
       }
 
       .task-group-done .task-group-header:hover {
@@ -975,10 +1151,10 @@
       }
 
       .caret-icon {
-        width: 12px;
-        height: 12px;
+        width: 10px;
+        height: 10px;
         color: var(--text-muted);
-        transition: transform var(--transition-base);
+        transition: transform var(--transition-smooth);
         flex-shrink: 0;
       }
 
@@ -987,18 +1163,19 @@
       }
 
       .task-group-label {
-        font-size: 10px;
-        font-weight: 500;
-        color: var(--text-tertiary);
+        font-size: var(--text-xs);
+        font-weight: var(--weight-semibold);
+        color: var(--text-muted);
         text-transform: uppercase;
-        letter-spacing: 0.05em;
+        letter-spacing: var(--tracking-wider);
       }
 
       .task-group-count {
-        font-size: 10px;
+        font-size: 9px;
         font-weight: 500;
         color: var(--text-muted);
         font-variant-numeric: tabular-nums;
+        opacity: 0.7;
       }
 
       .task-group-items {
@@ -1015,11 +1192,11 @@
 
       /* Done tasks visual treatment */
       .task-group-done .task-item {
-        opacity: 0.6;
+        opacity: 0.5;
       }
 
       .task-group-done .task-item:hover {
-        opacity: 0.8;
+        opacity: 0.7;
       }
 
       /* Pinned tasks visual treatment */
@@ -1054,22 +1231,34 @@
       }
 
       /* ==========================================================================
-         TASK ITEM - Premium Row Design
+         TASK ITEM - Refined Card Design
          ========================================================================== */
       .task-item {
         display: flex;
         align-items: flex-start;
         gap: var(--space-3);
-        padding: var(--space-3) var(--space-4);
-        background: transparent;
-        transition: all var(--transition-fast);
-        animation: slideUp 0.2s ease-out;
+        padding: var(--space-3);
+        margin-bottom: var(--space-2);
+        background: var(--layer-3-card-rest);
+        border: 1px solid var(--border-default);
+        border-left: 3px solid transparent;
+        border-radius: var(--radius-lg);
+        box-shadow: var(--elevation-1);
+        transition: all var(--transition-base);
+        animation: slideUp 0.25s cubic-bezier(0.4, 0, 0.2, 1);
         position: relative;
         cursor: default;
       }
 
       .task-item:hover {
-        background: var(--surface-hover);
+        background: var(--layer-4-card-hover);
+        border-color: var(--border-strong);
+        transform: translateY(-1px);
+        box-shadow: var(--elevation-2);
+      }
+
+      .task-item:active {
+        transform: translateY(0);
       }
 
       .task-item.selected {
@@ -1125,54 +1314,88 @@
         margin-top: -2px;
       }
 
-      /* Timer running state */
+      /* Timer running state - Refined with pulsing glow */
       .task-item.timer-running {
-        background: var(--accent-subtle);
+        background: var(--accent-dim);
+        border-left-color: var(--accent);
+        box-shadow:
+          0 0 0 1px rgba(59, 130, 246, 0.2),
+          var(--elevation-2);
+        animation: timerPulse 2s ease-in-out infinite;
       }
 
-      .task-item.timer-running::before {
-        content: '';
-        position: absolute;
-        left: 0;
-        top: 0;
-        bottom: 0;
-        width: 3px;
-        background: var(--accent);
-        animation: accentGlow 2s ease-in-out infinite;
+      @keyframes timerPulse {
+        0%,
+        100% {
+          box-shadow:
+            0 0 0 1px rgba(59, 130, 246, 0.2),
+            var(--elevation-2);
+        }
+        50% {
+          box-shadow:
+            0 0 0 1px rgba(59, 130, 246, 0.4),
+            0 4px 20px rgba(59, 130, 246, 0.2);
+        }
       }
 
       .task-item.timer-warning {
-        background: var(--danger-muted);
+        background: var(--priority-medium-bg);
+        border-left-color: var(--priority-medium);
       }
 
-      .task-item.timer-warning::before {
-        background: var(--danger);
+      .task-item.timer-warning.timer-running {
+        animation: timerWarningPulse 2s ease-in-out infinite;
       }
 
-      /* Checkbox */
+      @keyframes timerWarningPulse {
+        0%,
+        100% {
+          box-shadow:
+            0 0 0 1px rgba(245, 158, 11, 0.2),
+            var(--elevation-2);
+        }
+        50% {
+          box-shadow:
+            0 0 0 1px rgba(245, 158, 11, 0.4),
+            0 4px 20px rgba(245, 158, 11, 0.2);
+        }
+      }
+
+      /* Checkbox - Refined with better hover states */
       .task-checkbox {
-        width: 18px;
-        height: 18px;
-        min-width: 18px;
+        width: 20px;
+        height: 20px;
+        min-width: 20px;
         border-radius: var(--radius-sm);
-        border: 1.5px solid var(--border-strong);
+        border: 2px solid rgba(255, 255, 255, 0.2);
         background: transparent;
         cursor: pointer;
         position: relative;
         transition: all var(--transition-fast);
-        margin-top: 1px;
+        margin-top: 2px;
         flex-shrink: 0;
+      }
+
+      .task-checkbox:hover {
+        border-color: var(--accent-bright);
+        background: var(--accent-subtle);
       }
 
       .task-checkbox:hover {
         border-color: var(--accent);
         background: var(--accent-subtle);
+        transform: scale(1.05);
+      }
+
+      .task-checkbox:active {
+        transform: scale(0.95);
       }
 
       .task-checkbox.completed {
         background: var(--accent);
         border-color: var(--accent);
-        animation: checkPop 0.25s ease;
+        animation: checkPop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        box-shadow: 0 0 12px var(--accent-glow);
       }
 
       .task-checkbox.completed::after {
@@ -1181,9 +1404,9 @@
         top: 50%;
         left: 50%;
         width: 5px;
-        height: 8px;
+        height: 9px;
         border: solid white;
-        border-width: 0 2px 2px 0;
+        border-width: 0 2.5px 2.5px 0;
         transform: translate(-50%, -55%) rotate(45deg);
       }
 
@@ -1207,7 +1430,7 @@
         color: var(--text-primary);
         font-size: 14px;
         font-weight: 500;
-        line-height: 1.4;
+        line-height: 1.45;
         word-break: break-word;
         cursor: text;
         letter-spacing: -0.01em;
@@ -1222,6 +1445,30 @@
       .task-item.timer-running .task-title {
         color: var(--text-primary);
         font-weight: 500;
+      }
+
+      /* Running timer indicator - pulsing dot */
+      .task-item.timer-running .task-priority-indicator,
+      .task-item.timer-running::before {
+        animation: timerPulse 2s ease-in-out infinite;
+      }
+
+      @keyframes timerPulse {
+        0%,
+        100% {
+          opacity: 1;
+          transform: scale(1);
+        }
+        50% {
+          opacity: 0.6;
+          transform: scale(1.2);
+        }
+      }
+
+      /* Active task highlight */
+      .task-item.timer-running {
+        background: var(--accent-subtle);
+        border-color: var(--accent-muted);
       }
 
       /* Task edit input */
@@ -1292,129 +1539,197 @@
       }
 
       /* ==========================================================================
-         TIMER - Hover Reveal Design
+         TIMER - Enhanced Visual Design
          ========================================================================== */
       .task-timer {
         display: flex;
         align-items: center;
-        gap: var(--space-2);
-        margin-top: var(--space-1);
-        padding-top: var(--space-1);
+        gap: var(--space-3);
+        margin-top: var(--space-2);
+        padding-top: var(--space-2);
         opacity: 0;
         max-height: 0;
         overflow: hidden;
-        transition: all var(--transition-base);
+        transition: all var(--transition-smooth);
       }
 
       .task-item:hover .task-timer,
       .task-item.timer-running .task-timer,
       .task-item.has-timer .task-timer {
         opacity: 1;
-        max-height: 24px;
+        max-height: 36px;
       }
 
       .task-item.timer-running .task-timer {
         opacity: 1;
       }
 
+      /* Timer Display - More prominent with better typography */
       .timer-time {
         font-family: var(--font-mono);
-        font-size: 13px;
-        font-weight: 600;
-        color: var(--text-tertiary);
-        min-width: 44px;
+        font-size: var(--text-lg);
+        font-weight: var(--weight-semibold);
+        color: var(--text-primary);
+        min-width: 70px;
         flex-shrink: 0;
         font-variant-numeric: tabular-nums;
+        letter-spacing: var(--tracking-wide);
+        transition: all var(--transition-base);
       }
 
       .task-item.timer-running .timer-time {
-        color: var(--accent);
+        color: var(--accent-bright);
+        text-shadow: 0 0 12px var(--accent-glow);
       }
 
       .task-item.timer-warning .timer-time {
-        color: var(--danger);
-        animation: pulse 1s ease-in-out infinite;
+        color: var(--priority-medium-bright);
+        animation: timerWarningPulseText 1s ease-in-out infinite;
+        text-shadow: 0 0 12px var(--priority-medium-glow);
       }
 
+      @keyframes timerWarningPulseText {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.7;
+        }
+      }
+
+      /* Progress Bar - Thicker and more prominent */
       .timer-progress {
         flex: 1;
-        height: 3px;
-        background: var(--border-default);
-        border-radius: 2px;
+        height: 6px;
+        background: rgba(255, 255, 255, 0.08);
+        border-radius: var(--radius-full);
         overflow: hidden;
+        box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.2);
       }
 
       .timer-progress-fill {
         height: 100%;
-        background: var(--accent);
-        border-radius: 2px;
-        transition: width 1s linear;
+        background: linear-gradient(90deg, var(--accent) 0%, var(--accent-bright) 100%);
+        border-radius: var(--radius-full);
+        transition: width 300ms var(--ease-out);
+        box-shadow: var(--glow-accent);
       }
 
       .task-item.timer-running .timer-progress-fill {
-        animation: progressPulse 2s ease-in-out infinite;
+        animation: progressGlow 2s ease-in-out infinite;
       }
 
+      @keyframes progressGlow {
+        0%,
+        100% {
+          box-shadow: 0 0 8px var(--accent-glow);
+        }
+        50% {
+          box-shadow: 0 0 16px var(--accent-glow-strong);
+        }
+      }
+
+      /* Warning state (< 5 minutes) */
       .task-item.timer-warning .timer-progress-fill {
-        background: var(--danger);
+        background: linear-gradient(
+          90deg,
+          var(--priority-medium) 0%,
+          var(--priority-medium-bright) 100%
+        );
+        box-shadow: 0 0 12px var(--priority-medium-glow);
+      }
+
+      /* Critical state (< 1 minute) */
+      .task-item.timer-critical .timer-progress-fill {
+        background: linear-gradient(
+          90deg,
+          var(--priority-high) 0%,
+          var(--priority-high-bright) 100%
+        );
+        box-shadow: 0 0 12px var(--priority-high-glow);
+        animation: criticalPulse 1s ease-in-out infinite;
+      }
+
+      @keyframes criticalPulse {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.8;
+        }
       }
 
       .timer-progress-fill.paused {
         background: var(--text-muted);
+        box-shadow: none;
       }
 
       .timer-controls {
         display: flex;
         align-items: center;
-        gap: 4px;
+        gap: var(--space-1);
         flex-shrink: 0;
       }
 
       .timer-btn {
-        width: 24px;
-        height: 24px;
+        width: 28px;
+        height: 28px;
         padding: 0;
-        background: transparent;
-        border: none;
-        border-radius: var(--radius-xs);
+        background: var(--surface-overlay);
+        border: 1px solid var(--border-subtle);
+        border-radius: var(--radius-sm);
         color: var(--text-tertiary);
         cursor: pointer;
         display: flex;
         align-items: center;
         justify-content: center;
-        transition: all var(--transition-fast);
+        transition: all var(--transition-base);
       }
 
       .timer-btn:hover {
-        background: var(--surface-overlay);
+        background: var(--surface-active);
         color: var(--text-secondary);
+        border-color: var(--border-default);
+        transform: translateY(-1px);
       }
 
       .timer-btn:active {
-        transform: scale(0.9);
+        transform: scale(0.92);
+        transition: transform 0.08s ease;
       }
 
       .timer-btn.play {
         background: var(--accent);
+        border-color: var(--accent);
         color: white;
+        box-shadow: 0 2px 8px var(--accent-glow);
       }
 
       .timer-btn.play:hover {
         background: var(--accent-hover);
+        border-color: var(--accent-hover);
+        box-shadow: 0 4px 12px var(--accent-glow-strong);
+        transform: translateY(-1px);
       }
 
       .timer-btn.pause {
         background: var(--warning);
-        color: rgba(0, 0, 0, 0.8);
+        border-color: var(--warning);
+        color: rgba(0, 0, 0, 0.85);
+        box-shadow: 0 2px 8px var(--warning-muted);
       }
 
       .timer-btn.pause:hover {
         background: #d97706;
+        border-color: #d97706;
+        box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
       }
 
       .timer-btn .icon {
-        width: 10px;
-        height: 10px;
+        width: 11px;
+        height: 11px;
       }
 
       /* ==========================================================================
@@ -1662,7 +1977,7 @@
 
       .container.focus-mode .task-item.timer-running .task-timer {
         opacity: 1;
-        max-height: 24px;
+        max-height: 32px;
       }
 
       /* Focus mode empty state */
@@ -2380,12 +2695,18 @@
         bottom: 0;
         background: rgba(0, 0, 0, 0.6);
         backdrop-filter: blur(4px);
-        display: flex;
+        display: none;
         align-items: center;
         justify-content: center;
         z-index: 10000;
         opacity: 0;
+        pointer-events: none;
         transition: opacity 0.2s ease;
+      }
+
+      .loading-overlay.active {
+        display: flex;
+        pointer-events: auto;
       }
 
       .loading-content {
@@ -2832,6 +3153,6 @@
       </div>
     </div>
 
-    <script src="../dist/renderer.js"></script>
+    <script src="../dist/renderer.bundle.js"></script>
   </body>
 </html>
