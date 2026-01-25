@@ -295,7 +295,7 @@ npm start
 
 - **Issues**: [GitHub Issues](https://github.com/Cyvid7-Darus10/task-floater/issues)
 - **Documentation**: [docs/](../docs/)
-- **Email**: cyrus@reap.hk
+- **Email**: cyrus@pastelero.ph
 
 ---
 

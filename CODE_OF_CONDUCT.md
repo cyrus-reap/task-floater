@@ -30,7 +30,7 @@ This Code of Conduct applies within project spaces and in public spaces when rep
 
 ## Enforcement
 
-Instances of unacceptable behavior may be reported by contacting the project team at cyrus@reap.hk. All complaints will be reviewed and investigated promptly and fairly.
+Instances of unacceptable behavior may be reported by contacting the project team at cyrus@pastelero.ph. All complaints will be reviewed and investigated promptly and fairly.
 
 ## Attribution
 

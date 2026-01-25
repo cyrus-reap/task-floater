@@ -333,7 +333,7 @@ This project is licensed under the MIT License. See [LICENSE](LICENSE) for detai
 
 **Cyrus David Pastelero**
 GitHub: [@cyrus-reap](https://github.com/cyrus-reap)
-Email: cyrus@reap.hk
+Email: cyrus@pastelero.ph
 
 ## Acknowledgments
 

@@ -412,7 +412,7 @@ Task Floater does not communicate with external servers or services.
 
 ## Contact
 For questions about this privacy policy:
-Email: cyrus@reap.hk
+Email: cyrus@pastelero.ph
 GitHub: https://github.com/Cyvid7-Darus10/task-floater
 
 ---

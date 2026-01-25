@@ -12,10 +12,12 @@
   },
   "homepage": "https://github.com/cyrus-reap/task-floater#readme",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && npm run bundle:renderer",
+    "bundle:renderer": "esbuild dist/renderer.js --bundle --outfile=dist/renderer.bundle.js --platform=browser --format=iife --target=es2020",
     "watch": "tsc --watch",
+    "watch:bundle": "esbuild dist/renderer.js --bundle --outfile=dist/renderer.bundle.js --platform=browser --format=iife --target=es2020 --watch",
     "start": "npm run build && electron .",
-    "dev": "concurrently \"npm run watch\" \"wait-on dist/main.js && electron .\"",
+    "dev": "npm run build && concurrently \"npm run watch\" \"npm run watch:bundle\" \"wait-on dist/renderer.bundle.js && electron .\"",
     "clean": "rm -rf dist",
     "rebuild": "npm run clean && npm run build",
     "typecheck": "tsc --noEmit",
@@ -64,7 +66,7 @@
   ],
   "author": {
     "name": "Cyrus David Pastelero",
-    "email": "cyrus@reap.hk"
+    "email": "cyrus@pastelero.ph"
   },
   "license": "MIT",
   "devDependencies": {
@@ -77,6 +79,7 @@
     "concurrently": "^8.2.2",
     "electron": "^40.0.0",
     "electron-builder": "^26.4.0",
+    "esbuild": "^0.27.2",
     "eslint": "^9.39.2",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.4",
