@@ -1016,8 +1016,10 @@
          SEARCH BAR
          ========================================================================== */
       .search-section {
-        padding: 0 var(--space-4) var(--space-2);
+        padding: var(--space-3) var(--space-4) var(--space-2);
         flex-shrink: 0;
+        background: var(--surface-elevated);
+        border-bottom: 1px solid var(--border-subtle);
       }
 
       .search-wrapper {
@@ -1031,32 +1033,41 @@
         transform: translateY(-50%);
         width: 14px;
         height: 14px;
-        color: var(--text-muted);
+        color: var(--text-tertiary);
         pointer-events: none;
+        transition: color var(--transition-base);
       }
 
       #searchInput {
         width: 100%;
         padding: var(--space-2) var(--space-3);
-        padding-left: 36px;
-        padding-right: 60px;
-        background: var(--surface-overlay);
-        border: 1px solid transparent;
-        border-radius: var(--radius-md);
+        padding-left: 38px;
+        padding-right: 64px;
+        background: var(--surface-input);
+        border: 1px solid var(--border-default);
+        border-radius: var(--radius-lg);
         color: var(--text-primary);
-        font-size: 12px;
+        font-size: 13px;
         font-family: inherit;
         outline: none;
-        transition: all var(--transition-fast);
+        transition: all var(--transition-base);
+        box-shadow: var(--shadow-inset);
       }
 
       #searchInput:focus {
-        background: var(--surface-base);
-        border-color: var(--border-default);
+        background: var(--surface-card);
+        border-color: var(--border-focus);
+        box-shadow:
+          var(--shadow-inset),
+          0 0 0 3px var(--accent-subtle);
+      }
+
+      #searchInput:focus ~ .search-icon {
+        color: var(--accent);
       }
 
       #searchInput::placeholder {
-        color: var(--text-muted);
+        color: var(--text-placeholder);
       }
 
       .search-shortcut {
@@ -1068,6 +1079,12 @@
         align-items: center;
         gap: 2px;
         pointer-events: none;
+        opacity: 0.6;
+        transition: opacity var(--transition-base);
+      }
+
+      #searchInput:focus ~ .search-shortcut {
+        opacity: 0;
       }
 
       .kbd {
@@ -1076,13 +1093,14 @@
         justify-content: center;
         min-width: 18px;
         height: 18px;
-        padding: 0 4px;
-        background: var(--surface-base);
-        border-radius: var(--radius-xs);
+        padding: 0 5px;
+        background: var(--surface-overlay);
+        border-radius: var(--radius-sm);
         font-size: 10px;
         font-family: var(--font-mono);
-        color: var(--text-muted);
+        color: var(--text-tertiary);
         border: 1px solid var(--border-subtle);
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
       }
 
       /* ==========================================================================
@@ -1253,12 +1271,7 @@
       .task-item:hover {
         background: var(--layer-4-card-hover);
         border-color: var(--border-strong);
-        transform: translateY(-1px);
         box-shadow: var(--elevation-2);
-      }
-
-      .task-item:active {
-        transform: translateY(0);
       }
 
       .task-item.selected {
@@ -1314,14 +1327,14 @@
         margin-top: -2px;
       }
 
-      /* Timer running state - Refined with pulsing glow */
+      /* Timer running state - Subtle minimal animation */
       .task-item.timer-running {
         background: var(--accent-dim);
         border-left-color: var(--accent);
         box-shadow:
           0 0 0 1px rgba(59, 130, 246, 0.2),
           var(--elevation-2);
-        animation: timerPulse 2s ease-in-out infinite;
+        animation: timerPulse 4s ease-in-out infinite;
       }
 
       @keyframes timerPulse {
@@ -1333,8 +1346,8 @@
         }
         50% {
           box-shadow:
-            0 0 0 1px rgba(59, 130, 246, 0.4),
-            0 4px 20px rgba(59, 130, 246, 0.2);
+            0 0 0 1px rgba(59, 130, 246, 0.25),
+            0 4px 12px rgba(59, 130, 246, 0.06);
         }
       }
 
@@ -1344,7 +1357,7 @@
       }
 
       .task-item.timer-warning.timer-running {
-        animation: timerWarningPulse 2s ease-in-out infinite;
+        animation: timerWarningPulse 4s ease-in-out infinite;
       }
 
       @keyframes timerWarningPulse {
@@ -1356,8 +1369,8 @@
         }
         50% {
           box-shadow:
-            0 0 0 1px rgba(245, 158, 11, 0.4),
-            0 4px 20px rgba(245, 158, 11, 0.2);
+            0 0 0 1px rgba(245, 158, 11, 0.25),
+            0 4px 12px rgba(245, 158, 11, 0.06);
         }
       }
 
@@ -1379,12 +1392,6 @@
       .task-checkbox:hover {
         border-color: var(--accent-bright);
         background: var(--accent-subtle);
-      }
-
-      .task-checkbox:hover {
-        border-color: var(--accent);
-        background: var(--accent-subtle);
-        transform: scale(1.05);
       }
 
       .task-checkbox:active {
@@ -1447,21 +1454,21 @@
         font-weight: 500;
       }
 
-      /* Running timer indicator - pulsing dot */
+      /* Running timer indicator - subtle pulsing dot */
       .task-item.timer-running .task-priority-indicator,
       .task-item.timer-running::before {
-        animation: timerPulse 2s ease-in-out infinite;
+        animation: dotPulse 3s ease-in-out infinite;
       }
 
-      @keyframes timerPulse {
+      @keyframes dotPulse {
         0%,
         100% {
           opacity: 1;
           transform: scale(1);
         }
         50% {
-          opacity: 0.6;
-          transform: scale(1.2);
+          opacity: 0.85;
+          transform: scale(1.05);
         }
       }
 
@@ -1579,13 +1586,13 @@
 
       .task-item.timer-running .timer-time {
         color: var(--accent-bright);
-        text-shadow: 0 0 12px var(--accent-glow);
+        text-shadow: 0 0 8px var(--accent-glow);
       }
 
       .task-item.timer-warning .timer-time {
         color: var(--priority-medium-bright);
-        animation: timerWarningPulseText 1s ease-in-out infinite;
-        text-shadow: 0 0 12px var(--priority-medium-glow);
+        animation: timerWarningPulseText 3s ease-in-out infinite;
+        text-shadow: 0 0 8px var(--priority-medium-glow);
       }
 
       @keyframes timerWarningPulseText {
@@ -1594,7 +1601,7 @@
           opacity: 1;
         }
         50% {
-          opacity: 0.7;
+          opacity: 0.9;
         }
       }
 
@@ -1617,16 +1624,16 @@
       }
 
       .task-item.timer-running .timer-progress-fill {
-        animation: progressGlow 2s ease-in-out infinite;
+        animation: progressGlow 4s ease-in-out infinite;
       }
 
       @keyframes progressGlow {
         0%,
         100% {
-          box-shadow: 0 0 8px var(--accent-glow);
+          box-shadow: 0 0 6px var(--accent-glow);
         }
         50% {
-          box-shadow: 0 0 16px var(--accent-glow-strong);
+          box-shadow: 0 0 10px var(--accent-glow);
         }
       }
 
@@ -1647,8 +1654,8 @@
           var(--priority-high) 0%,
           var(--priority-high-bright) 100%
         );
-        box-shadow: 0 0 12px var(--priority-high-glow);
-        animation: criticalPulse 1s ease-in-out infinite;
+        box-shadow: 0 0 8px var(--priority-high-glow);
+        animation: criticalPulse 2s ease-in-out infinite;
       }
 
       @keyframes criticalPulse {
@@ -1657,7 +1664,7 @@
           opacity: 1;
         }
         50% {
-          opacity: 0.8;
+          opacity: 0.92;
         }
       }
 
@@ -1692,11 +1699,10 @@
         background: var(--surface-active);
         color: var(--text-secondary);
         border-color: var(--border-default);
-        transform: translateY(-1px);
       }
 
       .timer-btn:active {
-        transform: scale(0.92);
+        transform: scale(0.97);
         transition: transform 0.08s ease;
       }
 
@@ -1710,8 +1716,7 @@
       .timer-btn.play:hover {
         background: var(--accent-hover);
         border-color: var(--accent-hover);
-        box-shadow: 0 4px 12px var(--accent-glow-strong);
-        transform: translateY(-1px);
+        box-shadow: 0 3px 10px var(--accent-glow);
       }
 
       .timer-btn.pause {
@@ -2546,7 +2551,6 @@
 
       .source-item:hover {
         border-color: var(--accent);
-        transform: translateY(-2px);
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
       }
 
