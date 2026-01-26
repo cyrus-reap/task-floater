@@ -375,7 +375,7 @@
         width: 380px;
         height: auto;
         min-height: 200px;
-        max-height: 600px;
+        max-height: 700px;
         background: var(--surface-base);
         backdrop-filter: blur(60px) saturate(180%);
         -webkit-backdrop-filter: blur(60px) saturate(180%);
@@ -393,7 +393,7 @@
 
       /* Mode variations */
       .container.compact-mode {
-        max-height: 350px;
+        max-height: 700px;
       }
 
       .container.focus-mode {
@@ -914,20 +914,17 @@
         background: #3b82f6;
       }
 
-      /* Priority Border Indicators - Uses left-border from base */
-      .task-item.priority-low {
-        border-left-color: var(--priority-low);
+      /* Priority indicators - subtle dot only, no borders */
+      .task-item.priority-low .task-priority-indicator {
+        opacity: 1;
       }
 
-      .task-item.priority-medium {
-        border-left-color: var(--priority-medium);
+      .task-item.priority-medium .task-priority-indicator {
+        opacity: 1;
       }
 
-      .task-item.priority-high {
-        border-left-color: var(--priority-high);
-        box-shadow:
-          var(--elevation-1),
-          -2px 0 8px var(--priority-high-glow);
+      .task-item.priority-high .task-priority-indicator {
+        opacity: 1;
       }
 
       /* Legacy elements */
@@ -1111,14 +1108,14 @@
         overflow-y: auto;
         overflow-x: hidden;
         min-height: 100px;
-        max-height: 400px;
+        max-height: 500px;
         background: var(--surface-base);
         position: relative;
         z-index: 1;
       }
 
       .container.compact-mode .tasks-section {
-        max-height: 200px;
+        max-height: 500px;
       }
 
       .container.focus-mode .tasks-section {
@@ -1220,17 +1217,7 @@
       /* Pinned tasks visual treatment */
       .task-item.pinned {
         background: var(--accent-subtle);
-      }
-
-      .task-item.pinned::after {
-        content: '';
-        position: absolute;
-        left: 0;
-        top: 0;
-        bottom: 0;
-        width: 2px;
-        background: var(--accent);
-        opacity: 0.5;
+        border-color: var(--accent-muted);
       }
 
       .pin-indicator {
@@ -1255,13 +1242,12 @@
         display: flex;
         align-items: flex-start;
         gap: var(--space-3);
-        padding: var(--space-3);
-        margin-bottom: var(--space-2);
-        background: var(--layer-3-card-rest);
+        padding: var(--space-3) var(--space-4);
+        margin: var(--space-1) var(--space-2);
+        min-height: 56px;
+        background: var(--surface-card);
         border: 1px solid var(--border-default);
-        border-left: 3px solid transparent;
-        border-radius: var(--radius-lg);
-        box-shadow: var(--elevation-1);
+        border-radius: var(--radius-md);
         transition: all var(--transition-base);
         animation: slideUp 0.25s cubic-bezier(0.4, 0, 0.2, 1);
         position: relative;
@@ -1269,9 +1255,10 @@
       }
 
       .task-item:hover {
-        background: var(--layer-4-card-hover);
+        background: var(--surface-overlay);
         border-color: var(--border-strong);
-        box-shadow: var(--elevation-2);
+        transform: translateY(-1px);
+        box-shadow: var(--shadow-sm);
       }
 
       .task-item.selected {
@@ -2356,40 +2343,156 @@
          LIGHT THEME
          ========================================================================== */
       .light-theme {
-        --surface-base: rgba(255, 255, 255, 0.98);
-        --surface-elevated: rgba(250, 250, 252, 1);
-        --surface-overlay: rgba(245, 245, 248, 1);
-        --surface-hover: rgba(0, 0, 0, 0.03);
-        --surface-active: rgba(0, 0, 0, 0.05);
+        /* Surface hierarchy - Refined light layers */
+        --surface-base: #f8f9fa;
+        --surface-elevated: #ffffff;
+        --surface-overlay: #f1f3f5;
+        --surface-card: #ffffff;
+        --surface-hover: rgba(0, 0, 0, 0.04);
+        --surface-active: rgba(0, 0, 0, 0.06);
+        --surface-input: #ffffff;
 
-        --text-primary: rgba(0, 0, 0, 0.88);
-        --text-secondary: rgba(0, 0, 0, 0.6);
-        --text-tertiary: rgba(0, 0, 0, 0.4);
-        --text-muted: rgba(0, 0, 0, 0.25);
-        --text-placeholder: rgba(0, 0, 0, 0.3);
+        /* Text hierarchy - Better contrast */
+        --text-primary: rgba(0, 0, 0, 0.92);
+        --text-secondary: rgba(0, 0, 0, 0.65);
+        --text-tertiary: rgba(0, 0, 0, 0.48);
+        --text-muted: rgba(0, 0, 0, 0.35);
+        --text-placeholder: rgba(0, 0, 0, 0.4);
 
-        --border-subtle: rgba(0, 0, 0, 0.04);
-        --border-default: rgba(0, 0, 0, 0.08);
-        --border-strong: rgba(0, 0, 0, 0.12);
+        /* Borders - Enhanced visibility */
+        --border-subtle: rgba(0, 0, 0, 0.06);
+        --border-default: rgba(0, 0, 0, 0.1);
+        --border-strong: rgba(0, 0, 0, 0.15);
+        --border-focus: rgba(59, 130, 246, 0.6);
 
-        --accent-muted: rgba(59, 130, 246, 0.1);
-        --accent-subtle: rgba(59, 130, 246, 0.05);
+        /* Accent - Light mode variants */
+        --accent: #2563eb;
+        --accent-hover: #1d4ed8;
+        --accent-muted: rgba(37, 99, 235, 0.12);
+        --accent-subtle: rgba(37, 99, 235, 0.06);
+        --accent-glow: rgba(37, 99, 235, 0.2);
+        --accent-glow-strong: rgba(37, 99, 235, 0.3);
 
-        --success-muted: rgba(16, 185, 129, 0.08);
-        --warning-muted: rgba(245, 158, 11, 0.08);
-        --danger-muted: rgba(239, 68, 68, 0.06);
+        /* Semantic colors */
+        --success: #059669;
+        --success-muted: rgba(5, 150, 105, 0.12);
+        --success-tint: rgba(5, 150, 105, 0.08);
+        --warning: #d97706;
+        --warning-muted: rgba(217, 119, 6, 0.12);
+        --warning-tint: rgba(217, 119, 6, 0.08);
+        --danger: #dc2626;
+        --danger-muted: rgba(220, 38, 38, 0.12);
+        --danger-tint: rgba(220, 38, 38, 0.08);
+
+        /* Priority colors */
+        --priority-low: #2563eb;
+        --priority-low-tint: rgba(37, 99, 235, 0.1);
+        --priority-medium: #d97706;
+        --priority-medium-tint: rgba(217, 119, 6, 0.1);
+        --priority-high: #dc2626;
+        --priority-high-tint: rgba(220, 38, 38, 0.1);
+
+        /* Shadows - More depth */
+        --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.06);
+        --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08), 0 2px 6px rgba(0, 0, 0, 0.06);
+        --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.1), 0 4px 12px rgba(0, 0, 0, 0.08);
+        --shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.12), 0 8px 24px rgba(0, 0, 0, 0.1);
+        --shadow-glow: 0 0 20px rgba(37, 99, 235, 0.15);
+        --shadow-inset: inset 0 1px 2px rgba(0, 0, 0, 0.04);
       }
 
       .light-theme .container {
-        background: rgba(255, 255, 255, 0.98);
+        background: linear-gradient(to bottom, #ffffff, #fafbfc);
+        border-color: rgba(0, 0, 0, 0.1);
         box-shadow:
-          0 8px 32px rgba(0, 0, 0, 0.12),
-          0 0 0 1px rgba(0, 0, 0, 0.04);
+          0 8px 32px rgba(0, 0, 0, 0.08),
+          0 2px 8px rgba(0, 0, 0, 0.04),
+          inset 0 1px 0 rgba(255, 255, 255, 0.8);
+      }
+
+      .light-theme .input-section {
+        background: #ffffff;
+        border-bottom-color: rgba(0, 0, 0, 0.08);
+      }
+
+      .light-theme .tasks-toolbar {
+        background: #ffffff;
+        border-bottom-color: rgba(0, 0, 0, 0.08);
+      }
+
+      .light-theme .search-section {
+        background: #ffffff;
+        border-bottom-color: rgba(0, 0, 0, 0.08);
+      }
+
+      .light-theme .task-item {
+        background: #ffffff;
+        border-color: rgba(0, 0, 0, 0.08);
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+      }
+
+      .light-theme .task-item:hover {
+        background: #fafbfc;
+        border-color: rgba(0, 0, 0, 0.12);
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+      }
+
+      .light-theme .task-checkbox {
+        background: #ffffff;
+        border-color: rgba(0, 0, 0, 0.2);
+      }
+
+      .light-theme .timer-progress {
+        background: rgba(0, 0, 0, 0.08);
       }
 
       .light-theme .kbd {
-        background: var(--surface-elevated);
-        border-color: var(--border-default);
+        background: #f1f3f5;
+        border-color: rgba(0, 0, 0, 0.12);
+        color: rgba(0, 0, 0, 0.6);
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+      }
+
+      .light-theme .duration-picker,
+      .light-theme .priority-picker {
+        background: #f8f9fa;
+        border-color: rgba(0, 0, 0, 0.08);
+      }
+
+      .light-theme .duration-option.selected,
+      .light-theme .priority-option.selected {
+        box-shadow:
+          0 1px 3px rgba(0, 0, 0, 0.1),
+          0 0 12px var(--accent-glow);
+      }
+
+      .light-theme .input-row {
+        background: #ffffff;
+        border-color: rgba(0, 0, 0, 0.12);
+        box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.04);
+      }
+
+      .light-theme .input-row:focus-within {
+        border-color: var(--border-focus);
+        box-shadow:
+          inset 0 1px 2px rgba(0, 0, 0, 0.04),
+          0 0 0 3px var(--accent-subtle),
+          var(--shadow-glow);
+      }
+
+      .light-theme #searchInput {
+        background: #ffffff;
+        border-color: rgba(0, 0, 0, 0.12);
+      }
+
+      .light-theme .timer-btn {
+        background: #f8f9fa;
+        border-color: rgba(0, 0, 0, 0.1);
+      }
+
+      .light-theme .timer-btn:hover {
+        background: #f1f3f5;
+        border-color: rgba(0, 0, 0, 0.15);
       }
 
       /* ==========================================================================
