@@ -5,6 +5,7 @@
 
 const { notarize } = require('@mistweaverco/electron-notarize-async');
 const path = require('path');
+const fs = require('fs');
 
 exports.default = async function notarizing(context) {
   const { electronPlatformName, appOutDir } = context;
@@ -13,6 +14,23 @@ exports.default = async function notarizing(context) {
   if (electronPlatformName !== 'darwin') {
     console.log('Skipping notarization: not macOS');
     return;
+  }
+
+  // Try to load credentials from .env.signing file
+  const envPath = path.join(__dirname, '..', '.env.signing');
+  if (fs.existsSync(envPath)) {
+    const envContent = fs.readFileSync(envPath, 'utf-8');
+    const envLines = envContent.split('\n');
+
+    envLines.forEach(line => {
+      const match = line.match(/^export\s+([A-Z_]+)="([^"]+)"$/);
+      if (match) {
+        const [, key, value] = match;
+        if (!process.env[key]) {
+          process.env[key] = value;
+        }
+      }
+    });
   }
 
   // Check for required environment variables
@@ -25,6 +43,7 @@ exports.default = async function notarizing(context) {
     console.log('  APPLE_ID:', appleId ? '✓' : '✗ missing');
     console.log('  APPLE_APP_SPECIFIC_PASSWORD:', appleIdPassword ? '✓' : '✗ missing');
     console.log('  APPLE_TEAM_ID:', teamId ? '✓' : '✗ missing');
+    console.log('  Tip: Create .env.signing file with credentials or set environment variables');
     return;
   }
 

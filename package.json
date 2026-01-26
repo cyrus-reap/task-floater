@@ -126,7 +126,7 @@
     ],
     "mac": {
       "identity": "Cyrus David Pastelero (SM3PR8224Z)",
-      "notarize": false,
+      "notarize": true,
       "category": "public.app-category.productivity",
       "target": [
         {
