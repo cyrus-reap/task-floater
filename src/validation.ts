@@ -47,6 +47,7 @@ export const Validators = {
    * Validate duration in minutes
    * - Prevents resource exhaustion from extreme values
    * - Ensures valid range (1-24 hours)
+   * - Treats 0 as undefined (no timer)
    */
   duration(duration: unknown): number | undefined {
     if (duration === undefined || duration === null) {
@@ -59,6 +60,11 @@ export const Validators = {
 
     if (Number.isNaN(duration) || !Number.isFinite(duration)) {
       throw new ValidationError('Duration must be a valid number');
+    }
+
+    // Treat 0 as "no timer" (convert to undefined)
+    if (duration === 0) {
+      return undefined;
     }
 
     if (duration < 1 || duration > SECURITY_LIMITS.MAX_DURATION_MINUTES) {

@@ -1806,7 +1806,8 @@ function attachCustomDurationHandler(): void {
       // Clear preset selection
       clearPresetSelection();
       customInput.classList.add(CSS_CLASSES.ACTIVE);
-    } else if (customInput.value === '') {
+    } else if (customInput.value === '' || value === 0) {
+      // Treat empty or 0 as "no timer"
       selectedDuration = undefined;
       customInput.classList.remove(CSS_CLASSES.ACTIVE);
     }
@@ -1820,9 +1821,11 @@ function attachCustomDurationHandler(): void {
       const clampedValue = Math.min(Math.max(value, 1), 1440);
       customInput.value = clampedValue.toString();
       selectedDuration = clampedValue;
-    } else if (customInput.value === '') {
+    } else if (customInput.value === '' || value === 0) {
+      // Treat empty or 0 as "no timer"
+      customInput.value = ''; // Clear the input
       customInput.classList.remove(CSS_CLASSES.ACTIVE);
-      // If empty, select "None" option
+      // Select "None" option
       selectNoneOption();
     }
   });
