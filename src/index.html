@@ -1720,8 +1720,21 @@
       }
 
       .timer-btn .icon {
-        width: 11px;
-        height: 11px;
+        width: 14px;
+        height: 14px;
+      }
+
+      /* Override general icon styles for timer buttons */
+      .timer-btn .icon polygon,
+      .timer-btn .icon rect {
+        fill: currentColor;
+        stroke: none;
+      }
+
+      .timer-btn .icon polyline,
+      .timer-btn .icon path {
+        fill: none;
+        stroke: currentColor;
       }
 
       /* ==========================================================================
