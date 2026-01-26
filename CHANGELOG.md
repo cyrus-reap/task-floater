@@ -7,6 +7,51 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.10.0] - 2026-01-26
+
+### ✨ Features
+
+- **Enhanced Design System**: Refined dark mode color layering with no pure black surfaces
+- **Improved Light Mode**: Complete redesign with better contrast, shadows, and professional appearance
+- **Premium Micro-interactions**: Smooth animations, glowing focus states, and subtle hover effects
+- **Dynamic Window Resizing**: Window now properly resizes based on mode (Full/Compact/Focus)
+- **Increased Maximum Height**: Window can now grow to 750px for better task visibility
+
+### 🎨 Design & Style
+
+- **Unified Input Design**: Input field and Add button now form a single cohesive component
+- **Enhanced Priority Selectors**: Interactive pill buttons with tinted backgrounds when selected
+- **Refined Task Cards**: Consistent heights (56px minimum), removed distracting colored borders
+- **Improved Timer Display**: Larger countdown (14px bold), thicker progress bar (4px), gradient fills
+- **Better Search Bar**: Added top margin, improved focus states, refined keyboard shortcut badges
+- **Cleaner Section Labels**: Smaller size (9px), increased letter spacing, structural appearance
+- **Enhanced Checkboxes**: Larger (20px), better contrast, bounce animation on completion
+- **Pulsing Timer Indicator**: Running timers now have a subtle pulsing animation
+
+### 🐛 Bug Fixes
+
+- **Fixed Loading Overlay**: Removed invisible overlay that was blocking all mouse clicks
+- **Fixed Cut-off UI Elements**: Timer controls now have proper spacing and visibility
+- **Fixed Card Heights**: All task cards now have consistent minimum height
+- **Fixed Module Bundling**: Added esbuild bundler to properly compile renderer for browser
+
+### ⚡ Performance
+
+- **Optimized Transitions**: Refined timing functions (150-250ms) for smoother animations
+- **Improved Rendering**: Better flexbox layout prevents content overflow
+
+### ♻️ Code Refactoring
+
+- **Removed Debug Logging**: Cleaned up console logs from initialization
+- **Better Color Variables**: Added priority-specific tints and glow variants
+- **Enhanced Shadow System**: More sophisticated shadow layering for depth
+
+### 📝 Breaking Changes
+
+- None - fully backward compatible
+
+---
+
 ## [1.6.0] - 2026-01-24
 
 ### ✨ Features
